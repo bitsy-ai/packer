@@ -32,6 +32,7 @@
             "mountpoint": "/"
             }
         ],
+        "image_mount_path": "/tmp/rpi_chroot",
         "image_chroot_env": ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"],
         "qemu_binary_source_path": "/usr/bin/qemu-arm-static",
         "qemu_binary_destination_path": "/usr/bin/qemu-arm-static"
@@ -40,14 +41,14 @@
       {
         "type": "shell",
         "inline": [
-            "touch /boot/ssh",
-            "sudo apt-get install -y ansible"
+            "touch /boot/ssh"
         ]
       },
       {
-        "type": "ansible-local",
+        "type": "ansible",
         "playbook_file": "./playbooks/janus.yml",
-        "galaxy_file": "./playbooks/requirements.yml"
+        "galaxy_file": "./playbooks/requirements.yml",
+        "inventory_file_template": "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
       }
     ],
     "post-processors": [

@@ -1,3 +1,6 @@
 vars/
 packer_cache/
 *.img
+*.log
+
+*.tmp

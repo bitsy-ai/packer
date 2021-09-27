@@ -1,7 +1,0 @@
----
-- hosts: localhost
-  connection: local  
-  collections:
-    - bitsyai.printnanny
-  tasks:
-    - import_playbook: bitsyai.printnanny.janus
