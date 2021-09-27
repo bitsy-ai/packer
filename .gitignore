@@ -1,0 +1,3 @@
+vars/
+packer_cache/
+*.img
