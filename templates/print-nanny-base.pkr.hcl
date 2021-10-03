@@ -22,7 +22,7 @@ locals {
   # confusion mainly because this is evaluated a 'parsing-time'.
 }
 
-variable "printnanny_release_channel" {
+variable "RELEASE_CHANNEL" {
   type    = string
   default = "main"
 }
@@ -73,7 +73,7 @@ build {
   }
 
   provisioner "ansible" {
-    extra_arguments = ["--extra-vars", "\"printnanny_release_channel=${var.printnanny_release_channel}\""]
+    extra_arguments = ["--extra-vars", "\"printnanny_release_channel=${var.RELEASE_CHANNEL}\""]
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
