@@ -28,7 +28,7 @@ jobs:
       run: |
         make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-        echo ::set-output name=manifest::"$(cat dist/manifest.json)"
+        echo ::set-output name=manifest::"$(cat dist/manifest.json | jq .builds)"
 
     - name: Upload to GCP_BUCKET
       run: |
@@ -37,6 +37,8 @@ jobs:
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        DISCORD_EMBEDS: '[{ "type": "rich","title": `manifest.json`,"description": ````\n${{ steps.packer.outputs.manifest }}\n````,"color": 0x00FFFF}]'
       uses: Ilshidur/action-discord@master
       with:
-        args: 'Published img ${{ steps.packer.outputs.image_name }} \n ${{ steps.packer.outputs.manifest }}'
+        args: 'Published ${{ steps.packer.outputs.image_name }}'
+
