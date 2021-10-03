@@ -3,7 +3,9 @@ on:
     branches: [ main, devel ]
 
 env:
-  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+
   GCP_BUCKET: print-nanny-cdn
   CPU_ARCH: arm64
 jobs:
