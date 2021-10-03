@@ -1,0 +1,33 @@
+on: 
+  push:
+    branches: [ main, devel ]
+
+env:
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Input Settings
+      run: |
+        echo "User: ${{ github.event.inputs.user }}" 
+        echo "Branch: ${{ github.event.inputs.branch }}"
+        echo "Loglevel: ${{ github.event.inputs.loglevel }}"
+        echo "Plugin Version: ${{ github.event.inputs.plugin_version }}"
+        echo "Octoprint Version: ${{ github.event.inputs.octoprint_version }}"
+        echo "Load fixture data: ${{ github.event.inputs.fixtures }}"
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - name: Set BRANCH_NAME env var
+      uses: nelonoel/branch-name@v1 # adds $BRANCH_NAME to environment
+    - name: Write deploy key
+      run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+    - name: Active Service Account
+      run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+
+    - name: Send Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: 'Published img from {{ EVENT_PAYLOAD.repository.full_name }}@{{ GITHUB_SHA }}'
