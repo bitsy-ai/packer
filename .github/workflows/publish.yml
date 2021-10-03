@@ -27,8 +27,8 @@ jobs:
       id: packer
       run: |
         make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
-        echo "::set-output image_name=$(cat dist/manifest.json| jq '.builds[-1].custom_data.image_name')\n"
-        echo "::set-output manifest=$(cat dist/manifest.json)\n"
+        echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+        echo ::set-output name=manifest::"$(cat dist/manifest.json)"
 
     - name: Upload to GCP_BUCKET
       run: |
