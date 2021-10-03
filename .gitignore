@@ -4,3 +4,8 @@ packer_cache/
 *.log
 
 *.tmp
+
+manifest.json
+
+*.checksum
+*.tar.gz
