@@ -35,4 +35,4 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'Published img from ${{ EVENT_PAYLOAD.repository.full_name }}@${{ GITHUB_SHA }} \n ${{ publish.steps.manifest.outputs }}'
+        args: 'Published img ${{ publish.steps.manifest.outputs.image_name }} \n ${{ publish.steps.manifest.outputs }}'
