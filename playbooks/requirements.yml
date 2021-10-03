@@ -1,6 +1,4 @@
 ---
-roles:
-  - bitsyai.janus_gateway
 collections:
   - name: https://github.com/bitsy-ai/ansible-collection-print-nanny.git
     type: git

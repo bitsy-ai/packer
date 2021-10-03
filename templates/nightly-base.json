@@ -1,8 +1,7 @@
 {
     "variables": {
-        "release-channel": "main",
-        "print-nanny-cli": "",
-        "ansible-role-print-nanny": ""
+        "printnanny_release_channel": "main"
+
     },
     "builders": [{
         "type": "arm",
@@ -46,10 +45,12 @@
       },
       {
         "type": "ansible",
-        "playbook_file": "./playbooks/janus.yml",
+        "playbook_file": "./playbooks/printnanny.yml",
         "galaxy_file": "./playbooks/requirements.yml",
-        "inventory_file_template": "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
-      }
+        "extra_arguments": [
+            "--extra-vars",
+            "\"printnanny_release_channel={{ user `printnanny_release_channel`}}\""
+          ]      }
     ],
     "post-processors": [
         {
