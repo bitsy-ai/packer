@@ -11,13 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Input Settings
-      run: |
-        echo "User: ${{ github.event.inputs.user }}" 
-        echo "Branch: ${{ github.event.inputs.branch }}"
-        echo "Loglevel: ${{ github.event.inputs.loglevel }}"
-        echo "Plugin Version: ${{ github.event.inputs.plugin_version }}"
-        echo "Octoprint Version: ${{ github.event.inputs.octoprint_version }}"
-        echo "Load fixture data: ${{ github.event.inputs.fixtures }}"
     - name: Checkout branch
       uses: actions/checkout@v2
     - name: Write deploy key
@@ -25,13 +18,13 @@ jobs:
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
     - name: Make base image
-      run: make image RELEASE_CHANNEL=${{github.event.inputs.branch}} CPU_ARCH=$CPU_ARCH
+      run: make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
     - name: Print Manifest
       id: manifest
-      run: cat manifest.json
+      run: cat dist/manifest.json
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil cp -r dist/ gs://$GCP_BUCKET/releases/{{github.event.inputs.branch}}/{{ steps.manifest.outputs.custom_data.image_path }}/{{ steps.manifest.outputs.custom_data.image_name }}/
+        gsutil cp -r dist/ gs://$GCP_BUCKET/releases/main/{{ steps.manifest.outputs.custom_data.image_path }}/{{ steps.manifest.outputs.custom_data.image_name }}/
 
     - name: Send Discord notification
       env:

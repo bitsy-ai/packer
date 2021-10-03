@@ -21,3 +21,10 @@ image: docker-builder-image
 			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
 			-var "CPU_ARCH=$(CPU_ARCH)" \
 			templates/print-nanny-base.pkr.hcl
+
+validate:
+	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible validate \
+			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
+			-var "CPU_ARCH=$(CPU_ARCH)" \
+			templates/print-nanny-base.pkr.hcl
