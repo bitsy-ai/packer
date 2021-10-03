@@ -1,8 +1,0 @@
----
-- hosts: all
-  collections:
-    - bitsyai.printnanny
-  tasks:
-    - name: "Install Print Nanny"
-      include_role: 
-        name: printnanny

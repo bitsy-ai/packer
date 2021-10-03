@@ -1,0 +1,33 @@
+{
+  "builds": [
+    {
+      "name": "arm",
+      "builder_type": "arm",
+      "build_time": 1633232241,
+      "files": [
+        {
+          "name": "2021-05-07-raspios-buster-arm64.img",
+          "size": 3737124864
+        }
+      ],
+      "artifact_id": "",
+      "packer_run_uuid": "4c96dcc2-ccb0-00da-bdad-f8a777241053",
+      "custom_data": null
+    },
+    {
+      "name": "base_image",
+      "builder_type": "arm",
+      "build_time": 1633233318,
+      "files": [
+        {
+          "name": "2021-05-07-raspios-buster-arm64.img",
+          "size": 3737124864
+        }
+      ],
+      "artifact_id": "",
+      "packer_run_uuid": "5352ada8-02c7-6088-ba44-c4be15abd387",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": "5352ada8-02c7-6088-ba44-c4be15abd387"
+}

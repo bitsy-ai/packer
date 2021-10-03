@@ -1,4 +1,4 @@
-
+ANSIBLE_COLLECTIONS_PATHS ?= $(HOME)/projects/
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
@@ -8,4 +8,4 @@ nightly-base: docker-builder-image
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
 			-debug \
-			templates/nightly-base.json
+			templates/nightly-base.json.pkr.hcl
