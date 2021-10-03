@@ -9,7 +9,7 @@ env:
   GCP_BUCKET: print-nanny-cdn
   CPU_ARCH: arm64
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
@@ -35,4 +35,4 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'Published img from ${{ EVENT_PAYLOAD.repository.full_name }}@${{ GITHUB_SHA }} \n ${{ steps.manifest.outputs }}'
+        args: 'Published img from ${{ EVENT_PAYLOAD.repository.full_name }}@${{ GITHUB_SHA }} \n ${{ publish.steps.manifest.outputs }}'
