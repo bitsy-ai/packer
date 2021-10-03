@@ -65,7 +65,7 @@ source "arm" "print_nanny" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
+  image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.tar.gz"
   image_size                   = "2G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -87,12 +87,22 @@ build {
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
+  post-processor "checksum" {
+    checksum_types = ["sha1", "sha256"]
+    output = "dist/{{.ChecksumType}}.checksum"
+  }
 
   post-processor "manifest" {
-    output     = "manifest.json"
+    output     = "dist/manifest.json"
     strip_path = true
     custom_data = {
-      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
+      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}"
+      image_name = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.tar.gz"
+      release_channel = "${var.RELEASE_CHANNEL}"
+      datestamp = "${local.DATESTAMP}"
+      platform_version = "${var.PLATFORM_VERSION}"
+      cpu_arch = "${var.CPU_ARCH}"
     }
   }
+
 }

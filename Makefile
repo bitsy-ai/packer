@@ -1,13 +1,19 @@
 ANSIBLE_COLLECTIONS_PATHS ?= $(HOME)/projects/
 
 RELEASE_CHANNEL ?= main
-CPU_ARCH ?= "arm64"
+CPU_ARCH ?= arm64
+DIST_DIR = ?= dist
+
+
+clean:
+	rm -rf dist/
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
 image: docker-builder-image
+	mkdir -p $(DIST_DIR)
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \

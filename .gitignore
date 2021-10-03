@@ -6,3 +6,6 @@ packer_cache/
 *.tmp
 
 manifest.json
+
+*.checksum
+*.tar.gz

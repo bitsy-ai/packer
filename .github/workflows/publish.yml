@@ -4,6 +4,8 @@ on:
 
 env:
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_BUCKET: print-nanny-cdn
+  CPU_ARCH: arm64
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,17 +20,19 @@ jobs:
         echo "Load fixture data: ${{ github.event.inputs.fixtures }}"
     - name: Checkout branch
       uses: actions/checkout@v2
-    - name: Set BRANCH_NAME env var
-      uses: nelonoel/branch-name@v1 # adds $BRANCH_NAME to environment
     - name: Write deploy key
       run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
     - name: Make base image
-      run: make image
+      run: make image RELEASE_CHANNEL=${{github.event.inputs.branch}} CPU_ARCH=$CPU_ARCH
     - name: Print Manifest
       id: manifest
       run: cat manifest.json
+    - name: Upload to GCP_BUCKET
+      run: |
+        gsutil cp -r dist/ gs://$GCP_BUCKET/releases/{{github.event.inputs.branch}}/{{ steps.manifest.outputs.custom_data.image_path }}/{{ steps.manifest.outputs.custom_data.image_name }}/
+
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
