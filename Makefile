@@ -1,4 +1,8 @@
 ANSIBLE_COLLECTIONS_PATHS ?= $(HOME)/projects/
+
+RELEASE_CHANNEL ?= main
+CPU_ARCH ?= "arm64"
+
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
@@ -8,4 +12,6 @@ image: docker-builder-image
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
 			-debug \
-			templates/nightly-base.json.pkr.hcl
+			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
+			-var "CPU_ARCH=$(CPU_ARCH)" \
+			templates/print-nanny-base.pkr.hcl

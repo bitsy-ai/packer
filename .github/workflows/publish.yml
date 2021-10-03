@@ -24,10 +24,14 @@ jobs:
       run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-
+    - name: Make base image
+      run: make image
+    - name: Print Manifest
+      id: manifest
+      run: cat manifest.json
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'Published img from {{ EVENT_PAYLOAD.repository.full_name }}@{{ GITHUB_SHA }}'
+        args: 'Published img from {{ EVENT_PAYLOAD.repository.full_name }}@{{ GITHUB_SHA }} \n {{ steps.manifest.outputs }}'

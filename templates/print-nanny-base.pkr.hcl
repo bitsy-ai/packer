@@ -17,7 +17,7 @@
 # https://www.packer.io/docs/templates/hcl_templates/variables#type-constraints for more info.
 
 locals {
-  packerstarttime = formatdate("YYYY-MM-DD-hhmm", timestamp())
+  DATESTAMP = formatdate("YYYY-MM-DD-hhmm", timestamp())
   # Also here I believe naming this variable `buildtime` could lead to 
   # confusion mainly because this is evaluated a 'parsing-time'.
 }
@@ -27,15 +27,25 @@ variable "RELEASE_CHANNEL" {
   default = "main"
 }
 
+variable "CPU_ARCH" {
+  type    = string
+  default = "arm64"
+}
+
+variable "PLATFORM_VERSION" {
+  type = string
+  default = "buster"
+}
+
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/source
-source "arm" "base_image" {
+source "arm" "print_nanny" {
   file_checksum_type    = "sha256"
-  file_checksum_url     = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip.sha256"
+  file_checksum_url     = "https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip.sha256"
   file_target_extension = "zip"
-  file_urls             = ["https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip"]
+  file_urls             = ["https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"]
   image_build_method    = "reuse"
   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_mount_path      = "/tmp/rpi_chroot"
@@ -55,7 +65,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${local.packerstarttime}-${var.printnanny_release_channel}-print-nanny.img"
+  image_path                   = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
   image_size                   = "2G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -66,14 +76,14 @@ source "arm" "base_image" {
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
-  sources = ["source.arm.base_image"]
+  sources = ["source.arm.print_nanny"]
 
   provisioner "shell" {
     inline = ["touch /boot/ssh"]
   }
 
   provisioner "ansible" {
-    extra_arguments = ["--extra-vars", "\"printnanny_release_channel=${var.RELEASE_CHANNEL}\""]
+    extra_arguments = ["--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}", "--extra-vars","printnanny_cpu_arch=${var.CPU_ARCH}"]
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
@@ -81,5 +91,8 @@ build {
   post-processor "manifest" {
     output     = "manifest.json"
     strip_path = true
+    custom_data = {
+      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
+    }
   }
 }
