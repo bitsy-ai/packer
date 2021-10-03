@@ -22,17 +22,18 @@ jobs:
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
     - name: Make base image
-      run: make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
-    - name: Print Manifest
-      id: manifest
-      run: cat dist/manifest.json
+      id: packer
+      run: |
+        make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
+        echo "::set-output manifest=$(cat dist/manifest.json)\n"
+
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil cp -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.manifest.outputs.custom_data.image_path }}/
+        gsutil cp -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.manifest.custom_data.image_path }}/
 
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'Published img ${{ jobs.publish.steps.manifest.outputs.image_name }} \n ${{ jobs.publish.steps.manifest.outputs }}'
+        args: 'Published img ${{ steps.packer.outputs.manifest.custom_data.image_name }} \n ${{ steps.packer.outputs.manifest }}'
