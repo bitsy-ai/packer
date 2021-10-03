@@ -37,7 +37,7 @@ jobs:
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-        DISCORD_EMBEDS: '[{ "type": "rich","title": `manifest.json`,"description": ````\n${{ steps.packer.outputs.manifest }}\n````,"color": 0x00FFFF}]'
+        DISCORD_EMBEDS: '[{ "type": "rich","title": `manifest.json`,"description": ```${{ steps.packer.outputs.manifest }}```,"color": 0x00FFFF}]'
       uses: Ilshidur/action-discord@master
       with:
         args: 'Published ${{ steps.packer.outputs.image_name }}'
