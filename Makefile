@@ -8,4 +8,4 @@ nightly-base: docker-builder-image
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
 			-debug \
-			templates/nightly-base.json
+			templates/nightly-base.json.pkr.hcl
