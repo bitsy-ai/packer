@@ -29,6 +29,7 @@ jobs:
         DISCORD_MSG=$(cat << EOF
           Published ${{ steps.packer.outputs.image_name }}
           $(cat dist/manifest.json | jq .)
+          EOF
         )
     - name: Upload to GCP_BUCKET
       run: |
