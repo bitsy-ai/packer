@@ -25,7 +25,7 @@ jobs:
       run: |
         make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-        echo ::set-output name=manifest::"$(cat dist/manifest.json | jq .builds)"
+        echo ::set-output name=manifest::"$(cat dist/manifest.json)"
         DISCORD_MSG=$(cat dist/manifest.json | jq .)
     - name: Upload to GCP_BUCKET
       run: |
@@ -38,7 +38,7 @@ jobs:
         args: |
           Published ${{ steps.packer.outputs.image_name }}
           ```
-          ${{ env.DISCORD_MSG }}
+          ${{ steps.packer.outputs.manifest }}
           ```
         
 
