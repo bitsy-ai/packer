@@ -24,14 +24,18 @@ jobs:
       id: packer
       run: |
         make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
-        echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.path')"
+        echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
+        echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+        echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
+
+
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.image_path }}/
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/releasess/main/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Published ${{ steps.packer.outputs.image_name }}
+          Published ${{ steps.packer.outputs.image_name }} with sha256.checksum ${{ steps.packer.outputs.checksum }}
