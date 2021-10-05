@@ -27,7 +27,7 @@ jobs:
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.path')"
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil sync -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.image_path }}/
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
