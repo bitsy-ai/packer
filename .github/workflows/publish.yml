@@ -1,7 +1,7 @@
 on: 
   push:
     branches: [ main, devel ]
-
+  workflow_dispatch:
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
