@@ -57,6 +57,29 @@ variable "JANUS_VERSION" {
     default = "0.11.4"
 }
 
+variable "JANUS_USRSCTP_VERSION" {
+    type = string
+    default = "0.9.5.0"
+}
+
+variable "JANUS_LIBNICE_VERSION" {
+    type = string
+    default = "0.1.18"
+}
+
+variable "JANUS_LIBSRTP_VERSION" {
+    type = string
+    default = "2.2.0"
+}
+
+variable "JANUS_WEBSOCKETS_VERSION" {
+    type = string
+    default = "v3.2-stable"
+}
+
+
+
+
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
@@ -107,8 +130,12 @@ build {
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
         "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
         "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
+        "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}",
         "--extra-vars", "janus_version=${var.JANUS_VERSION}",
-        "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}"
+        "--extra-vars", "janus_usrsctp_version=${var.JANUS_USRSCTP_VERSION}",
+        "--extra-vars", "janus_libnice_version=${var.JANUS_LIBNICE_VERSION}",
+        "--extra-vars", "janus_libsrtp_version=${var.JANUS_LIBSRTP_VERSION}",
+        "--extra-vars", "janus_websockets_version=${var.JANUS_WEBSOCKETS_VERSION}",
     ]
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
@@ -133,6 +160,10 @@ build {
       octoprint_version = "${var.OCTOPRINT_VERSION}"
       distro_version = "${var.DISTRO_VERSION}"
       janus_version = "${var.JANUS_VERSION}"
+      janus_usrsctp_version = "${var.JANUS_USRSCTP_VERSION}"
+      janus_libnice_version = "${var.JANUS_LIBNICE_VERSION}"
+      janus_libsrtp_version = "${var.JANUS_LIBSRTP_VERSION}"
+      janus_websockets_version = "${var.JANUS_WEBSOCKETS_VERSION}"
     }
   }
 
