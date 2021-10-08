@@ -22,6 +22,11 @@ locals {
   # confusion mainly because this is evaluated a 'parsing-time'.
 }
 
+variable "DISTRO_VERSION" {
+    type = string
+    default = "2021-05-07-raspios"
+}
+
 variable "RELEASE_CHANNEL" {
   type    = string
   default = "main"
@@ -35,6 +40,21 @@ variable "CPU_ARCH" {
 variable "PLATFORM_VERSION" {
   type = string
   default = "buster"
+}
+
+variable "PRINTNANNY_CLI_VERSION" {
+    type = string
+    default = "0.1.1"
+}
+
+variable "OCTOPRINT_VERSION" {
+    type = string
+    default = "1.6.1"
+}
+
+variable "JANUS_VERSION" {
+    type = string
+    default = "0.11.4"
 }
 
 # source blocks are generated from your builders; a source can be referenced in
@@ -82,8 +102,19 @@ build {
     inline = ["touch /boot/ssh"]
   }
 
+  provisioner "file" {
+    source = "files/ansible.cfg"
+    destination = "/etc/ansible/ansible.cfg"
+  }
+
   provisioner "ansible" {
-    extra_arguments = ["--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}", "--extra-vars","printnanny_cpu_arch=${var.CPU_ARCH}"]
+    extra_arguments = [
+        "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
+        "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
+        "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
+        "--extra-vars", "janus_version=${var.JANUS_VERSION}",
+        "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}"
+    ]
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
@@ -95,6 +126,7 @@ build {
   post-processor "manifest" {
     output     = "dist/manifest.json"
     strip_path = true
+    strip_time = true
     custom_data = {
       image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}"
       image_name = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.tar.gz"
@@ -102,6 +134,10 @@ build {
       datestamp = "${local.DATESTAMP}"
       platform_version = "${var.PLATFORM_VERSION}"
       cpu_arch = "${var.CPU_ARCH}"
+      printnanny_cli_version = "${var.PRINTNANNY_CLI_VERSION}"
+      octoprint_version = "${var.OCTOPRINT_VERSION}"
+      distro_version = "${var.DISTRO_VERSION}"
+      janus_version = "${var.JANUS_VERSION}"
     }
   }
 
