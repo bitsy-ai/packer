@@ -38,7 +38,7 @@ jobs:
 
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil rsync -r dist/ gs://$GCP_BUCKET/releasess/main/${{ steps.packer.outputs.image_path }}/
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
