@@ -49,7 +49,7 @@ jobs:
           distro_version ${{ steps.packer.outputs.distro_version }}
           platform_version ${{ steps.packer.outputs.platform_version }}
           cpu_arch ${{ steps.packer.outputs.cpu_arch }}
-          printnanny_cli_version ${{ steps.packer.outputs.octoprint_version }}
-          octoprint_version ${{ steps.packer.outputs.printnanny_cli_version }}
+          printnanny_cli_version ${{ steps.packer.outputs.printnanny_cli_version }}
+          octoprint_version ${{ steps.packer.outputs.octoprint_version }}
           janus_version ${{ steps.packer.outputs.janus_version }}
           ```

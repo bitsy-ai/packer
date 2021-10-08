@@ -101,12 +101,7 @@ build {
   provisioner "shell" {
     inline = ["touch /boot/ssh"]
   }
-
-  provisioner "file" {
-    source = "files/ansible.cfg"
-    destination = "/etc/ansible/ansible.cfg"
-  }
-
+  
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
