@@ -27,6 +27,12 @@ jobs:
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
+        echo ::set-output name=distro_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.distro_version')"
+        echo ::set-output name=platform_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.platform_version')"
+        echo ::set-output name=cpu_arch::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.cpu_arch')"
+        echo ::set-output name=printnanny_cli_arch::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_arch')"
+        echo ::set-output name=octoprint_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.octoprint_version')"
+        echo ::set-output name=janus_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_version')"
 
 
     - name: Upload to GCP_BUCKET
@@ -39,3 +45,11 @@ jobs:
       with:
         args: |
           Published ${{ steps.packer.outputs.checksum }}
+          ```
+          distro_version ${{ steps.packer.outputs.distro_version }}
+          platform_version ${{ steps.packer.outputs.platform_version }}
+          cpu_arch ${{ steps.packer.outputs.cpu_arch }}
+          printnanny_cli_version ${{ steps.packer.outputs.printnanny_cli_version }}
+          octoprint_version ${{ steps.packer.outputs.octoprint_version }}
+          janus_version ${{ steps.packer.outputs.janus_version }}
+          ```
