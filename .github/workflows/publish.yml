@@ -45,8 +45,10 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Published ${{ steps.packer.outputs.checksum }}
+          Published https://cdn.print-nanny.com/releases/main/${{ steps.packer.outputs.image_path }}/
           ```
+          ${{ steps.packer.outputs.checksum }}
+          ------------------------------------
           distro_version ${{ steps.packer.outputs.distro_version }}
           platform_version ${{ steps.packer.outputs.platform_version }}
           cpu_arch ${{ steps.packer.outputs.cpu_arch }}
