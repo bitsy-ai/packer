@@ -34,6 +34,10 @@ jobs:
         echo ::set-output name=octoprint_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.octoprint_version')"
         echo ::set-output name=janus_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_version')"
         echo ::set-output name=printnanny_cli_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_version')"
+        echo ::set-output name=janus_usrsctp_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_usrsctp_version')"
+        echo ::set-output name=janus_libnice_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_libnice_version')"
+        echo ::set-output name=janus_libsrtp_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_libsrtp_version')"
+        echo ::set-output name=janus_websockets_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_websockets_version')"
 
 
     - name: Upload to GCP_BUCKET
@@ -55,4 +59,8 @@ jobs:
           printnanny_cli_version ${{ steps.packer.outputs.printnanny_cli_version }}
           octoprint_version ${{ steps.packer.outputs.octoprint_version }}
           janus_version ${{ steps.packer.outputs.janus_version }}
+          janus_usrsctp_version ${{ steps.packer.outputs.janus_usrsctp_version }}
+          janus_libnice_version ${{ steps.packer.outputs.janus_libnice_version }}
+          janus_libsrtp_version ${{ steps.packer.outputs.janus_libsrtp_version }}
+          janus_websockets_version ${{ steps.packer.outputs.janus_websockets_version }}
           ```
