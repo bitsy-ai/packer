@@ -33,6 +33,7 @@ jobs:
         echo ::set-output name=printnanny_cli_arch::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_arch')"
         echo ::set-output name=octoprint_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.octoprint_version')"
         echo ::set-output name=janus_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_version')"
+        echo ::set-output name=printnanny_cli_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_version')"
 
 
     - name: Upload to GCP_BUCKET
