@@ -91,6 +91,8 @@ source "arm" "print_nanny" {
   file_urls             = ["https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"]
   image_build_method    = "resize"
   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
+  image_mount_path      = "/tmp/rpi_chroot"
+
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
@@ -124,10 +126,7 @@ build {
     inline = ["touch /boot/ssh"]
   }
 
-  provisioner "shell" {
-    inline = ["pip install ansible"]
-  }
-  provisioner "ansible-local" {
+  provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
         "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
@@ -139,6 +138,7 @@ build {
         "--extra-vars", "janus_libsrtp_version=${var.JANUS_LIBSRTP_VERSION}",
         "--extra-vars", "janus_websockets_version=${var.JANUS_WEBSOCKETS_VERSION}",
     ]
+    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
