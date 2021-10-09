@@ -108,7 +108,7 @@ source "arm" "print_nanny" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.tar.gz"
+  image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
   image_size                   = "2G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -151,7 +151,7 @@ build {
     strip_time = true
     custom_data = {
       image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}"
-      image_name = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.tar.gz"
+      image_name = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
       release_channel = "${var.RELEASE_CHANNEL}"
       datestamp = "${local.DATESTAMP}"
       platform_version = "${var.PLATFORM_VERSION}"
