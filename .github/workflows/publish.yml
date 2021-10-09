@@ -49,7 +49,9 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Published https://cdn.print-nanny.com/releases/main/${{ steps.packer.outputs.image_path }}/
+          Published https://cdn.print-nanny.com/releases/main/${{ steps.packer.outputs.image_path }}/${{ steps.packer.outputs.image_name }}
+          Checksum https://cdn.print-nanny.com/releases/main/${{ steps.packer.outputs.image_path }}/sha256.checksum
+          Manifest https://cdn.print-nanny.com/releases/main/${{ steps.packer.outputs.image_path }}/manifest.json
           ```
           ${{ steps.packer.outputs.checksum }}
           ------------------------------------
