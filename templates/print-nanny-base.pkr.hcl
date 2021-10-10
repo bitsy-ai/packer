@@ -110,7 +110,7 @@ source "arm" "print_nanny" {
     type         = "83"
   }
   image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
-  image_size                   = "4.6G"
+  image_size                   = "6G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
@@ -167,6 +167,10 @@ build {
       janus_libsrtp_version = "${var.JANUS_LIBSRTP_VERSION}"
       janus_websockets_version = "${var.JANUS_WEBSOCKETS_VERSION}"
     }
+  }
+
+  post-processor "compress" {
+    output = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"
   }
 
 }
