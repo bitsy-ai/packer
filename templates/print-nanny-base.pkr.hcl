@@ -54,7 +54,7 @@ variable "OCTOPRINT_VERSION" {
 
 variable "JANUS_VERSION" {
     type = string
-    default = "0.11.4"
+    default = "v0.11.4"
 }
 
 variable "JANUS_USRSCTP_VERSION" {
