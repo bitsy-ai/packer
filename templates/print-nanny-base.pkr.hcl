@@ -90,7 +90,7 @@ source "arm" "print_nanny" {
   file_target_extension = "zip"
   file_urls             = ["https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"]
   image_build_method    = "resize"
-  image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
+//   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
@@ -110,7 +110,7 @@ source "arm" "print_nanny" {
     type         = "83"
   }
   image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
-  image_size                   = "4G"
+  image_size                   = "4.6G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
