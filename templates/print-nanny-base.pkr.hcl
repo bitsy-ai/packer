@@ -142,6 +142,11 @@ build {
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
+  provisioner "file" {
+      source = "/etc/ansible/facts.json"
+      destination = "dist/ansible_facts.json"
+      direction = "download"
+  }
   post-processor "checksum" {
     checksum_types = ["sha1", "sha256"]
     output = "dist/{{.ChecksumType}}.checksum"
