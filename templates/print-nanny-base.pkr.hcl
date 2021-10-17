@@ -77,7 +77,15 @@ variable "JANUS_WEBSOCKETS_VERSION" {
     default = "v3.2-stable"
 }
 
+variable "PRINTNANNY_USER" {
+  type = string
+  default = "pi"
+}
 
+variable "PRINTNANNY_GROUP" {
+  type = string
+  default = "pi"
+}
 
 
 # source blocks are generated from your builders; a source can be referenced in
@@ -141,6 +149,8 @@ build {
         "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
         "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
         "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}",
+        "--extra-vars", "printnanny_user=${var.PRINTNANNY_USER}",
+        "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
         "--extra-vars", "janus_version=${var.JANUS_VERSION}",
         "--extra-vars", "janus_usrsctp_version=${var.JANUS_USRSCTP_VERSION}",
         "--extra-vars", "janus_libnice_version=${var.JANUS_LIBNICE_VERSION}",
