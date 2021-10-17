@@ -9,3 +9,5 @@ manifest.json
 
 *.checksum
 *.tar.gz
+
+dist/

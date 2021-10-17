@@ -126,6 +126,15 @@ build {
     inline = ["touch /boot/ssh"]
   }
 
+  provisioner "shell" {
+    inline = [
+        "apt-get -y update",
+        "apt-get -y dist-upgrade --force-yes",
+    ]
+    pause_before = "60s"
+    timeout      = "800s"
+  }
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
@@ -141,6 +150,11 @@ build {
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
+  }
+  provisioner "file" {
+      source = "/etc/ansible/facts.json"
+      destination = "dist/ansible_facts.json"
+      direction = "download"
   }
   post-processor "checksum" {
     checksum_types = ["sha1", "sha256"]
