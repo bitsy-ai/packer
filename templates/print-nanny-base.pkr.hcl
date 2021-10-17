@@ -126,6 +126,15 @@ build {
     inline = ["touch /boot/ssh"]
   }
 
+  provisioner "shell" {
+    inline = [
+        "apt-get -y update",
+        "apt-get -y dist-upgrade --force-yes",
+    ]
+    pause_before = "60s"
+    timeout      = "800s"
+  }
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
