@@ -136,8 +136,9 @@ build {
 
   provisioner "shell" {
     inline = [
-        "apt-get -y update",
-        "apt-get -y dist-upgrade --force-yes",
+        "DEBIAN_FRONTEND=noninteractive apt-get -y update",
+        "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade --force-yes",
+        "DEBIAN_FRONTEND=noninteractive apt-get clean"
     ]
     pause_before = "60s"
     timeout      = "800s"
