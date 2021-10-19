@@ -41,12 +41,15 @@ on:
       JANUS_USRSCTP_VERSION:
         description: 'https://github.com/sctplab/usrsctp/releases'
         default: '0.9.5.0'
+        required: true
       JANUS_LIBNICE_VERSION:
         description: 'https://gitlab.freedesktop.org/libnice/libnice/-/tags'
         default: '0.1.18'
+        required: true
       JANUS_WEBSOCKETS_VERSION:
         description: 'https://libwebsockets.org/git/libwebsockets'
-        default: 'v3.2-stable"'
+        default: 'v3.2-stable'
+        required: true
       RELEASE_CHANNEL:
         description: 'Publish image to release channel: (nightly, stable)'     
         required: true
