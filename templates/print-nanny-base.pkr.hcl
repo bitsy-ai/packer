@@ -79,14 +79,23 @@ variable "JANUS_WEBSOCKETS_VERSION" {
 
 variable "PRINTNANNY_USER" {
   type = string
-  default = "pi"
+  default = "printnanny"
 }
 
 variable "PRINTNANNY_GROUP" {
   type = string
-  default = "pi"
+  default = "printnanny"
 }
 
+variable "OCTOPRINT_USER" {
+  type = string
+  default = "octoprint"
+}
+
+variable "OCTOPRINT_GROUP" {
+  type = string
+  default = "octoprint"
+}
 
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
@@ -149,6 +158,8 @@ build {
         "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
         "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
         "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
+        "--extra-vars", "octoprint_user=${var.OCTOPRINT_USER}",
+        "--extra-vars", "octoprint_group=${var.OCTOPRINT_GROUP}",
         "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}",
         "--extra-vars", "printnanny_user=${var.PRINTNANNY_USER}",
         "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
