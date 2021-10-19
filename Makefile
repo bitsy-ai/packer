@@ -43,6 +43,16 @@ dist/printnanny-pi.img: docker-builder-image
 validate: docker-builder-image
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
+			-var "BASE_DISTRO_VERSION=$(BASE_DISTRO_VERSION)" \
+			-var "BASE_IMAGE_CHECKSUM=$(BASE_IMAGE_CHECKSUM)" \
+			-var "BASE_IMAGE_EXT=$(BASE_IMAGE_EXT)" \
+			-var "BASE_IMAGE_URL=$(BASE_IMAGE_URL)" \
+			-var "PRINTNANNY_CLI_VERSION=$(PRINTNANNY_CLI_VERSION)" \
+			-var "OCTOPRINT_VERSION=$(OCTOPRINT_VERSION)" \
+			-var "JANUS_VERSION=$(JANUS_VERSION)" \
+			-var "JANUS_USRSCTP_VERSION=$(JANUS_USRSCTP_VERSION)" \
+			-var "JANUS_LIBNICE_VERSION=$(JANUS_LIBNICE_VERSION)" \
+			-var "JANUS_LIBSRTP_VERSION=$(JANUS_LIBSRTP_VERSION)" \
+			-var "JANUS_WEBSOCKETS_VERSION=$(JANUS_WEBSOCKETS_VERSION)" \
 			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
-			-var "CPU_ARCH=$(CPU_ARCH)" \
 			templates/print-nanny-base.pkr.hcl
