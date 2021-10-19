@@ -44,7 +44,7 @@ variable "PLATFORM_VERSION" {
 
 variable "PRINTNANNY_CLI_VERSION" {
     type = string
-    default = "0.1.1"
+    default = "0.1.2"
 }
 
 variable "OCTOPRINT_VERSION" {
