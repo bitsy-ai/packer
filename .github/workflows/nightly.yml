@@ -89,23 +89,7 @@ jobs:
           JANUS_LIBSRTP_VERSION=${{ inputs.JANUS_LIBSRTP_VERSION }} \
           JANUS_WEBSOCKETS_VERSION=${{ inputs.JANUS_WEBSOCKETS_VERSION }} \
           RELEASE_CHANNEL=${{ inputs.RELEASE_CHANN }}
-        
-        echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
-        echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
-        echo ::set-output name=distro_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.distro_version')"
-        echo ::set-output name=platform_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.platform_version')"
-        echo ::set-output name=cpu_arch::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.cpu_arch')"
-        echo ::set-output name=printnanny_cli_arch::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_arch')"
-        echo ::set-output name=octoprint_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.octoprint_version')"
-        echo ::set-output name=janus_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_version')"
-        echo ::set-output name=printnanny_cli_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.printnanny_cli_version')"
-        echo ::set-output name=janus_usrsctp_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_usrsctp_version')"
-        echo ::set-output name=janus_libnice_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_libnice_version')"
-        echo ::set-output name=janus_libsrtp_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_libsrtp_version')"
-        echo ::set-output name=janus_websockets_version::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.janus_websockets_version')"
-
-
     - name: Upload to GCP_BUCKET
       run: |
         gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/${{ inputs.RELEASE_CHANNEL }}/${{ steps.packer.outputs.image_path }}/
