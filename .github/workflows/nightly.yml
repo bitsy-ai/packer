@@ -1,10 +1,62 @@
-on: 
+# bake a nightly image
+on:
+  # on merge to mainline (packer repo)
   push:
-    branches: [ main, devel ]
+    branches: [ main ]
+  # on manual trigger (packer repo) OR workflow_dispatch event from another repo's cd pipeline
+  # https://github.community/t/triggering-by-other-repository/16163/6
   workflow_dispatch:
+    inputs:
+      # begin BASE_IMAGE
+      BASE_DISTRO_VERSION:
+        description: 'Version string for base distribution, e.g. 2021-05-07-raspios-buster-arm64 or 20211019-02:17-debian-bullseye-arm64'
+        required: true
+        default: '2021-05-07-raspios-buster-arm64'
+      BASE_IMAGE_URL:
+        description: 'Bake nightly beginning from this base image'
+        required: true
+        default: 'https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip'
+      BASE_IMAGE_EXT:
+        description: 'Base image file format (zip, tar.gz, img)'
+        required: true
+        default: 'zip'
+      BASE_IMAGE_CHECKSUM:
+        required: true
+        description: 'Checksum for base image'
+        default: 'https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip.sha256'
+      # end BASE_IMAGE
+      # begin app vars
+      PRINTNANNY_CLI_VERSION:
+        description: 'https://github.com/bitsy-ai/print-nanny-cli/releases'
+        required: true
+        default: '0.1.2'
+      OCTOPRINT_VERSION:
+        description: 'https://github.com/OctoPrint/OctoPrint/releases'
+        required: true
+        default: '1.6.1'
+      JANUS_VERSION:
+        description: 'https://github.com/meetecho/janus-gateway/releases'
+        default: 'v0.11.5'
+        required: true
+      JANUS_USRSCTP_VERSION:
+        description: 'https://github.com/sctplab/usrsctp/releases'
+        default: '0.9.5.0'
+      JANUS_LIBNICE_VERSION:
+        description: 'https://gitlab.freedesktop.org/libnice/libnice/-/tags'
+        default: '0.1.18'
+      JANUS_WEBSOCKETS_VERSION:
+        description: 'https://libwebsockets.org/git/libwebsockets'
+        default: 'v3.2-stable"'
+      RELEASE_CHANNEL:
+        description: 'Publish image to release channel: (nightly, stable)'     
+        required: true
+        default: 'nightly'
+    
+    
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  RELEASE_CHANNEL: nightly
 
   GCP_BUCKET: print-nanny-cdn
   CPU_ARCH: arm64
@@ -23,7 +75,9 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make image RELEASE_CHANNEL=main CPU_ARCH=$CPU_ARCH
+        make image \
+            RELEASE_CHANNEL=$RELEASE_CHANNEL \
+            CPU_ARCH=$CPU_ARCH
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"

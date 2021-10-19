@@ -22,59 +22,37 @@ locals {
   # confusion mainly because this is evaluated a 'parsing-time'.
 }
 
-variable "DISTRO_VERSION" {
-    type = string
-    default = "2021-05-07-raspios"
-}
-
 variable "RELEASE_CHANNEL" {
   type    = string
   default = "main"
 }
 
-variable "CPU_ARCH" {
-  type    = string
-  default = "arm64"
-}
-
-variable "PLATFORM_VERSION" {
-  type = string
-  default = "buster"
-}
-
 variable "PRINTNANNY_CLI_VERSION" {
     type = string
-    default = "0.1.2"
 }
 
 variable "OCTOPRINT_VERSION" {
     type = string
-    default = "1.6.1"
 }
 
 variable "JANUS_VERSION" {
     type = string
-    default = "v0.11.4"
 }
 
 variable "JANUS_USRSCTP_VERSION" {
     type = string
-    default = "0.9.5.0"
 }
 
 variable "JANUS_LIBNICE_VERSION" {
     type = string
-    default = "0.1.18"
 }
 
 variable "JANUS_LIBSRTP_VERSION" {
     type = string
-    default = "2.2.0"
 }
 
 variable "JANUS_WEBSOCKETS_VERSION" {
     type = string
-    default = "v3.2-stable"
 }
 
 variable "PRINTNANNY_USER" {
@@ -97,17 +75,35 @@ variable "OCTOPRINT_GROUP" {
   default = "octoprint"
 }
 
+variable "BASE_DISTRO_VERSION" {
+  type = string
+}
+variable "BASE_IMAGE_URL" {
+  type = string
+}
+
+variable "BASE_IMAGE_CHECKSUM" {
+    type = string
+}
+
+variable "BASE_IMAGE_EXT" {
+    type = string
+}
+
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/source
 source "arm" "print_nanny" {
   file_checksum_type    = "sha256"
-  file_checksum_url     = "https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip.sha256"
-  file_target_extension = "zip"
-  file_urls             = ["https://downloads.raspberrypi.org/raspios_${var.CPU_ARCH}/images/raspios_${var.CPU_ARCH}-2021-05-28/2021-05-07-raspios-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"]
+  file_checksum_url     = "${var.BASE_IMAGE_CHECKSUM}"
+  file_target_extension = "${var.BASE_IMAGE_EXT}"
+  file_urls             = [
+      "${var.BASE_IMAGE_URL}"
+    ]
   image_build_method    = "resize"
-//   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
+// override chroot environment variables
+// image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
@@ -126,7 +122,7 @@ source "arm" "print_nanny" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
+  image_path                   = "dist/printnanny-pi.img"
   image_size                   = "6G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -160,7 +156,6 @@ build {
         "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
         "--extra-vars", "octoprint_user=${var.OCTOPRINT_USER}",
         "--extra-vars", "octoprint_group=${var.OCTOPRINT_GROUP}",
-        "--extra-vars", "printnanny_cpu_arch=${var.CPU_ARCH}",
         "--extra-vars", "printnanny_user=${var.PRINTNANNY_USER}",
         "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
         "--extra-vars", "janus_version=${var.JANUS_VERSION}",
@@ -184,15 +179,17 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}"
-      image_name = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.img"
+      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.BASE_DISTRO_VERSION}"
+      image_name = "$printnanny-pi.img"
       release_channel = "${var.RELEASE_CHANNEL}"
       datestamp = "${local.DATESTAMP}"
-      platform_version = "${var.PLATFORM_VERSION}"
-      cpu_arch = "${var.CPU_ARCH}"
+      base_distro_version = "${var.BASE_DISTRO_VERSION}"
+      base_image_checksum = "${var.BASE_IMAGE_CHECKSUM}"
+      base_image_ext = "${var.BASE_IMAGE_EXT}"
+      base_image_url = "${var.BASE_IMAGE_URL}"
+
       printnanny_cli_version = "${var.PRINTNANNY_CLI_VERSION}"
       octoprint_version = "${var.OCTOPRINT_VERSION}"
-      distro_version = "${var.DISTRO_VERSION}"
       janus_version = "${var.JANUS_VERSION}"
       janus_usrsctp_version = "${var.JANUS_USRSCTP_VERSION}"
       janus_libnice_version = "${var.JANUS_LIBNICE_VERSION}"
@@ -202,7 +199,7 @@ build {
   }
 
   post-processor "compress" {
-    output = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.PLATFORM_VERSION}-${var.CPU_ARCH}.zip"
+    output = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.BASE_DISTRO_VERSION}.zip"
   }
 
 }
