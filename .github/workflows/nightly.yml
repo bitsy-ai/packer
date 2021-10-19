@@ -105,7 +105,7 @@ jobs:
 
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/main/${{ steps.packer.outputs.image_path }}/
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/${{ inputs.RELEASE_CHANNEL }}/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
@@ -118,14 +118,5 @@ jobs:
           ```
           ${{ steps.packer.outputs.checksum }}
           ------------------------------------
-          distro_version ${{ steps.packer.outputs.distro_version }}
-          platform_version ${{ steps.packer.outputs.platform_version }}
-          cpu_arch ${{ steps.packer.outputs.cpu_arch }}
-          printnanny_cli_version ${{ steps.packer.outputs.printnanny_cli_version }}
-          octoprint_version ${{ steps.packer.outputs.octoprint_version }}
-          janus_version ${{ steps.packer.outputs.janus_version }}
-          janus_usrsctp_version ${{ steps.packer.outputs.janus_usrsctp_version }}
-          janus_libnice_version ${{ steps.packer.outputs.janus_libnice_version }}
-          janus_libsrtp_version ${{ steps.packer.outputs.janus_libsrtp_version }}
-          janus_websockets_version ${{ steps.packer.outputs.janus_websockets_version }}
+          ${{ inputs }}
           ```
