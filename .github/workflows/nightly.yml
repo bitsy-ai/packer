@@ -16,10 +16,6 @@ on:
         description: 'Bake nightly beginning from this base image'
         required: true
         default: 'https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip'
-      BASE_IMAGE_EXT:
-        description: 'Base image file format (zip, tar.gz, img)'
-        required: true
-        default: 'zip'
       BASE_IMAGE_CHECKSUM:
         required: true
         description: 'Checksum for base image'

@@ -88,6 +88,7 @@ variable "BASE_IMAGE_CHECKSUM" {
 
 variable "BASE_IMAGE_EXT" {
     type = string
+    default = "zip"
 }
 
 # source blocks are generated from your builders; a source can be referenced in
