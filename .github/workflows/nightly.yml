@@ -73,22 +73,22 @@ jobs:
       id: packer
       run: |
         make dist/printnanny-pi.img \
-          BASE_DISTRO_VERSION=${{ inputs.BASE_DISTRO_VERSION }} \
-          BASE_IMAGE_CHECKSUM=${{ inputs.BASE_IMAGE_CHECKSUM }} \
-          BASE_IMAGE_EXT=${{ inputs.BASE_IMAGE_EXT }} \
-          BASE_IMAGE_URL=${{ inputs.BASE_IMAGE_URL }} \
-          PRINTNANNY_CLI_VERSION=${{ inputs.PRINTNANNY_CLI_VERSION }} \
-          OCTOPRINT_VERSION=${{ inputs.OCTOPRINT_VERSION }} \
-          JANUS_VERSION=${{ inputs.JANUS_VERSION }} \
-          JANUS_USRSCTP_VERSION=${{ inputs.JANUS_USRSCTP_VERSION }} \
-          JANUS_LIBNICE_VERSION=${{ inputs.JANUS_LIBNICE_VERSION }} \
-          JANUS_LIBSRTP_VERSION=${{ inputs.JANUS_LIBSRTP_VERSION }} \
-          JANUS_WEBSOCKETS_VERSION=${{ inputs.JANUS_WEBSOCKETS_VERSION }} \
-          RELEASE_CHANNEL=${{ inputs.RELEASE_CHANN }}
+          BASE_DISTRO_VERSION=${{ github.event.inputs.BASE_DISTRO_VERSION }} \
+          BASE_IMAGE_CHECKSUM=${{ github.event.inputs.BASE_IMAGE_CHECKSUM }} \
+          BASE_IMAGE_EXT=${{ github.event.inputs.BASE_IMAGE_EXT }} \
+          BASE_IMAGE_URL=${{ github.event.inputs.BASE_IMAGE_URL }} \
+          PRINTNANNY_CLI_VERSION=${{ github.event.inputs.PRINTNANNY_CLI_VERSION }} \
+          OCTOPRINT_VERSION=${{ github.event.inputs.OCTOPRINT_VERSION }} \
+          JANUS_VERSION=${{ github.event.inputs.JANUS_VERSION }} \
+          JANUS_USRSCTP_VERSION=${{ github.event.inputs.JANUS_USRSCTP_VERSION }} \
+          JANUS_LIBNICE_VERSION=${{ github.event.inputs.JANUS_LIBNICE_VERSION }} \
+          JANUS_LIBSRTP_VERSION=${{ github.event.inputs.JANUS_LIBSRTP_VERSION }} \
+          JANUS_WEBSOCKETS_VERSION=${{ github.event.inputs.JANUS_WEBSOCKETS_VERSION }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANN }}
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
     - name: Upload to GCP_BUCKET
       run: |
-        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/${{ inputs.RELEASE_CHANNEL }}/${{ steps.packer.outputs.image_path }}/
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/releases/${{ github.event.inputs.RELEASE_CHANNEL }}/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
