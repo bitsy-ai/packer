@@ -72,7 +72,6 @@ jobs:
         make dist/printnanny-pi.img \
           BASE_DISTRO_VERSION=${{ github.event.inputs.BASE_DISTRO_VERSION }} \
           BASE_IMAGE_CHECKSUM=${{ github.event.inputs.BASE_IMAGE_CHECKSUM }} \
-          BASE_IMAGE_EXT=${{ github.event.inputs.BASE_IMAGE_EXT }} \
           BASE_IMAGE_URL=${{ github.event.inputs.BASE_IMAGE_URL }} \
           PRINTNANNY_CLI_VERSION=${{ github.event.inputs.PRINTNANNY_CLI_VERSION }} \
           OCTOPRINT_VERSION=${{ github.event.inputs.OCTOPRINT_VERSION }} \
