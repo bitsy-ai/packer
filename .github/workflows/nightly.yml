@@ -72,7 +72,7 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make image \
+        make dist/printnanny-pi.img \
           BASE_DISTRO_VERSION=${{ inputs.BASE_DISTRO_VERSION }} \
           BASE_IMAGE_CHECKSUM=${{ inputs.BASE_IMAGE_CHECKSUM }} \
           BASE_IMAGE_EXT=${{ inputs.BASE_IMAGE_EXT }} \
