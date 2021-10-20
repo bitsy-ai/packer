@@ -1,8 +1,5 @@
 # bake a nightly image
 on:
-  # on merge to mainline (packer repo)
-  push:
-    branches: [ main ]
   # on manual trigger (packer repo) OR workflow_dispatch event from another repo's cd pipeline
   # https://github.community/t/triggering-by-other-repository/16163/6
   workflow_dispatch:
