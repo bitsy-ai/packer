@@ -11,6 +11,7 @@ JANUS_VERSION ?= "v0.11.5"
 JANUS_USRSCTP_VERSION ?= "0.9.5.0"
 JANUS_LIBNICE_VERSION ?= "0.1.18"
 JANUS_WEBSOCKETS_VERSION ?= "v3.2-stable"
+JANUS_LIBSRTP_VERSION ?= "2.2.0"
 
 .PHONY: clean docker-builder-image validate
 clean:
