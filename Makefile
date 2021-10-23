@@ -1,5 +1,5 @@
 ANSIBLE_COLLECTIONS_PATHS ?= $(HOME)/projects/
-RELEASE_CHANNEL ?= main
+RELEASE_CHANNEL ?= nightly
 DIST_DIR ?= dist
 BASE_IMAGE_CHECKSUM ?= "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip.sha256"
 BASE_IMAGE_URL ?= "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip"
