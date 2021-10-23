@@ -172,10 +172,6 @@ build {
       printnanny_cli_version = "${var.PRINTNANNY_CLI_VERSION}"
       octoprint_version = "${var.OCTOPRINT_VERSION}"
       janus_version = "${var.JANUS_VERSION}"
-      janus_usrsctp_version = "${var.JANUS_USRSCTP_VERSION}"
-      janus_libnice_version = "${var.JANUS_LIBNICE_VERSION}"
-      janus_libsrtp_version = "${var.JANUS_LIBSRTP_VERSION}"
-      janus_websockets_version = "${var.JANUS_WEBSOCKETS_VERSION}"
     }
   }
 
