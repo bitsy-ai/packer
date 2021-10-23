@@ -160,8 +160,8 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.BASE_DISTRO_VERSION}"
-      image_name = "$printnanny-pi.img"
+      image_path = "releases/${var.RELEASE_CHANNEL}/${local.DATESTAMP}-printnanny-os-buster-arm64"
+      image_name = "printnanny-pi.img"
       release_channel = "${var.RELEASE_CHANNEL}"
       datestamp = "${local.DATESTAMP}"
       base_distro_version = "${var.BASE_DISTRO_VERSION}"
