@@ -83,5 +83,8 @@ jobs:
           ```
           ${{ steps.packer.outputs.checksum }}
           ------------------------------------
-          ${{ github.event.inputs }}
+          BASE_DISTRO_VERSION = ${{ github.event.inputs.BASE_DISTRO_VERSION }}
+          PRINTNANNY_CLI_VERSION = ${{ github.event.inputs.PRINTNANNY_CLI_VERSION }}
+          OCTOPRINT_VERSION=${{ github.event.inputs.OCTOPRINT_VERSION }}
+          JANUS_VERSION=${{ github.event.inputs.JANUS_VERSION }}
           ```
