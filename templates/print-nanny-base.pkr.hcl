@@ -39,22 +39,6 @@ variable "JANUS_VERSION" {
     type = string
 }
 
-variable "JANUS_USRSCTP_VERSION" {
-    type = string
-}
-
-variable "JANUS_LIBNICE_VERSION" {
-    type = string
-}
-
-variable "JANUS_LIBSRTP_VERSION" {
-    type = string
-}
-
-variable "JANUS_WEBSOCKETS_VERSION" {
-    type = string
-}
-
 variable "PRINTNANNY_USER" {
   type = string
   default = "printnanny"
@@ -160,10 +144,6 @@ build {
         "--extra-vars", "printnanny_user=${var.PRINTNANNY_USER}",
         "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
         "--extra-vars", "janus_version=${var.JANUS_VERSION}",
-        "--extra-vars", "janus_usrsctp_version=${var.JANUS_USRSCTP_VERSION}",
-        "--extra-vars", "janus_libnice_version=${var.JANUS_LIBNICE_VERSION}",
-        "--extra-vars", "janus_libsrtp_version=${var.JANUS_LIBSRTP_VERSION}",
-        "--extra-vars", "janus_websockets_version=${var.JANUS_WEBSOCKETS_VERSION}",
     ]
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
     galaxy_file     = "./playbooks/requirements.yml"

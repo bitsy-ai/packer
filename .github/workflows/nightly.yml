@@ -31,18 +31,6 @@ on:
         description: 'https://github.com/meetecho/janus-gateway/releases'
         default: 'v0.11.5'
         required: true
-      JANUS_USRSCTP_VERSION:
-        description: 'https://github.com/sctplab/usrsctp/releases'
-        default: '0.9.5.0'
-        required: true
-      JANUS_LIBNICE_VERSION:
-        description: 'https://gitlab.freedesktop.org/libnice/libnice/-/tags'
-        default: '0.1.18'
-        required: true
-      JANUS_WEBSOCKETS_VERSION:
-        description: 'https://libwebsockets.org/git/libwebsockets'
-        default: 'v3.2-stable'
-        required: true
       RELEASE_CHANNEL:
         description: 'Publish image to release channel: (nightly, stable)'     
         required: true
@@ -76,11 +64,7 @@ jobs:
           PRINTNANNY_CLI_VERSION=${{ github.event.inputs.PRINTNANNY_CLI_VERSION }} \
           OCTOPRINT_VERSION=${{ github.event.inputs.OCTOPRINT_VERSION }} \
           JANUS_VERSION=${{ github.event.inputs.JANUS_VERSION }} \
-          JANUS_USRSCTP_VERSION=${{ github.event.inputs.JANUS_USRSCTP_VERSION }} \
-          JANUS_LIBNICE_VERSION=${{ github.event.inputs.JANUS_LIBNICE_VERSION }} \
-          JANUS_LIBSRTP_VERSION=${{ github.event.inputs.JANUS_LIBSRTP_VERSION }} \
-          JANUS_WEBSOCKETS_VERSION=${{ github.event.inputs.JANUS_WEBSOCKETS_VERSION }} \
-          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANN }}
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }}
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
     - name: Upload to GCP_BUCKET
       run: |
