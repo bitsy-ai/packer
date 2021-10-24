@@ -5,7 +5,7 @@ BASE_IMAGE_CHECKSUM ?= "https://downloads.raspberrypi.org/raspios_arm64/images/r
 BASE_IMAGE_URL ?= "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip"
 BASE_IMAGE_EXT ?= "zip"
 BASE_DISTRO_VERSION ?= "2021-05-07-raspios-buster-arm64"
-PRINTNANNY_CLI_VERSION ?= "0.1.2"
+PRINTNANNY_CLI_VERSION ?= "0.1.3"
 OCTOPRINT_VERSION ?= "1.6.1"
 JANUS_VERSION ?= "v0.11.5"
 
