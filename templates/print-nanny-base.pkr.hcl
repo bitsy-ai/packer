@@ -145,7 +145,7 @@ build {
         "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
         "--extra-vars", "janus_version=${var.JANUS_VERSION}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot\n"
+    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "./playbooks/printnanny.yml"
   }
