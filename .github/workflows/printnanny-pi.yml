@@ -24,7 +24,7 @@ jobs:
             vars: vars/buster.pkrvars.hcl
             template: templates/buster.pkr.hcl
           - os: bullseye-arm64-latest
-            vars: vars/bullseye.pkvars.hcl
+            vars: vars/bullseye.pkrvars.hcl
             template: templates/bullseye.pkr.hcl
     runs-on: ubuntu-latest
     steps:
