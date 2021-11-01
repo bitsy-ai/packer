@@ -15,8 +15,10 @@ strategy:
     include:
       - os: buster-arm64-latest
         vars: vars/buster.pkrvars.hcl
+        template: templates/buster.hcl
       - os: bullseye-arm64-latest
         vars: vars/bullseye.pkvars.hcl
+        template: templates/bullseye.hcl
     
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
@@ -41,7 +43,7 @@ jobs:
         make dist/printnanny-pi.img \
           VAR_FILE=${{ matrix.vars }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          -var
+          TEMPLATE_FILE=${{ matrix.template }}
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
