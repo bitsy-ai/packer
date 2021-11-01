@@ -103,8 +103,8 @@ build {
 
   provisioner "shell" {
     inline = [
-        "DEBIAN_FRONTEND=noninteractive apt-get -y update",
-        "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade --allow",
+        "DEBIAN_FRONTEND=noninteractive apt-get update",
+        "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
         "DEBIAN_FRONTEND=noninteractive apt-get -y install python3 python3-pip",
         "DEBIAN_FRONTEND=noninteractive apt-get clean"
     ]
