@@ -17,6 +17,7 @@ env:
 jobs:
   publish:
     strategy:
+      fail-fast: false # if fail-fast is true (default) parallel builds will be cancelled on first matrix failure
       matrix:
         os: [buster-arm64-latest, bullseye-arm64-latest] 
         include:
