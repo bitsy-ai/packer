@@ -5,6 +5,7 @@ RUN apt-get update -qq \
     python3 \
     python3-dev \
     python3-pip \
-    git
+    git \
+    unzip
 
 RUN pip install --no-cache ansible
