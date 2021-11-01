@@ -8,17 +8,6 @@ on:
         description: 'Publish image to release channel: (nightly, stable)'     
         required: true
         default: 'nightly'
-
-strategy:
-  matrix:
-    os: [buster-arm64-latest, bullseye-arm64-latest] 
-    include:
-      - os: buster-arm64-latest
-        vars: vars/buster.pkrvars.hcl
-        template: templates/buster.hcl
-      - os: bullseye-arm64-latest
-        vars: vars/bullseye.pkvars.hcl
-        template: templates/bullseye.hcl
     
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
@@ -27,6 +16,16 @@ env:
 
 jobs:
   publish:
+    strategy:
+      matrix:
+        os: [buster-arm64-latest, bullseye-arm64-latest] 
+        include:
+          - os: buster-arm64-latest
+            vars: vars/buster.pkrvars.hcl
+            template: templates/buster.hcl
+          - os: bullseye-arm64-latest
+            vars: vars/bullseye.pkvars.hcl
+            template: templates/bullseye.hcl
     runs-on: ubuntu-latest
     steps:
     - name: Install platform deps
