@@ -1,0 +1,69 @@
+# bake a nightly image
+on:
+  # on manual trigger (packer repo) OR workflow_dispatch event from another repo's cd pipeline
+  # https://github.community/t/triggering-by-other-repository/16163/6
+  workflow_dispatch:
+    inputs:
+      RELEASE_CHANNEL:
+        description: 'Publish image to release channel: (nightly, stable)'     
+        required: true
+        default: 'nightly'
+
+strategy:
+  matrix:
+    os: [buster-arm64-latest, bullseye-arm64-latest] 
+    include:
+      - os: buster-arm64-latest
+        vars: vars/buster.pkrvars.hcl
+        template: templates/buster.hcl
+      - os: bullseye-arm64-latest
+        vars: vars/bullseye.pkvars.hcl
+        template: templates/bullseye.hcl
+    
+env:
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  GCP_BUCKET: print-nanny-cdn
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install platform deps
+      run: sudo apt-get install -y jq wget
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - name: Write deploy key
+      run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+    - name: Active Service Account
+      run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+    - name: Make base image
+      id: packer
+      run: |
+        make dist/printnanny-pi.img \
+          VAR_FILE=${{ matrix.vars }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          TEMPLATE_FILE=${{ matrix.template }}
+        echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
+        echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+        echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
+        echo ::set-output name=release::"$(cat dist/release.json | jq '.')"
+
+    - name: Upload to GCP_BUCKET
+      run: |
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+    - name: Send Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          Published https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/${{ steps.packer.outputs.image_name }}
+          Checksum https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/sha256.checksum
+          Release targets https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/release.json
+          Build manifest https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/manifest.json
+          ```
+          ${{ steps.packer.outputs.checksum }}
+          ------------------------------------
+          ${{ steps.packer.outputs.release}}
+          ```

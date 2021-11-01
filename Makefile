@@ -1,48 +1,34 @@
-ANSIBLE_COLLECTIONS_PATHS ?= $(HOME)/projects/
 RELEASE_CHANNEL ?= nightly
+VAR_FILE ?= vars/buster.pkrvars.hcl
+TEMPLATE_FILE ?= templates/buster.pkr.hcl
 DIST_DIR ?= dist
-BASE_IMAGE_CHECKSUM ?= "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip.sha256"
-BASE_IMAGE_URL ?= "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/2021-05-07-raspios-buster-arm64.zip"
-BASE_IMAGE_EXT ?= "zip"
-BASE_DISTRO_VERSION ?= "2021-05-07-raspios-buster-arm64"
-PRINTNANNY_CLI_VERSION ?= "0.1.3"
-OCTOPRINT_VERSION ?= "1.6.1"
-JANUS_VERSION ?= "v0.11.5"
-
 
 .PHONY: clean docker-builder-image validate
 clean:
-	rm -rf dist/
+	rm -rf $(DIST_DIR)
+	mkdir -p $(DIST_DIR)
+
+dist/release.json:
+	wget https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest -O dist/release.json
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
-dist/printnanny-pi.img: docker-builder-image
-	mkdir -p $(DIST_DIR)
+dist/printnanny-pi.img: docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
 			-debug \
-			-var "BASE_DISTRO_VERSION=$(BASE_DISTRO_VERSION)" \
-			-var "BASE_IMAGE_CHECKSUM=$(BASE_IMAGE_CHECKSUM)" \
-			-var "BASE_IMAGE_EXT=$(BASE_IMAGE_EXT)" \
-			-var "BASE_IMAGE_URL=$(BASE_IMAGE_URL)" \
-			-var "PRINTNANNY_CLI_VERSION=$(PRINTNANNY_CLI_VERSION)" \
-			-var "OCTOPRINT_VERSION=$(OCTOPRINT_VERSION)" \
-			-var "JANUS_VERSION=$(JANUS_VERSION)" \
-			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
-			templates/print-nanny-base.pkr.hcl
+			-var-file $(VAR_FILE) \
+			-var "release_channel=$(RELEASE_CHANNEL)" \
+			-var "ansible_extra_vars=$(shell cat dist/release.json | jq .ansible_extra_vars)" \
+			$(TEMPLATE_FILE)
 
-validate: docker-builder-image
+validate: docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
-			-var "BASE_DISTRO_VERSION=$(BASE_DISTRO_VERSION)" \
-			-var "BASE_IMAGE_CHECKSUM=$(BASE_IMAGE_CHECKSUM)" \
-			-var "BASE_IMAGE_EXT=$(BASE_IMAGE_EXT)" \
-			-var "BASE_IMAGE_URL=$(BASE_IMAGE_URL)" \
-			-var "PRINTNANNY_CLI_VERSION=$(PRINTNANNY_CLI_VERSION)" \
-			-var "OCTOPRINT_VERSION=$(OCTOPRINT_VERSION)" \
-			-var "JANUS_VERSION=$(JANUS_VERSION)" \
-			-var "RELEASE_CHANNEL=$(RELEASE_CHANNEL)" \
-			templates/print-nanny-base.pkr.hcl
+			-var "RELEASE_CHANNEL=$(release_channel)" \
+			-var-file $(VAR_FILE) \
+			-var "ansible_extra_vars=$(shell cat dist/release.json | jq .ansible_extra_vars)" \
+			$(TEMPLATE_FILE)

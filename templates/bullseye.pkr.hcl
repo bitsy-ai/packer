@@ -22,73 +22,49 @@ locals {
   # confusion mainly because this is evaluated a 'parsing-time'.
 }
 
-variable "RELEASE_CHANNEL" {
+variable "ansible_extra_vars" {
   type    = string
   default = "main"
 }
 
-variable "PRINTNANNY_CLI_VERSION" {
-    type = string
-}
-
-variable "OCTOPRINT_VERSION" {
-    type = string
-}
-
-variable "JANUS_VERSION" {
-    type = string
-}
-
-variable "PRINTNANNY_USER" {
-  type = string
-  default = "printnanny"
-}
-
-variable "PRINTNANNY_GROUP" {
-  type = string
-  default = "printnanny"
-}
-
-variable "OCTOPRINT_USER" {
-  type = string
-  default = "octoprint"
-}
-
-variable "OCTOPRINT_GROUP" {
-  type = string
-  default = "octoprint"
-}
-
-variable "BASE_DISTRO_VERSION" {
-  type = string
-}
-variable "BASE_IMAGE_URL" {
+variable "release_channel" {
   type = string
 }
 
-variable "BASE_IMAGE_CHECKSUM" {
-    type = string
+variable "base_image_url" {
+  type = string
 }
 
-variable "BASE_IMAGE_EXT" {
-    type = string
-    default = "zip"
+variable "base_image_checksum" {
+  type = string
+}
+
+variable "base_image_ext" {
+  type = string
+}
+
+variable "base_distro_version" {
+  type = string
+}
+
+variable "base_image_unarchive_cmd" {
+  type = list(string)
 }
 
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/source
-source "arm" "print_nanny" {
+source "arm" "printnanny" {
   file_checksum_type    = "sha256"
-  file_checksum_url     = "${var.BASE_IMAGE_CHECKSUM}"
-  file_target_extension = "${var.BASE_IMAGE_EXT}"
+  file_checksum_url     = "${var.base_image_checksum}"
+  file_target_extension = "${var.base_image_ext}" 
+  # todo - custom unarchive cmd only required for xz file here, otherwise we could combine buster/bullseye templaets
+  file_unarchive_cmd = var.base_image_unarchive_cmd 
   file_urls             = [
-      "${var.BASE_IMAGE_URL}"
-    ]
+    "${var.base_image_url}"
+  ]
   image_build_method    = "resize"
-// override chroot environment variables
-// image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
@@ -107,18 +83,19 @@ source "arm" "print_nanny" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/printnanny-pi.img"
+  image_path                   = "dist/printnanny-pi-bullseye.img"
   image_size                   = "6G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
+  
 }
 
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
-  sources = ["source.arm.print_nanny"]
+  sources = ["source.arm.printnanny"]
 
   provisioner "shell" {
     inline = ["touch /boot/ssh"]
@@ -136,14 +113,7 @@ build {
 
   provisioner "ansible" {
     extra_arguments = [
-        "--extra-vars", "printnanny_release_channel=${var.RELEASE_CHANNEL}",
-        "--extra-vars", "printnanny_cli_version=${var.PRINTNANNY_CLI_VERSION}",
-        "--extra-vars", "octoprint_version=${var.OCTOPRINT_VERSION}",
-        "--extra-vars", "octoprint_user=${var.OCTOPRINT_USER}",
-        "--extra-vars", "octoprint_group=${var.OCTOPRINT_GROUP}",
-        "--extra-vars", "printnanny_user=${var.PRINTNANNY_USER}",
-        "--extra-vars", "printnanny_group=${var.PRINTNANNY_GROUP}",
-        "--extra-vars", "janus_version=${var.JANUS_VERSION}",
+        "--extra-vars", "${var.ansible_extra_vars}",
     ]
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
@@ -151,7 +121,7 @@ build {
   }
 
   post-processor "checksum" {
-    checksum_types = ["sha1", "sha256"]
+    checksum_types = ["sha256"]
     output = "dist/{{.ChecksumType}}.checksum"
   }
 
@@ -160,23 +130,18 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "releases/${var.RELEASE_CHANNEL}/${local.DATESTAMP}-printnanny-os-buster-arm64"
-      image_name = "printnanny-pi.img"
-      release_channel = "${var.RELEASE_CHANNEL}"
+      image_path = "releases/${var.release_channel}/${local.DATESTAMP}-printnanny-os-bullseye-arm64"
+      image_name = "dist/printnanny-pi-bullseye.img"
+      release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
-      base_distro_version = "${var.BASE_DISTRO_VERSION}"
-      base_image_checksum = "${var.BASE_IMAGE_CHECKSUM}"
-      base_image_ext = "${var.BASE_IMAGE_EXT}"
-      base_image_url = "${var.BASE_IMAGE_URL}"
-
-      printnanny_cli_version = "${var.PRINTNANNY_CLI_VERSION}"
-      octoprint_version = "${var.OCTOPRINT_VERSION}"
-      janus_version = "${var.JANUS_VERSION}"
+      base_image_checksum = "${var.base_image_checksum}"
+      base_image_ext = "${var.base_image_ext}"
+      base_image_url = "${var.base_image_url}"
     }
   }
 
   post-processor "compress" {
-    output = "dist/${local.DATESTAMP}-print-nanny-${var.RELEASE_CHANNEL}-${var.BASE_DISTRO_VERSION}.zip"
+    output = "dist/${local.DATESTAMP}-print-nanny-${var.release_channel}-${var.base_distro_version}.zip"
   }
 
 }
