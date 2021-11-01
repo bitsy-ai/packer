@@ -31,7 +31,7 @@ dist/printnanny-pi.img: $(DIST_DIR) docker-builder-image dist/release.json
 validate: $(DIST_DIR) docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
-			-var "RELEASE_CHANNEL=$(release_channel)" \
+			-var "release_channel=$(RELEASE_CHANNEL)" \
 			-var-file $(VAR_FILE) \
 			-var "ansible_extra_vars=$(shell cat dist/release.json | jq .ansible_extra_vars)" \
 			$(TEMPLATE_FILE)
