@@ -1,5 +1,6 @@
 RELEASE_CHANNEL ?= nightly
 VAR_FILE ?= vars/buster.pkrvars.hcl
+TEMPLATE_FILE ?= templates/buster.pkr.hcl
 DIST_DIR ?= dist
 
 .PHONY: clean docker-builder-image validate
@@ -14,7 +15,7 @@ docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
-dist/printnanny-pi.img: clean docker-builder-image dist/release.json
+dist/printnanny-pi.img: docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
@@ -22,12 +23,12 @@ dist/printnanny-pi.img: clean docker-builder-image dist/release.json
 			-var-file $(VAR_FILE) \
 			-var "release_channel=$(RELEASE_CHANNEL)" \
 			-var "ansible_extra_vars=$(shell cat dist/release.json | jq .ansible_extra_vars)" \
-			templates/print-nanny-base.pkr.hcl
+			$(TEMPLATE_FILE)
 
-validate: clean docker-builder-image dist/release.json
+validate: docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
 			-var "RELEASE_CHANNEL=$(release_channel)" \
 			-var-file $(VAR_FILE) \
 			-var "ansible_extra_vars=$(shell cat dist/release.json | jq .ansible_extra_vars)" \
-			templates/print-nanny-base.pkr.hcl
+			$(TEMPLATE_FILE)

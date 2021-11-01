@@ -58,8 +58,9 @@ variable "base_image_unarchive_cmd" {
 source "arm" "printnanny" {
   file_checksum_type    = "sha256"
   file_checksum_url     = "${var.base_image_checksum}"
-  file_target_extension = "${var.base_image_ext}"
-  file_unarchive_cmd = var.base_image_unarchive_cmd
+  file_target_extension = "${var.base_image_ext}" 
+  # todo - custom unarchive cmd only required for xz file here, otherwise we could combine buster/bullseye templaets
+  file_unarchive_cmd = var.base_image_unarchive_cmd 
   file_urls             = [
     "${var.base_image_url}"
   ]
@@ -82,7 +83,7 @@ source "arm" "printnanny" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/printnanny-pi.img"
+  image_path                   = "dist/printnanny-pi-bullseye.img"
   image_size                   = "6G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -129,8 +130,8 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "releases/${var.release_channel}/${local.DATESTAMP}-printnanny-os-buster-arm64"
-      image_name = "printnanny-pi.img"
+      image_path = "releases/${var.release_channel}/${local.DATESTAMP}-printnanny-os-bullseye-arm64"
+      image_name = "dist/printnanny-pi-bullseye.img"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
       base_image_checksum = "${var.base_image_checksum}"
