@@ -26,9 +26,9 @@ jobs:
           - os: buster-arm64-latest
             vars: vars/buster.pkrvars.hcl
             template: templates/buster.pkr.hcl
-          - os: bullseye-arm64-latest
-            vars: vars/bullseye.pkrvars.hcl
-            template: templates/bullseye.pkr.hcl
+          # - os: bullseye-arm64-latest
+          #   vars: vars/bullseye.pkrvars.hcl
+          #   template: templates/bullseye.pkr.hcl
     runs-on: ubuntu-latest
     steps:
     - name: Install platform deps
