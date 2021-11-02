@@ -103,10 +103,10 @@ build {
 
   provisioner "shell" {
     inline = [
-        "DEBIAN_FRONTEND=noninteractive apt-get update",
-        "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
-        "DEBIAN_FRONTEND=noninteractive apt-get -y install python3",
-        "DEBIAN_FRONTEND=noninteractive apt-get clean"
+        "DEBIAN_FRONTEND=noninteractive apt update",
+        "DEBIAN_FRONTEND=noninteractive apt -y dist-upgrade",
+        "DEBIAN_FRONTEND=noninteractive apt -y install python3",
+        "DEBIAN_FRONTEND=noninteractive apt clean"
     ]
     pause_before = "60s"
     timeout      = "800s"
