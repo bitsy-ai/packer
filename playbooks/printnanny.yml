@@ -1,2 +1,3 @@
 ---
+- include: bitsyai.printnanny.firmware
 - include: bitsyai.printnanny.packer
