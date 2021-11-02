@@ -49,7 +49,7 @@ jobs:
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
-        echo ::set-output name=release::"$(cat dist/release.json | jq '.')"
+        echo ::set-output name=release::'$(cat dist/release.json)'
 
     - name: Upload to GCP_BUCKET
       run: |
@@ -67,5 +67,5 @@ jobs:
           ```
           ${{ steps.packer.outputs.checksum }}
           ------------------------------------
-          ${{ steps.packer.outputs.release}}
+          ${{ steps.packer.outputs.release }}
           ```
