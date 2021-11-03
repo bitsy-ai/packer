@@ -62,7 +62,7 @@ sudo mount -v -o offset="$OFFSET" -t ext4 "$IMAGE_FILE" /mnt/printnanny
 qemu-system-arm \
 -kernel ~/projects/qemu-rpi-kernel/kernel-qemu-5.4.51-buster \
 -cpu arm64 \
--2048m \
+-m 2048m \
 -serial stdio \
 -redir tcp:8022:22 \
 -hda "$IMAGE_FILE" \
