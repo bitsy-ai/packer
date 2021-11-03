@@ -59,6 +59,10 @@ sudo mount -v -o offset="$OFFSET" -t ext4 "$IMAGE_FILE" /mnt/printnanny
 4. Emulate with QEMU
 
 ```
+pushd ~/projects && \
+  git clone https://github.com/dhruvvyas90/qemu-rpi-kernel && \
+  popd
+
 qemu-system-arm \
 -kernel ~/projects/qemu-rpi-kernel/kernel-qemu-5.4.51-buster \
 -cpu arm64 \
