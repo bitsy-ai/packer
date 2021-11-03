@@ -50,10 +50,9 @@ Note start sector number. Partition info can also be found in Packer templates u
 
 ```
 export START_SECTOR=532480
-export OFFSET=272629760
 export IMAGE_FILE="${PWD}/dist/2021-10-09-0439-print-nanny-main-buster-arm64.img"
 sudo mkdir -p /mnt/printnanny
-sudo mount -v -o offset="$OFFSET" -t ext4 "$IMAGE_FILE" /mnt/printnanny
+sudo mount -v -o offset="${START_SECTOR}" -t ext4 "$IMAGE_FILE" /mnt/printnanny
 ```
 
 4. Emulate with QEMU
