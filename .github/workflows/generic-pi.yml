@@ -20,13 +20,14 @@ jobs:
       # fail-fast: false # if fail-fast is true (default) parallel builds will be cancelled on first matrix failure
       matrix:
         image:
-          - printnanny-pi-buster-arm64
-          # - printnanny-pi-bullseye-arm64
+          - generic-pi-buster-arm64
         include:
-          - image: printnanny-pi-buster-arm64
-            template_file: templates/printnanny-pi-buster.pkr.hcl
-            var_file: vars/printnanny-pi-buster.pkrvars.hcl
-            ansible_extra_vars: vars/printnanny-pi-buster.ansiblevars.json
+          - image: generic-pi-buster-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/generic-pi-buster-arm64.ansiblevars.yml
+        #   - image: bitsyai-pi-bullseye-arm64
+        # TODO
 
     runs-on: ubuntu-latest
     steps:
@@ -38,27 +39,26 @@ jobs:
       run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-    - name: Download ansible_extra_vars
-      run: make ${{ vars/printnanny-pi-buster.ansiblevars.json }}
+    - name: Ensure ansible variables file generated
+      run: make ${{ matrix.ansible_extra_vars }}
     - name: Make base image
       id: packer
       run: |
-        make dist/printnanny-pi.img \
-          VAR_FILE=${{ matrix.vars }} \
-          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          IMAGE_NAME=${{ matrix.image_name}} \
-
+        make dist/${{ matrix.image_name }}.img \
+          VAR_FILE=${{ matrix.var_file }} \
+          IMAGE_NAME=${{ matrix.image_name }} \
+          TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
-        echo ::set-output name=release::"$(cat dist/release.json)"
 
     - name: Upload to GCP_BUCKET
       run: |
         gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
       uses: Ilshidur/action-discord@master
       with:
         args: |

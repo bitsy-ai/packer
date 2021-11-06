@@ -6,28 +6,13 @@ Cross-arch Raspberry Pi image builder. Create ARM images from an x86 host using:
 * https://github.com/mkaczanowski/packer-builder-arm
 
 
-## Bake image from existing templates
+## Bake image from template
 
 ```
-$ make dist/printnanny-pi-buster.img
+$ make dist/printnanny-pi-buster-arm64.img
+
+$ make dist/my-custom-pi-buster-arm64.img \
+    IMAGE_NAME=my-custom-pi \
+    VAR_FILE=vars/generic-pi-buster-arm64.pkrvars.hcl \
+    ANSIBLE_EXTRA_VARS=vars/generic-pi-buster-arm64.ansiblevars.yml
 ```
-
-## Create a new template
-
-1. Create a new Packer template
-
-```
-$ touch templates/<image name>-<variant>.pkr.hcl
-```
-
-For examples of an image created using an Ansible provisioner, see `templates/printnanny-pi-bullseye.pkr.hcl`.
-
-Please refer to [Packer's documentation](https://www.packer.io/docs/provisioners) for provisioners / builders usage.
-
-2. Provide variables
-
-Parameterize a Packer template with a `-var-file vars/<image name>-<variant>.pkrvars.hcl` and/or in-line values `-var `.
-
-3. Ansible Provisioner
-
-If using Packer's Ansible provisioner, specify collection/role dependencies in `playbooks/requirements.yml` 
