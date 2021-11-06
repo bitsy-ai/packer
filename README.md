@@ -12,7 +12,7 @@ Cross-arch Raspberry Pi image builder. Create ARM images from an x86 host using:
 $ make dist/printnanny-pi-buster-arm64.img
 
 $ make dist/my-custom-pi-buster-arm64.img \
-    IMAGE_NAME=my-custom-pi \
+    IMAGE_NAME=my-custom-pi-arm64 \
     VAR_FILE=vars/generic-pi-buster-arm64.pkrvars.hcl \
     ANSIBLE_EXTRA_VARS=vars/generic-pi-buster-arm64.ansiblevars.yml
 ```
