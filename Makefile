@@ -1,7 +1,9 @@
 RELEASE_CHANNEL ?= nightly
+RELEASE_URL ?= https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest
 VAR_FILE ?= vars/buster.pkrvars.hcl
 TEMPLATE_FILE ?= templates/buster.pkr.hcl
 DIST_DIR ?= dist
+
 
 .PHONY: clean docker-builder-image validate
 
@@ -12,7 +14,7 @@ clean:
 	mkdir -p $(DIST_DIR)
 
 dist/release.json:
-	wget https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest -O dist/release.json
+	wget $(RELEASE_URL) -O dist/release.json
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
