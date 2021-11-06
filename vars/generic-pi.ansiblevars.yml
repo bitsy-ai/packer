@@ -1,0 +1,7 @@
+---
+camera_enabled: false
+users:
+    - name: leigh
+      authorized_keys: https://github.com/leigh-johnson.keys
+    - name: jason
+      authorized_keys: https://github.com/perfinion.keys
