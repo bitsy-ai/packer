@@ -27,10 +27,12 @@ jobs:
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
+            discord_webhook: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
           - image_name: generic-pi-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-buster-arm64.ansiblevars.yml
+            discord_webhook: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     runs-on: ubuntu-latest
     steps:
     - name: Install platform deps
@@ -51,27 +53,27 @@ jobs:
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
           TEMPLATE_FILE=${{ matrix.template_file }}
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
-        echo ::set-output name=release::"$(cat dist/release.json)"
+        echo ::set-output name=ansible_extra_vars::"$(cat matrix.ansible_extra_vars)"
 
     - name: Upload to GCP_BUCKET
       run: |
         gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ matrix.discord_webhook }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
           Published https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/${{ steps.packer.outputs.image_name }}
           Checksum https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/sha256.checksum
-          Release targets https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/release.json
           Build manifest https://cdn.print-nanny.com/${{ steps.packer.outputs.image_path }}/manifest.json
           ```
           ${{ steps.packer.outputs.checksum }}
           ------------------------------------
-          ${{ steps.packer.outputs.release }}
+          ${{ steps.packer.outputs.ansible_extra_vars }}
           ```
