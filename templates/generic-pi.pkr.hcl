@@ -28,10 +28,6 @@ variable "base_image_ext" {
   type = string
 }
 
-variable "base_distro_version" {
-  type = string
-}
-
 variable "playbook_file" {
   type = string
   default = "./playbooks/generic.yml"
