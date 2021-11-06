@@ -43,7 +43,7 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make ${{ matrix.image_name}} \
+        make dist/${{ matrix.image_name}}.img \
           VAR_FILE=${{ matrix.vars }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
