@@ -2,9 +2,14 @@ locals {
   DATESTAMP = formatdate("YYYY-MM-DD-hhmm", timestamp())
 }
 
+variable "release_channel" {
+    type = string
+    default = "nightly"
+}
+
 variable "ansible_extra_vars" {
   type    = string
-  default = "@vars/generic-pi.ansiblevars.yml"
+  default = "vars/generic-pi.ansiblevars.yml"
 }
 
 variable "image_name" {
@@ -87,7 +92,7 @@ build {
 
   provisioner "ansible" {
     extra_arguments = [
-        "--extra-vars", "${var.ansible_extra_vars}",
+        "--extra-vars", "@${var.ansible_extra_vars}",
     ]
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
@@ -104,8 +109,8 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "releases/${var.release_channel}/${local.DATESTAMP}-printnanny-os-buster-arm64"
-      image_name = "printnanny-pi-buster.img"
+      image_path = "releases/${var.image_name}/${var.release_channel}/${local.DATESTAMP}-${image_name}"
+      image_name = "${image_name}.img"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
       base_image_checksum = "${var.base_image_checksum}"
