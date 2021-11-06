@@ -10,7 +10,6 @@ Cross-arch Raspberry Pi image builder. Create ARM images from an x86 host using:
 
 ```
 $ make dist/printnanny-pi-buster.img
-$ make dist/printnanny-pi-buster.img
 ```
 
 ## Create a new template
