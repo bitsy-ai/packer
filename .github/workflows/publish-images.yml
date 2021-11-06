@@ -24,8 +24,8 @@ jobs:
           - generic-pi-buster-arm64
         include:
           - image_name: printnanny-pi-buster-arm64
-            template_file: templates/printnanny-pi-buster.pkr.hcl
-            var_file: vars/printnanny-pi-buster.pkrvars.hcl
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
           - image_name: generic-pi-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
