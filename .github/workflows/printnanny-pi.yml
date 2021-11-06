@@ -43,10 +43,11 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make dist/printnanny-pi.img \
+        make ${{ matrix.image_name}} \
           VAR_FILE=${{ matrix.vars }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
+          TEMPLATE_FILE=${{ matrix.template_file }}
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
