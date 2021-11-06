@@ -44,7 +44,7 @@ jobs:
       id: packer
       run: |
         make dist/${{ matrix.image_name}}.img \
-          VAR_FILE=${{ matrix.vars }} \
+          VAR_FILE=${{ matrix.var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
           TEMPLATE_FILE=${{ matrix.template_file }}
