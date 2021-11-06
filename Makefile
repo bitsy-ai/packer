@@ -16,7 +16,7 @@ clean:
 
 vars/generic-pi-buster-arm64.ansiblevars.json:
 
-vars/printnanny-pi-buster-arm64.ansiblevars.json:
+vars/printnanny-pi-buster-arm64.ansiblevars.json: $(DIST_DIR)
 	wget $(RELEASE_URL) -O dist/printnanny-release.json
 	cat dist/printnanny-release.json | jq .ansible_extra_vars > vars/printnanny-pi-buster.ansiblevars.json
 
