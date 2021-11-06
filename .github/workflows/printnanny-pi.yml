@@ -39,7 +39,7 @@ jobs:
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
     - name: Download ansible_extra_vars
-      run: make ${{ vars/printnanny-pi-buster.ansiblevars.json }}
+      run: make ${{ matrix.ansible_extra_vars }}
     - name: Make base image
       id: packer
       run: |
