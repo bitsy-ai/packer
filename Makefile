@@ -1,7 +1,10 @@
 RELEASE_CHANNEL ?= nightly
-VAR_FILE ?= vars/buster.pkrvars.hcl
-TEMPLATE_FILE ?= templates/buster.pkr.hcl
+RELEASE_URL ?= https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest
+IMAGE_NAME ?= printnanny-pi-buster
+VAR_FILE ?= vars/$(IMAGE_NAME).pkrvars.hcl
+TEMPLATE_FILE ?= templates/$(IMAGE_NAME).pkr.hcl
 DIST_DIR ?= dist
+
 
 .PHONY: clean docker-builder-image validate
 
@@ -12,13 +15,13 @@ clean:
 	mkdir -p $(DIST_DIR)
 
 dist/release.json:
-	wget https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest -O dist/release.json
+	wget $(RELEASE_URL) -O dist/release.json
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
-dist/printnanny-pi.img: $(DIST_DIR) docker-builder-image dist/release.json
+dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image dist/release.json
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \

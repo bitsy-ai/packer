@@ -1,70 +1,34 @@
-# Print Nanny Packer
+# Bitsy AI Labs Packer
 
-### Testing an Image
+Cross-arch Raspberry Pi image builder. Create ARM images from an x86 host using:
 
-1. Install QEMU
+* https://github.com/multiarch/qemu-user-static
+* https://github.com/mkaczanowski/packer-builder-arm
 
-```
-sudo apt-get install qemu-sytem
-```
-or package manager of your choice
 
-2. fdisk -l <img-file>
+## Bake image from existing templates
 
 ```
-$ fdisk -l dist/2021-10-09-0439-print-nanny-main-buster-arm64.img 
-Disk dist/2021-10-09-0439-print-nanny-main-buster-arm64.img: 4 GiB, 4294967296 bytes, 8388608 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0x053b14ee
-
-Device                                                  Boot  Start     End Sectors  Size Id Type
-dist/2021-10-09-0439-print-nanny-main-buster-arm64.img1        8192  532479  524288  256M  c W95 FAT32 (LBA)
-dist/2021-10-09-0439-print-nanny-main-buster-arm64.img2      532480 8388607 7856128  3.8G 83 Linux
+$ make dist/printnanny-pi-buster.img
+$ make dist/printnanny-pi-buster.img
 ```
 
-Note start sector number. Partition info can also be found in Packer templates using packer-arm-builder.
+## Create a new template
+
+1. Create a new Packer template
 
 ```
-  image_partitions {
-    filesystem   = "vfat"
-    mountpoint   = "/boot"
-    name         = "boot"
-    size         = "256M"
-    start_sector = "8192"
-    type         = "c"
-  }
-  image_partitions {
-    filesystem   = "ext4"
-    mountpoint   = "/"
-    name         = "root"
-    size         = "0"
-    start_sector = "532480"
-    type         = "83"
-  }
+$ touch templates/<image name>-<variant>.pkr.hcl
 ```
 
-3. Mount the rootfs for in-place editing (optional)
+For examples of an image created using an Ansible provisioner, see `templates/printnanny-pi-bullseye.pkr.hcl`.
 
-```
-export START_SECTOR=532480
-export OFFSET=272629760
-export IMAGE_FILE="${PWD}/dist/2021-10-09-0439-print-nanny-main-buster-arm64.img"
-sudo mkdir -p /mnt/printnanny
-sudo mount -v -o offset="$OFFSET" -t ext4 "$IMAGE_FILE" /mnt/printnanny
-```
+Please refer to [Packer's documentation](https://www.packer.io/docs/provisioners) for provisioners / builders usage.
 
-4. Emulate with QEMU
+2. Provide variables
 
-```
-qemu-system-arm \
--kernel ~/projects/qemu-rpi-kernel/kernel-qemu-5.4.51-buster \
--cpu arm64 \
--2048m \
--serial stdio \
--redir tcp:8022:22 \
--hda "$IMAGE_FILE" \
--no-reboot
-```
+Parameterize a Packer template with a `-var-file vars/<image name>-<variant>.pkrvars.hcl` and/or in-line values `-var `.
+
+3. Ansible Provisioner
+
+If using Packer's Ansible provisioner, specify collection/role dependencies in `playbooks/requirements.yml` 
