@@ -27,12 +27,10 @@ jobs:
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
-            discord_webhook: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
           - image_name: generic-pi-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-buster-arm64.ansiblevars.yml
-            discord_webhook: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     runs-on: ubuntu-latest
     steps:
     - name: Install platform deps
@@ -65,7 +63,7 @@ jobs:
         gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
-        DISCORD_WEBHOOK: ${{ matrix.discord_webhook }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
