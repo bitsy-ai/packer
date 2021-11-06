@@ -26,7 +26,7 @@ jobs:
           - image: printnanny-pi-buster-arm64
             template_file: templates/printnanny-pi-buster.pkr.hcl
             var_file: vars/printnanny-pi-buster.pkrvars.hcl
-            ansible_extra_vars: vars/printnanny-pi-buster.ansiblevars.json
+            ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
 
     runs-on: ubuntu-latest
     steps:
