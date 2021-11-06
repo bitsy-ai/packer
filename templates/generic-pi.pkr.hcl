@@ -32,10 +32,11 @@ variable "base_distro_version" {
   type = string
 }
 
-# source blocks are generated from your builders; a source can be referenced in
-# build blocks. A build block runs provisioner and post-processors on a
-# source. Read the documentation for source blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/source
+variable "playbook_file" {
+  type = string
+  default = "./playbooks/generic.yml"
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum_url     = "${var.base_image_checksum}"
@@ -96,7 +97,7 @@ build {
     ]
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
-    playbook_file   = "./playbooks/generic.yml"
+    playbook_file   = "${var.playbook_file}"
   }
 
   post-processor "checksum" {
@@ -109,8 +110,8 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      image_path = "releases/${var.image_name}/${var.release_channel}/${local.DATESTAMP}-${image_name}"
-      image_name = "${image_name}.img"
+      image_path = "releases/${var.image_name}/${var.release_channel}/${local.DATESTAMP}-${var.image_name}"
+      image_name = "${var.image_name}.img"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
       base_image_checksum = "${var.base_image_checksum}"

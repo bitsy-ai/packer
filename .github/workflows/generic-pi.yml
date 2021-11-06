@@ -4,15 +4,10 @@ on:
   # https://github.community/t/triggering-by-other-repository/16163/6
   workflow_dispatch:
     inputs:
-      IMAGE_NAME:
+      RELEASE_CHANNEL:
+        description: 'Publish image to release channel: (nightly, stable)'     
         required: true
-        default: bitsyai-pi-buster-arm64
-      TEMPLATE_FILE:
-        required: true
-        default: templates/generic-pi-buster.pkr.hcl
-      VAR_FILE:
-        required: true
-        default: vars/generic-pi-buster-arm64.pkrvars.hcl
+        default: 'nightly'
     
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
@@ -25,12 +20,12 @@ jobs:
       # fail-fast: false # if fail-fast is true (default) parallel builds will be cancelled on first matrix failure
       matrix:
         image:
-          - bitsyai-pi-buster-arm64
+          - generic-pi-buster-arm64
         include:
-          - image: bitsyai-pi-buster-arm64
+          - image: generic-pi-buster-arm64
             template_file: templates/generic-pi-buster.pkr.hcl
             var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
-            ansible_extra_vars: vars/bitsyai-pi-buster-arm64.ansiblevars.yml
+            ansible_extra_vars: vars/generic-pi-buster-arm64.ansiblevars.yml
         #   - image: bitsyai-pi-bullseye-arm64
         # TODO
 
@@ -44,13 +39,16 @@ jobs:
       run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
     - name: Active Service Account
       run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+    - name: Ensure ansible variables file generated
+      run: make ${{ matrix.ansible_extra_vars }}
     - name: Make base image
       id: packer
       run: |
         make dist/${{ matrix.image_name }}.img \
           VAR_FILE=${{ matrix.var_file }} \
           IMAGE_NAME=${{ matrix.image_name }} \
-          TEMPLATE_FILE=${{ matrix.template_file }}
+          TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
@@ -60,7 +58,7 @@ jobs:
         gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
     - name: Send Discord notification
       env:
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
