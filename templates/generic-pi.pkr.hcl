@@ -115,9 +115,4 @@ build {
       base_image_url = "${var.base_image_url}"
     }
   }
-
-  post-processor "compress" {
-    output = "dist/${local.DATESTAMP}-${var.image_name}.zip"
-  }
-
 }
