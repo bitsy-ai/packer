@@ -50,7 +50,7 @@ jobs:
           VAR_FILE=${{ matrix.var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
-          TEMPLATE_FILE=${{ matrix.template_file }}
+          TEMPLATE_FILE=${{ matrix.template_file }} \
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
