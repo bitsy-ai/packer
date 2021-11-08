@@ -182,7 +182,7 @@ jobs:
           -var "base_image_url=${{ needs.printnanny.outputs.image_url }}" \
           -var "base_image_checksum=${{ needs.printnanny.outputs.checksum_url }} \
           -var "image_name=${{ matrix.image_name}}" \
-          -var-file ${{ matrix.template_file }} \
+          -var-file ${{ matrix.var_file }} \
           -var "release_channel=${{ github.event.inputs.RELEASE_CHANNEL }} \
           -var "ansible_extra_vars=vars/printnanny-pi-buster-arm64.ansiblevars.json" \
           ${{ matrix.template_file }}
