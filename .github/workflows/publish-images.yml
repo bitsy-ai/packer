@@ -105,7 +105,7 @@ jobs:
       id: packer
       run: |
         make dist/${{ matrix.image_name}}.img \
-          PACKER_VARS=-var "base_image_url=${{ needs.packer.outputs.image_url }}" -var "base_image_checksum=${{ needs.packer.outputs.image_checksum }}" \
+          PACKER_VARS='-var "base_image_url=${{ needs.packer.outputs.image_url }}" -var "base_image_checksum=${{ needs.packer.outputs.image_checksum }}"' \
           PACKER_VAR_FILE=${{ matrix.var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
