@@ -110,7 +110,7 @@ jobs:
         include:
           - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
+            var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: buster
