@@ -1,8 +1,9 @@
 RELEASE_CHANNEL ?= nightly
 RELEASE_URL ?= https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest
 IMAGE_NAME ?= printnanny-pi-buster-arm64
-VAR_FILE ?= vars/printnanny-pi-buster-arm64.pkrvars.hcl
-TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
+PACKER_VARS ?=
+PACKER_VAR_FILE ?= vars/printnanny-pi-buster-arm64.pkrvars.hcl
+PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 DIST_DIR ?= dist
 ANSIBLE_EXTRA_VARS ?= vars/printnanny-pi-buster-arm64.ansiblevars.json
 
@@ -28,18 +29,19 @@ dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui \
-			-debug \
+			$(PACKER_VARS) \
 			-var "image_name=$(IMAGE_NAME)" \
-			-var-file $(VAR_FILE) \
+			-var-file $(PACKER_VAR_FILE) \
 			-var "release_channel=$(RELEASE_CHANNEL)" \
 			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
-			$(TEMPLATE_FILE)
+			$(PACKER_TEMPLATE_FILE)
 
 validate: $(DIST_DIR) docker-builder-image
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
+			$(PACKER_VARS) \
 			-var "release_channel=$(RELEASE_CHANNEL)" \
 			-var "image_name=$(IMAGE_NAME)" \
-			-var-file $(VAR_FILE) \
+			-var-file $(PACKER_VAR_FILE) \
 			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
-			$(TEMPLATE_FILE)
+			$(PACKER_TEMPLATE_FILE)
