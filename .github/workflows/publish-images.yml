@@ -71,6 +71,7 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
+          Base image: `2021-05-07-raspios-buster-arm64`
           Published ${{ steps.packer.outputs.image_url }}
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
@@ -133,7 +134,7 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: ${{ needs.packer.outputs.image_name }}
+          Base image: `${{ needs.packer.outputs.image_name }}`
           Published ${{ steps.packer.outputs.image_url }}
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
