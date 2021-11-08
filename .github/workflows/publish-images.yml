@@ -153,7 +153,7 @@ jobs:
           IMAGE_NAME=${{ matrix.image_name}} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
-          PACKER_VARS='-var "base_image_url=${{ IMAGE_URL }}" -var "base_image_checksum=${{ CHECKSUM_URL }}"'
+          PACKER_VARS='-var "base_image_url=${{ env.IMAGE_URL }}" -var "base_image_checksum=${{ env.CHECKSUM_URL }}"'
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
@@ -172,7 +172,7 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `${{ BASE_IMAGE }}`
+          Base image: `${{ env.BASE_IMAGE }}`
           Published ${{ steps.packer.outputs.image_url }}
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
