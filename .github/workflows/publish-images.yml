@@ -68,17 +68,22 @@ jobs:
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        IMAGE_NAME: ${{ needs.packer.outputs.image_name }}
+        IMAGE_URL: ${{ steps.packer.outputs.image_url }}
+        IMAGE_CHECKSUM: ${{ steps.packer.outputs.checksum_url }}
+        MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
+        MANIFEST: ${{ toJson(steps.packer.outputs.manifest) }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `2021-05-07-raspios-buster-arm64`
-          Published ${{ steps.packer.outputs.image_url }}
-          Checksum ${{ steps.packer.outputs.checksum_url }}
-          Build manifest ${{ steps.packer.outputs.manifest_url }}
+          Base image: `{{ IMAGE_NAME }}`
+          Published {{ IMAGE_URL }}
+          Checksum {{ IMAGE_CHECKSUM }}
+          Build manifest {{ MANIFEST_URL }}
           ```
-          ${{ steps.packer.outputs.checksum }}
+          {{ IMAGE_CHECKSUM }}
           ------------------------------------
-          ${{ toJson(steps.packer.outputs.manifest) }}
+          {{ MANIFEST }}
           ```
   printnanny:
     needs: [generic]
@@ -131,15 +136,20 @@ jobs:
     - name: Send Discord notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        IMAGE_NAME: ${{ needs.packer.outputs.image_name }}
+        IMAGE_URL: ${{ steps.packer.outputs.image_url }}
+        IMAGE_CHECKSUM: ${{ steps.packer.outputs.checksum_url }}
+        MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
+        MANIFEST: ${{ toJson(steps.packer.outputs.manifest) }}
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `${{ needs.packer.outputs.image_name }}`
-          Published ${{ steps.packer.outputs.image_url }}
-          Checksum ${{ steps.packer.outputs.checksum_url }}
-          Build manifest ${{ steps.packer.outputs.manifest_url }}
+          Base image: `{{ IMAGE_NAME }}`
+          Published {{ IMAGE_URL }}
+          Checksum {{ IMAGE_CHECKSUM }}
+          Build manifest {{ MANIFEST_URL }}
           ```
-          ${{ steps.packer.outputs.checksum }}
+          {{ IMAGE_CHECKSUM }}
           ------------------------------------
-          ${{ toJson(steps.packer.outputs.manifest) }}
+          {{ MANIFEST }}
           ```
