@@ -81,7 +81,6 @@ jobs:
           ```
   printnanny:
     needs: [generic]
-    fail-fast: false
     matrix:
       image_name:
         - printnanny-pi-buster-arm64
