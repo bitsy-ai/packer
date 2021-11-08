@@ -130,9 +130,9 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      IMAGE_URL: ${{ needs.generic.outputs[matrix.platform+matrix.os+matrix.arch+'_image_url'] }}
-      CHECKSUM_URL: ${{ needs.generic.outputs[matrix.platform+matrix.os+matrix.arch+'_checksum_url'] }}
-      BASE_IMAGE: ${{ needs.generic.outputs[matrix.platform+matrix.os+matrix.arch+'_image_name_url'] }}
+      IMAGE_URL: ${{ needs.generic.outputs[format('{0}_{1}_{2}_image_url', matrix.platform, matrix.os, matrix.arch)] }}
+      CHECKSUM_URL: ${{ needs.generic.outputs[format('{0}_{1}_{2}_checksum_url', matrix.platform, matrix.os, matrix.arch)] }}
+      BASE_IMAGE: ${{ needs.generic.outputs[format('{0}_{1}_{2}_image_name', matrix.platform, matrix.os, matrix.arch)] }}
     steps:
     - name: Install platform deps
       run: sudo apt-get install -y jq wget
