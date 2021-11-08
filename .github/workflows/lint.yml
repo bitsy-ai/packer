@@ -24,8 +24,7 @@ jobs:
       run: make ${{ matrix.ansible_extra_vars }}
     - run: |
         make validate \
-          VAR_FILE=${{ matrix.var_file }} \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
           IMAGE_NAME=${{ matrix.image_name }} \
-          TEMPLATE_FILE=${{ matrix.template_file }} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
-
