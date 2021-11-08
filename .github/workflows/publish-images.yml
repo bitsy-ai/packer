@@ -33,6 +33,9 @@ jobs:
           #   var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
           #   ansible_extra_vars: vars/generic-pi-bullseye-arm64.ansiblevars.yml
     runs-on: ubuntu-latest
+    outputs:
+      image_url: ${{ steps.packer.outputs.image_url }}
+      checksum_url: ${{ steps.packer.outputs.checksum_url }}
     steps:
     - name: Install platform deps
       run: sudo apt-get install -y jq wget
@@ -88,7 +91,9 @@ jobs:
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
-
+    outputs:
+      image_url: ${{ steps.packer.outputs.image_url }}
+      checksum_url: ${{ steps.packer.outputs.checksum_url }}
     runs-on: ubuntu-latest
     steps:
     - name: Install platform deps
@@ -104,13 +109,18 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make dist/${{ matrix.image_name}}.img \
-          PACKER_VARS='-var "base_image_url=${{ needs.packer.outputs.image_url }}" -var "base_image_checksum=${{ needs.packer.outputs.image_checksum }}"' \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
-          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          IMAGE_NAME=${{ matrix.image_name}} \
-          TEMPLATE_FILE=${{ matrix.template_file }} \
-          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+        make docker-builder-image
+        make vars/printnanny-pi-buster-arm64.ansiblevars.json
+        docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
+          bitsyai/packer-builder-arm-ansible build \
+          -timestamp-ui \
+          -var "base_image_url=${{ needs.generic.outputs.image_url }}" \
+          -var "base_image_checksum=${{ needs.generic.outputs.checksum_url }} \
+          -var "image_name=${{ matrix.image_name}}" \
+          -var-file ${{ matrix.template_file }} \
+          -var "release_channel=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          -var "ansible_extra_vars=vars/printnanny-pi-buster-arm64.ansiblevars.json" \
+          ${{ matrix.template_file }}
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
@@ -129,7 +139,7 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `${{ needs.packer.outputs.image_name }}`
+          Base image: `${{ needs.generic.outputs.image_name }}`
           Published ${{ steps.packer.outputs.image_url }}
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
