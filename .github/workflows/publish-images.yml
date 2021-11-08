@@ -148,11 +148,11 @@ jobs:
     strategy:
       matrix:
         image_name:
-          - printnanny-octopi-buster-arm64
+          - printnanny-octoprint-buster-arm64
           # TODO
           # - printnanny-pi-bullseye-arm64
         include:
-          - image_name: printnanny-octopi-buster-arm64
+          - image_name: printnanny-octoprint-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/printnanny-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-buster-arm64.ansiblevars.json
