@@ -144,7 +144,7 @@ jobs:
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
   octoprint:
-    needs: [octoprint]
+    needs: [printnanny]
     strategy:
       matrix:
         image_name:
