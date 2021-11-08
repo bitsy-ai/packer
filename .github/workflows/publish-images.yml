@@ -60,7 +60,7 @@ jobs:
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
         echo ::set-output name=image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
-        echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum/manifest.json"
+        echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
 
     - name: Upload to GCP_BUCKET
       run: |
@@ -80,11 +80,6 @@ jobs:
           Published {{ IMAGE_URL }}
           Checksum {{ IMAGE_CHECKSUM }}
           Build manifest {{ MANIFEST_URL }}
-          ```
-          {{ IMAGE_CHECKSUM }}
-          ------------------------------------
-          {{ MANIFEST }}
-          ```
   printnanny:
     needs: [generic]
     strategy:
@@ -128,7 +123,7 @@ jobs:
         echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
         echo ::set-output name=image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
         echo ::set-output name=checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
-        echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum/manifest.json"
+        echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
 
     - name: Upload to GCP_BUCKET
       run: |
@@ -148,8 +143,3 @@ jobs:
           Published {{ IMAGE_URL }}
           Checksum {{ IMAGE_CHECKSUM }}
           Build manifest {{ MANIFEST_URL }}
-          ```
-          {{ IMAGE_CHECKSUM }}
-          ------------------------------------
-          {{ MANIFEST }}
-          ```
