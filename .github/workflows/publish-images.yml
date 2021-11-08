@@ -109,18 +109,13 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make docker-builder-image
-        make vars/printnanny-pi-buster-arm64.ansiblevars.json
-        docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
-          bitsyai/packer-builder-arm-ansible build \
-          -timestamp-ui \
-          -var "base_image_url=${{ needs.generic.outputs.image_url }}" \
-          -var "base_image_checksum=${{ needs.generic.outputs.checksum_url }} \
-          -var "image_name=${{ matrix.image_name}}" \
-          -var-file ${{ matrix.var_file }} \
-          -var "release_channel=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          -var "ansible_extra_vars=vars/printnanny-pi-buster-arm64.ansiblevars.json" \
-          ${{ matrix.template_file }}
+        make dist/${{ matrix.image_name}}.img \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          IMAGE_NAME=${{ matrix.image_name}} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
+          PACKER_VARS='-var "base_image_url=${{ needs.generic.outputs.image_url }}" -var "base_image_checksum=${{ needs.generic.outputs.checksum_url }}"'
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
@@ -174,17 +169,14 @@ jobs:
     - name: Make base image
       id: packer
       run: |
-        make docker-builder-image
-        docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
-          bitsyai/packer-builder-arm-ansible build \
-          -timestamp-ui \
-          -var "base_image_url=${{ needs.printnanny.outputs.image_url }}" \
-          -var "base_image_checksum=${{ needs.printnanny.outputs.checksum_url }} \
-          -var "image_name=${{ matrix.image_name}}" \
-          -var-file ${{ matrix.var_file }} \
-          -var "release_channel=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          -var "ansible_extra_vars=vars/printnanny-pi-buster-arm64.ansiblevars.json" \
-          ${{ matrix.template_file }}
+        make dist/${{ matrix.image_name}}.img \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          IMAGE_NAME=${{ matrix.image_name}} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
+          PACKER_VARS='-var "base_image_url=${{ needs.generic.outputs.image_url }}" -var "base_image_checksum=${{ needs.generic.outputs.checksum_url }}"'
+
 
         echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
         echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
