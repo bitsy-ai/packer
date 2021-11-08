@@ -95,10 +95,11 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: ${{ matrix.base_image }}
-          Published ${{ steps.packer.outputs.image_url }}
-          Checksum ${{ steps.packer.outputs.checksum_url }}
-          Build manifest ${{ steps.packer.outputs.manifest_url }}
+          🚀 NEW ${{ github.event.inputs.RELEASE_CHANNEL}} release
+          **Base:** `${{ matrix.base_image }}`
+          **URL:** ${{ steps.packer.outputs.image_url }}
+          **Checksum:** ${{ steps.packer.outputs.checksum_url }}
+          **Manifest:** ${{ steps.packer.outputs.manifest_url }}
   printnanny:
     needs: [generic]
     strategy:
@@ -174,10 +175,11 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `${{ env.BASE_IMAGE }}`
-          Published ${{ steps.packer.outputs.image_url }}
-          Checksum ${{ steps.packer.outputs.checksum_url }}
-          Build manifest ${{ steps.packer.outputs.manifest_url }}
+          🚀 NEW ${{ github.event.inputs.RELEASE_CHANNEL}} release
+          **Base:** `${{ env.BASE_IMAGE }}`
+          **URL:** ${{ steps.packer.outputs.image_url }}
+          **Checksum:** ${{ steps.packer.outputs.checksum_url }}
+          **Manifest:** ${{ steps.packer.outputs.manifest_url }}
   octoprint:
     needs: [printnanny]
     strategy:
@@ -247,7 +249,8 @@ jobs:
       uses: Ilshidur/action-discord@master
       with:
         args: |
-          Base image: `${{ env.BASE_IMAGE }}`
-          Published ${{ steps.packer.outputs.image_url }}
-          Checksum ${{ steps.packer.outputs.checksum_url }}
-          Build manifest ${{ steps.packer.outputs.manifest_url }}
+          🚀 NEW ${{ github.event.inputs.RELEASE_CHANNEL}} release
+          **Base:** `${{ env.BASE_IMAGE }}`
+          **URL:** ${{ steps.packer.outputs.image_url }}
+          **Checksum:** ${{ steps.packer.outputs.checksum_url }}
+          **Manifest:** ${{ steps.packer.outputs.manifest_url }}
