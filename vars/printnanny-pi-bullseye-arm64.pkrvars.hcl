@@ -1,5 +1,5 @@
-base_image_url = "https://raspi.debian.net/tested/20210823_raspi_4_bullseye.img.xz"
-base_image_checksum = "https://raspi.debian.net/tested/20210823_raspi_4_bullseye.img.xz.sha256"
-base_image_ext = "xz"
-base_image_unarchive_cmd = ["xz", "-d", "$ARCHIVE_PATH"]
+base_image_url = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip"
+base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip.sha256"
+base_image_ext = "zip"
 playbook_file = "./playbooks/printnanny.yml"
+ansible_extra_vars = "vars/printnanny-pi-arm64.ansiblevars.json"
