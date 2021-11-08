@@ -19,9 +19,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image_name:
-          - generic-pi-buster-arm64
-          - generic-pi-bullseye-arm64
+        os: [ buster, bullseye ]
+        arch: [ arm64 ]
         include:
           - image_name: generic-pi-buster-arm64
             base_image: 2021-05-07-raspios-buster-arm64
@@ -104,9 +103,8 @@ jobs:
     needs: [generic]
     strategy:
       matrix:
-        image_name:
-          - printnanny-base-buster-arm64
-          - printnanny-base-bullseye-arm64
+        os: [ buster, bullseye ]
+        arch: [ arm64 ]
         include:
           - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
