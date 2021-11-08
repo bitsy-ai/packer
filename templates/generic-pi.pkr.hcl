@@ -106,7 +106,7 @@ build {
     strip_path = true
     strip_time = true
     custom_data = {
-      ansible_extra_vars = file("${var.ansible_extra_vars}")
+      ansible_extra_vars = file("../${var.ansible_extra_vars}")
       image_path = "releases/${var.image_name}/${var.release_channel}/${local.DATESTAMP}-${var.image_name}"
       image_name = "${var.image_name}.img"
       release_channel = "${var.release_channel}"
