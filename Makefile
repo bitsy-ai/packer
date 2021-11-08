@@ -5,7 +5,7 @@ PACKER_VARS ?=
 PACKER_VAR_FILE ?= vars/printnanny-pi-buster-arm64.pkrvars.hcl
 PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 DIST_DIR ?= dist
-ANSIBLE_EXTRA_VARS ?= vars/printnanny-pi-buster-arm64.ansiblevars.json
+ANSIBLE_EXTRA_VARS ?= vars/printnanny-pi-arm64.ansiblevars.json
 
 .PHONY: clean docker-builder-image validate
 
@@ -15,9 +15,7 @@ clean:
 	rm -rf $(DIST_DIR)
 	mkdir -p $(DIST_DIR)
 
-vars/generic-pi-buster-arm64.ansiblevars.json:
-
-vars/printnanny-pi-buster-arm64.ansiblevars.json: $(DIST_DIR)
+vars/printnanny-pi-arm64.ansiblevars.json: $(DIST_DIR)
 	wget $(RELEASE_URL) -O dist/printnanny-release.json
 	cat dist/printnanny-release.json | jq .ansible_extra_vars > vars/printnanny-pi-buster-arm64.ansiblevars.json
 

@@ -123,8 +123,12 @@ jobs:
             platform: debian
 
     outputs:
-      image_url: ${{ steps.packer.outputs.image_url }}
-      checksum_url: ${{ steps.packer.outputs.checksum_url }}
+      debian_buster_arm64_image_name: ${{ steps.packer.outputs.debian_buster_arm64_image_name }}
+      debian_buster_arm64_image_url: ${{ steps.packer.outputs.debian_buster_arm64_image_url }}
+      debian_buster_arm64_checksum_url: ${{ steps.packer.outputs.debian_buster_arm64_checksum_url }}
+      debian_bullseye_arm64_image_name: ${{ steps.packer.outputs.debian_bullseye_arm64_image_name }}
+      debian_bullseye_arm64_image_url: ${{ steps.packer.outputs.debian_bullseye_arm64_image_url }}
+      debian_bullseye_arm64_checksum_url: ${{ steps.packer.outputs.debian_bullseye_arm64_checksum_url }}
 
     runs-on: ubuntu-latest
     env:
@@ -174,64 +178,76 @@ jobs:
           Published ${{ steps.packer.outputs.image_url }}
           Checksum ${{ steps.packer.outputs.checksum_url }}
           Build manifest ${{ steps.packer.outputs.manifest_url }}
-  # octoprint:
-  #   needs: [printnanny]
-  #   strategy:
-  #     matrix:
-  #       image_name:
-  #         - printnanny-octoprint-buster-arm64
-  #         # TODO
-  #         # - printnanny-pi-bullseye-arm64
-  #       include:
-  #         - image_name: printnanny-octoprint-buster-arm64
-  #           template_file: templates/generic-pi.pkr.hcl
-  #           var_file: vars/octoprint-pi-buster-arm64.pkrvars.hcl
-  #           ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
-  #   outputs:
-  #     image_url: ${{ steps.packer.outputs.image_url }}
-  #     checksum_url: ${{ steps.packer.outputs.checksum_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Install platform deps
-  #     run: sudo apt-get install -y jq wget
-  #   - name: Checkout branch
-  #     uses: actions/checkout@v2
-  #   - name: Write deploy key
-  #     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
-  #   - name: Active Service Account
-  #     run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-  #   - name: Download ansible_extra_vars
-  #     run: make ${{ matrix.ansible_extra_vars }}
-  #   - name: Make base image
-  #     id: packer
-  #     run: |
-  #       make dist/${{ matrix.image_name}}.img \
-  #         PACKER_VAR_FILE=${{ matrix.var_file }} \
-  #         RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-  #         IMAGE_NAME=${{ matrix.image_name}} \
-  #         PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
-  #         ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
-  #         PACKER_VARS='-var "base_image_url=${{ needs.generic.outputs.image_url }}" -var "base_image_checksum=${{ needs.generic.outputs.checksum_url }}"'
+  octoprint:
+    needs: [printnanny]
+    strategy:
+      matrix:
+        os: [ buster, bullseye ]
+        arch: [ arm64 ]
+        include:
+          - image_name: printnanny-octoprint-buster-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/octoprint-pi-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+            arch: arm64
+            os: buster
+            platform: debian
 
+          - image_name: printnanny-octoprint-bullseye-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/octoprint-pi-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+            arch: arm64
+            os: bullseye
+            platform: debian
+    outputs:
+      image_url: ${{ steps.packer.outputs.image_url }}
+      checksum_url: ${{ steps.packer.outputs.checksum_url }}
+    env:
+      IMAGE_URL: ${{ needs.printnanny.outputs[format('{0}_{1}_{2}_image_url', matrix.platform, matrix.os, matrix.arch)] }}
+      CHECKSUM_URL: ${{ needs.printnanny.outputs[format('{0}_{1}_{2}_checksum_url', matrix.platform, matrix.os, matrix.arch)] }}
+      BASE_IMAGE: ${{ needs.printnanny.outputs[format('{0}_{1}_{2}_image_name', matrix.platform, matrix.os, matrix.arch)] }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install platform deps
+      run: sudo apt-get install -y jq wget
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - name: Write deploy key
+      run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+    - name: Active Service Account
+      run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+    - name: Download ansible_extra_vars
+      run: make ${{ matrix.ansible_extra_vars }}
+    - name: Make base image
+      id: packer
+      run: |
+        make dist/${{ matrix.image_name}}.img \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          IMAGE_NAME=${{ matrix.image_name}} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
+          PACKER_VARS='-var "base_image_url=${{ env.IMAGE_URL }}" -var "base_image_checksum=${{ env.CHECKSUM_URL }}"'
 
-  #       echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
-  #       echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-  #       echo ::set-output name=manifest::"$(cat dist/manifest.json)"
-  #       echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
-  #       echo ::set-output name=image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-  #       echo ::set-output name=checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
-  #       echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
+        echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
+        echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+        echo ::set-output name=manifest::"$(cat dist/manifest.json)"
+        echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
+        echo ::set-output name=image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+        echo ::set-output name=checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
+        echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
 
-  #   - name: Upload to GCP_BUCKET
-  #     run: |
-  #       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-  #   - name: Send Discord notification
-  #     env:
-  #       DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-  #     uses: Ilshidur/action-discord@master
-  #     with:
-  #       args: |
-  #         Base image: `${{ needs.printnanny.outputs.image_name }}`
-  #         Published ${{ steps.packer.outputs.image_url }}
-  #         Checksum ${{ steps.packer.outputs.checksum_url }}
-  #         Build manifest ${{ steps.packer.outputs.manifest_url }}
+    - name: Upload to GCP_BUCKET
+      run: |
+        gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+    - name: Send Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          Base image: `${{ env.BASE_IMAGE }}`
+          Published ${{ steps.packer.outputs.image_url }}
+          Checksum ${{ steps.packer.outputs.checksum_url }}
+          Build manifest ${{ steps.packer.outputs.manifest_url }}
