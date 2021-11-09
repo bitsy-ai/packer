@@ -1,0 +1,136 @@
+on:
+  workflow_dispatch:
+env:
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  GCP_BUCKET: print-nanny-cdn
+  CDN_BASE_URL: https://cdn.print-nanny.com
+jobs:
+  # begin image job
+  image:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ buster, bullseye ]
+        arch: [ arm64 ]
+        include:
+          - image_name: printnanny-base-buster-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            arch: arm64
+            os: buster
+            platform: debian
+
+          - image_name: printnanny-base-buster-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            arch: arm64
+            os: bullseye
+            platform: debian
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install platform deps
+      run: sudo apt-get install -y jq wget
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - name: Ensure ansible_extra_vars on disk
+      run: make ${{ matrix.ansible_extra_vars }}
+    - name: Make base image
+      id: packer
+      run: |
+        make dist/${{ matrix.image_name}}.img \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          IMAGE_NAME=${{ matrix.image_name}} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.image_name }}
+        path: dist/
+  # end image job
+  # begin publish job
+  publish-nightly:
+    # github action inputs are always strings
+    environment: nightly
+    needs: [image]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - generic-pi-buster-arm64
+          - generic-pi-bullseye-arm64
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}
+          path: dist/
+          if-no-files-found: error
+      - name: Set output vars
+        run: |
+          echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  publish-stable:
+    # github action inputs are always strings
+    environment: stable
+    needs: [image, publish-nightly]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - generic-pi-buster-arm64,
+          - generic-pi-bullseye-arm64
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}
+          path: dist/
+          if-no-files-found: error
+      # packer-builder-arm does not support file:// URI
+      # so downstream builds must consume https://cdn url
+      - name: Set output vars
+        run: |
+          mkdir -p published/
+          export IMAGE_NAME = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
+          export IMAGE_PATH = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
+          export IMAGE_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          export CHECKSUM_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
+          export MANIFEST_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
+
+          echo $IMAGE_NAME > published/image_name
+          echo $IMAGE_URL > published/image_url
+          echo $CHECKSUM_URL > published/checksum_url
+          echo $MANIFEST_URL > published/manifest_url
+
+          echo ::set-output name=image_url::"$IMAGE_URL"
+          echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+          echo ::set-output name=manifest_url::"$MANIFEST_URL"
+      # retain published urls as artifacts in published/ namespace
+      # intended for use with: https://github.com/dawidd6/action-download-artifact
+      # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}
+          path: published/
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🚀 Published `${{ steps.packer.outputs.image_name }}`
+            [Download](${{ steps.packer.outputs.image_url }})
+            [Manifest](${{ steps.packer.outputs.manifest_url }})
+            [Checksum](${{ steps.packer.outputs.checksum_url }})
