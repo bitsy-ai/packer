@@ -16,6 +16,10 @@ variable "image_name" {
   type = string
 }
 
+variable "base_image_name" {
+    type = string
+}
+
 variable "base_image_url" {
   type = string
 }
@@ -26,6 +30,11 @@ variable "base_image_checksum" {
 
 variable "base_image_ext" {
   type = string
+}
+
+variable "base_image_manifest_url" {
+    type = string
+    default = ""
 }
 
 variable "playbook_file" {
@@ -111,6 +120,8 @@ build {
       image_name = "${var.image_name}.img"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
+      base_image_name = "${var.base_image_name}"
+      base_image_manifest_url = "${var.base_image_manifest_url}"
       base_image_checksum = "${var.base_image_checksum}"
       base_image_ext = "${var.base_image_ext}"
       base_image_url = "${var.base_image_url}"

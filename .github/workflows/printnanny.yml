@@ -1,12 +1,10 @@
 on:
   workflow_dispatch:
-
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
   GCP_BUCKET: print-nanny-cdn
   CDN_BASE_URL: https://cdn.print-nanny.com
-
 jobs:
   # begin image job
   image:
@@ -16,8 +14,7 @@ jobs:
         os: [ buster, bullseye ]
         arch: [ arm64 ]
         include:
-          - image_name: generic-pi-buster-arm64
-            base_image: 2021-05-07-raspios-buster-arm64
+          - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
@@ -25,8 +22,7 @@ jobs:
             os: buster
             platform: debian
 
-          - image_name: generic-pi-bullseye-arm64
-            base_image: 2021-10-30-raspios-bullseye-arm64
+          - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
@@ -36,25 +32,54 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - name: Install platform deps
-      run: sudo apt-get install -y jq wget
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - name: Ensure ansible_extra_vars on disk
-      run: make ${{ matrix.ansible_extra_vars }}
-    - name: Make base image
-      id: packer
-      run: |
-        make dist/${{ matrix.image_name}}.img \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
-          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          IMAGE_NAME=${{ matrix.image_name}} \
-          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
-          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ${{ matrix.image_name }}-dist
-        path: dist/
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: generic-pi.yml
+          workflow_conclusion: success
+          name: ${{ matrix.image_name }}-published
+          path: published/
+      - name: Install platform deps
+        run: sudo apt-get install -y jq wget
+      - name: Install hclq
+        run: |
+          wget https://install.hclq.sh -O install.sh
+          sh install.sh
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Ensure ansible_extra_vars on disk
+        run: make ${{ matrix.ansible_extra_vars }}
+
+      - name: Update ${{ matrix.var_file }}
+        run: |
+          export BASE_IMAGE_URL=$(cat published/image_url)
+          export BASE_CHECKSUM_URL=$(cat published/checksum_url)
+          export BASE_IMAGE_NAME=$(cat published/image_name)
+          export BASE_MANIFEST_URL=$(cat published/manifest_url)
+
+          cat ${{ matrix.var_file }} \
+          | hclq set 'base_image_url' "$BASE_IMAGE_URL" \
+          | hclq set 'base_image_checksum' "$BASE_CHECKSUM_URL" \
+          | hclq set 'base_image_name' "$BASE_IMAGE_NAME" \
+          | hclq set 'base_manifest_url' "$BASE_MANIFEST_URL" \
+          > ${{ matrix.var_file }}
+          echo "Finished updating ${{ matrix.var_file }} - contents:"
+          cat ${{ matrix.var_file }}
+
+      - name: Make base image
+        id: packer
+        run: |
+          make dist/${{ matrix.image_name}}.img \
+            PACKER_VAR_FILE=${{ matrix.var_file }} \
+            RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+            IMAGE_NAME=${{ matrix.image_name}} \
+            PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+            
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}-dist
+          path: dist/
   # end image job
   # begin publish job
   publish-nightly:
@@ -75,7 +100,6 @@ jobs:
           path: dist/
           if-no-files-found: error
       - name: Set output vars
-        id: artifact
         run: |
           echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
       - name: Send Discord notification
@@ -84,7 +108,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🧪 NEW nightly `${{ steps.artifact.outputs.image_name }}`
+            🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
@@ -95,8 +119,8 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-buster-arm64
-          - generic-pi-bullseye-arm64
+          - printnanny-base-buster-arm64
+          - printnanny-base-bullseye-arm64
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -106,7 +130,6 @@ jobs:
       # packer-builder-arm does not support file:// URI
       # so downstream builds must consume https://cdn url
       - name: Set output vars
-        id: artifact
         run: |
           mkdir -p published/
           export IMAGE_NAME = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
@@ -120,7 +143,6 @@ jobs:
           echo $CHECKSUM_URL > published/checksum_url
           echo $MANIFEST_URL > published/manifest_url
 
-          echo ::set-output name=image_name::"$IMAGE_NAME"
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
@@ -137,7 +159,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🚀 Published `${{ steps.artifact.outputs.image_name }}`
-            [Download](${{ steps.artifact.outputs.image_url }})
-            [Manifest](${{ steps.artifact.outputs.manifest_url }})
-            [Checksum](${{ steps.artifact.outputs.checksum_url }})
+            🚀 Published `${{ steps.packer.outputs.image_name }}`
+            [Download](${{ steps.packer.outputs.image_url }})
+            [Manifest](${{ steps.packer.outputs.manifest_url }})
+            [Checksum](${{ steps.packer.outputs.checksum_url }})
