@@ -105,7 +105,10 @@ jobs:
         with:
           name: ${{ matrix.image_name }}-dist
           path: dist/
-          if-no-files-found: error
+      - name: Write deploy key
+        run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+      - name: Activate Service Account
+        run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
       # packer-builder-arm does not support file:// URI
       # so downstream builds must consume https://cdn url
       - name: Set output vars
@@ -135,6 +138,9 @@ jobs:
         with:
           name: ${{ matrix.image_name }}-published
           path: published/
+      - name: Upload to GCP_BUCKET
+        run: |
+          gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
