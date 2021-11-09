@@ -5,7 +5,7 @@ env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
   GCP_BUCKET: print-nanny-cdn
-  CDN_BASE_URL: https://cdn.print-nanny.com/
+  CDN_BASE_URL: https://cdn.print-nanny.com
 
 jobs:
   # begin image job
@@ -102,12 +102,32 @@ jobs:
           name: ${{ matrix.image_name }}
           path: dist/
           if-no-files-found: error
+      # packer-builder-arm does not support file:// URI
+      # so downstream builds must consume https://cdn url
       - name: Set output vars
         run: |
-          echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-          echo ::set-output name=image_url::"${{ env.CDN_BASE_URL }}$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-          echo ::set-output name=checksum_url::"${{ env.CDN_BASE_URL }}$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
-          echo ::set-output name=manifest_url::"${{ env.CDN_BASE_URL }}$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
+          mkdir -p published/
+          export IMAGE_NAME = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
+          export IMAGE_PATH = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
+          export IMAGE_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          export CHECKSUM_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
+          export MANIFEST_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
+
+          echo $IMAGE_NAME > published/image_name
+          echo $IMAGE_URL > published/image_url
+          echo $CHECKSUM_URL > published/checksum_url
+          echo $MANIFEST_URL > published/manifest_url
+
+          echo ::set-output name=image_url::"$IMAGE_URL"
+          echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+          echo ::set-output name=manifest_url::"$MANIFEST_URL"
+      # retain published urls as artifacts in published/ namespace
+      # intended for use with: https://github.com/dawidd6/action-download-artifact
+      # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}
+          path: published/
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
