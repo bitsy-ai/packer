@@ -69,7 +69,7 @@ source "arm" "base_image" {
     type         = "83"
   }
   image_path                   = "dist/${var.image_name}.img"
-  image_size                   = "6G"
+  image_size                   = "4G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
@@ -109,7 +109,7 @@ build {
     custom_data = {
       ansible_extra_vars = file("../${var.ansible_extra_vars}")
       image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-      image_name = "dist/${var.image_name}.tar.gz"
+      image_name = "${var.image_name}.tar.gz"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
       base_image_name = "${var.base_image_name}"
