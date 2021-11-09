@@ -66,7 +66,7 @@ jobs:
   # begin publish job
   publish:
     # github action inputs are always strings
-    if: github.event.inputs.PUBLISH.lower() === 'true'
+    if: github.event.inputs.PUBLISH === 'true'
     needs: [image]
     runs-on: ubuntu-latest
     steps:
