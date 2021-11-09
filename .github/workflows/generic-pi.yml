@@ -1,0 +1,107 @@
+on:
+  workflow_dispatch:
+    inputs:
+      RELEASE_CHANNEL:
+        description: 'Publish image to release channel: (nightly, stable)'     
+        required: true
+        default: 'nightly'
+      PUBLISH:
+        description: 'Publish artifacts to CDN (true or false). Unpublished artifacts are retained in Github for 90 days'
+        required: true
+        default: 'false'
+env:
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  GCP_BUCKET: print-nanny-cdn
+
+jobs:
+  # begin image job
+  image:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ buster, bullseye ]
+        arch: [ arm64 ]
+        include:
+          - image_name: generic-pi-buster-arm64
+            base_image: 2021-05-07-raspios-buster-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            arch: arm64
+            os: buster
+            platform: debian
+
+          - image_name: generic-pi-bullseye-arm64
+            base_image: 2021-10-30-raspios-bullseye-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            arch: arm64
+            os: bullseye
+            platform: debian
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install platform deps
+      run: sudo apt-get install -y jq wget
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - name: Ensure ansible_extra_vars on disk
+      run: make ${{ matrix.ansible_extra_vars }}
+    - name: Make base image
+      id: packer
+      run: |
+        make dist/${{ matrix.image_name}}.img \
+          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+          IMAGE_NAME=${{ matrix.image_name}} \
+          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.image_name }}
+        path: dist/
+  # end image job
+  # begin publish job
+  publish:
+    # github action inputs are always strings
+    if: github.event.inputs.PUBLISH.lower() === 'true'
+    needs: [image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write deploy key
+        run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+      - name: Active Service Account
+        run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+      - name: Set output vars
+        run: |
+          echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')"
+          echo ::set-output name=manifest::"$(cat dist/manifest.json)"
+          echo ::set-output name=checksum::"$(cat dist/sha256.checksum)"
+
+          echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          echo ::set-output name=${{ matrix.platform }}_${{ matrix.os }}_${{ matrix.arch }}_image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+
+          echo ::set-output name=image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          echo ::set-output name=${{ matrix.platform }}_${{ matrix.os }}_${{ matrix.arch }}_image_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+
+          echo ::set-output name=checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
+          echo ::set-output name=${{ matrix.platform }}_${{ matrix.os }}_${{ matrix.arch }}_checksum_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/sha256.checksum"
+
+          echo ::set-output name=manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
+          echo ::set-output name=${{ matrix.platform }}_${{ matrix.os }}_${{ matrix.arch }}_manifest_url::"https://cdn.print-nanny.com/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')/manifest.json"
+      - name: Upload to GCP_BUCKET
+        run: |
+          gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🚀 NEW ${{ github.event.inputs.RELEASE_CHANNEL}} release
+            **Base:** `${{ matrix.base_image }}`
+            **URL:** ${{ steps.packer.outputs.image_url }}
+            **Checksum:** ${{ steps.packer.outputs.checksum_url }}
+            **Manifest:** ${{ steps.packer.outputs.manifest_url }}
