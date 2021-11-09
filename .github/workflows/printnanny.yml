@@ -131,11 +131,11 @@ jobs:
       - name: Set output vars
         run: |
           mkdir -p published/
-          export IMAGE_NAME = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
-          export IMAGE_PATH = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
-          export IMAGE_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
-          export CHECKSUM_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
-          export MANIFEST_URL = "${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
+          export IMAGE_NAME=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
+          export IMAGE_PATH=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
+          export IMAGE_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$IMAGE_NAME"
+          export CHECKSUM_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
+          export MANIFEST_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
 
           echo $IMAGE_NAME > published/image_name
           echo $IMAGE_URL > published/image_url
