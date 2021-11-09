@@ -79,24 +79,6 @@ source "arm" "base_image" {
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
-build {
-  name = "dist_upgrade"
-  sources = ["source.arm.base_image"]
-
-  provisioner "shell" {
-    inline = ["touch /boot/ssh"]
-  }
-
-  provisioner "shell" {
-    inline = [
-        "DEBIAN_FRONTEND=noninteractive apt-get -y update",
-        "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade --force-yes",
-        "DEBIAN_FRONTEND=noninteractive apt-get clean"
-    ]
-    pause_before = "60s"
-    timeout      = "800s"
-  }
-}
 
 build {
   sources = ["source.arm.base_image"]
