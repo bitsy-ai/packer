@@ -53,7 +53,7 @@ jobs:
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
     - uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.image_name }}
+        name: ${{ matrix.image_name }}-dist
         path: dist/
   # end image job
   # begin publish job
@@ -71,10 +71,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
       - name: Set output vars
+        id: artifact
         run: |
           echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
       - name: Send Discord notification
@@ -83,7 +84,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
+            🧪 NEW nightly `${{ steps.artifact.outputs.image_name }}`
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
@@ -99,12 +100,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
       # packer-builder-arm does not support file:// URI
       # so downstream builds must consume https://cdn url
       - name: Set output vars
+        id: artifact
         run: |
           mkdir -p published/
           export IMAGE_NAME = $(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
@@ -118,6 +120,7 @@ jobs:
           echo $CHECKSUM_URL > published/checksum_url
           echo $MANIFEST_URL > published/manifest_url
 
+          echo ::set-output name=image_name::"$IMAGE_NAME"
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
@@ -126,7 +129,7 @@ jobs:
       # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-published
           path: published/
       - name: Send Discord notification
         env:
@@ -134,7 +137,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🚀 Published `${{ steps.packer.outputs.image_name }}`
-            [Download](${{ steps.packer.outputs.image_url }})
-            [Manifest](${{ steps.packer.outputs.manifest_url }})
-            [Checksum](${{ steps.packer.outputs.checksum_url }})
+            🚀 Published `${{ steps.artifact.outputs.image_name }}`
+            [Download](${{ steps.artifact.outputs.image_url }})
+            [Manifest](${{ steps.artifact.outputs.manifest_url }})
+            [Checksum](${{ steps.artifact.outputs.checksum_url }})
