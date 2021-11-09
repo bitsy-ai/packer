@@ -97,6 +97,11 @@ build {
     output = "dist/{{.ChecksumType}}.checksum"
   }
 
+  post-processor "compress" {
+    output = "dist/${var.image_name}.tar.gz"
+    format = ".tar.gz"
+  }
+
   post-processor "manifest" {
     output     = "dist/manifest.json"
     strip_path = true
@@ -104,7 +109,7 @@ build {
     custom_data = {
       ansible_extra_vars = file("../${var.ansible_extra_vars}")
       image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-      image_name = "${var.image_name}.img"
+      image_name = "dist/${var.image_name}.tar.gz"
       release_channel = "${var.release_channel}"
       datestamp = "${local.DATESTAMP}"
       base_image_name = "${var.base_image_name}"

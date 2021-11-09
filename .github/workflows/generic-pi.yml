@@ -51,6 +51,9 @@ jobs:
           IMAGE_NAME=${{ matrix.image_name}} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+        
+        ls -ahl dist/
+
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.image_name }}-dist
@@ -124,6 +127,7 @@ jobs:
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
+
       # retain published urls as artifacts in published/ namespace
       # intended for use with: https://github.com/dawidd6/action-download-artifact
       # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
