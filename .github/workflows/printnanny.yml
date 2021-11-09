@@ -16,7 +16,7 @@ jobs:
         include:
           - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             arch: arm64
             os: buster
@@ -24,7 +24,7 @@ jobs:
 
           - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             arch: arm64
             os: bullseye
@@ -50,27 +50,27 @@ jobs:
       - name: Ensure ansible_extra_vars on disk
         run: make ${{ matrix.ansible_extra_vars }}
 
-      - name: Update ${{ matrix.var_file }}
+      - name: Update ${{ matrix.packer_var_file }}
         run: |
           export BASE_IMAGE_URL=$(cat published/image_url)
           export BASE_CHECKSUM_URL=$(cat published/checksum_url)
           export BASE_IMAGE_NAME=$(cat published/image_name)
           export BASE_MANIFEST_URL=$(cat published/manifest_url)
 
-          cat ${{ matrix.var_file }} \
+          cat ${{ matrix.packer_var_file }} \
           | hclq set 'base_image_url' "$BASE_IMAGE_URL" \
           | hclq set 'base_image_checksum' "$BASE_CHECKSUM_URL" \
           | hclq set 'base_image_name' "$BASE_IMAGE_NAME" \
           | hclq set 'base_manifest_url' "$BASE_MANIFEST_URL" \
-          > ${{ matrix.var_file }}
-          echo "Finished updating ${{ matrix.var_file }} - contents:"
-          cat ${{ matrix.var_file }}
+          > ${{ matrix.packer_var_file }}
+          echo "Finished updating ${{ matrix.packer_var_file }} - contents:"
+          cat ${{ matrix.packer_var_file }}
 
       - name: Make base image
         id: packer
         run: |
           make dist/${{ matrix.image_name}}.img \
-            PACKER_VAR_FILE=${{ matrix.var_file }} \
+            PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
             RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
             IMAGE_NAME=${{ matrix.image_name}} \
             PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \

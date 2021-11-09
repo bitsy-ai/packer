@@ -14,12 +14,12 @@ jobs:
         include:
           - image: generic-pi-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
 
           - image: generic-pi-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
 
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
       run: make ${{ matrix.ansible_extra_vars }}
     - run: |
         make validate \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
           IMAGE_NAME=${{ matrix.image_name }} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
           ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}

@@ -25,7 +25,7 @@ jobs:
           - image_name: generic-pi-buster-arm64
             base_image: 2021-05-07-raspios-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             arch: arm64
             os: buster
@@ -34,7 +34,7 @@ jobs:
           - image_name: generic-pi-bullseye-arm64
             base_image: 2021-10-30-raspios-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+            packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             arch: arm64
             os: bullseye
@@ -64,7 +64,7 @@ jobs:
       id: packer
       run: |
         make dist/${{ matrix.image_name}}.img \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
@@ -109,7 +109,7 @@ jobs:
         include:
           - image_name: printnanny-base-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: buster
@@ -117,7 +117,7 @@ jobs:
 
           - image_name: printnanny-base-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: bullseye
@@ -151,7 +151,7 @@ jobs:
       id: packer
       run: |
         make dist/${{ matrix.image_name}}.img \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
@@ -189,7 +189,7 @@ jobs:
         include:
           - image_name: printnanny-octoprint-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/octoprint-pi-arm64.pkrvars.hcl
+            packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: buster
@@ -197,7 +197,7 @@ jobs:
 
           - image_name: printnanny-octoprint-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
-            var_file: vars/octoprint-pi-arm64.pkrvars.hcl
+            packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: bullseye
@@ -225,7 +225,7 @@ jobs:
       id: packer
       run: |
         make dist/${{ matrix.image_name}}.img \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
+          PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
           RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
           IMAGE_NAME=${{ matrix.image_name}} \
           PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
