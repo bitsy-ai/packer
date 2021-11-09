@@ -66,7 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-buster-arm64,
+          - generic-pi-buster-arm64
           - generic-pi-bullseye-arm64
     steps:
       - uses: actions/download-artifact@v2
@@ -83,7 +83,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🧪 NEW nightly `${{ steps.packer.outputs.image_path }}`
+            🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
