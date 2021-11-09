@@ -80,6 +80,7 @@ source "arm" "base_image" {
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
+  name = "dist_upgrade"
   sources = ["source.arm.base_image"]
 
   provisioner "shell" {
@@ -95,7 +96,11 @@ build {
     pause_before = "60s"
     timeout      = "800s"
   }
+}
 
+build {
+  sources = ["source.arm.base_image"]
+  name = "ansible"
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",

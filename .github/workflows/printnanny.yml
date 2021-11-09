@@ -74,8 +74,9 @@ jobs:
             RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
             IMAGE_NAME=${{ matrix.image_name}} \
             PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
-            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
-            
+            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
+            PACKER_EXTRA_ARGS="-except '*.dist_upgrade'"
+
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
