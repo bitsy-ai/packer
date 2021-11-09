@@ -26,7 +26,7 @@ docker-builder-image:
 dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible build \
-			-timestamp-ui -debug $(PACKER_VARS) \
+			-timestamp-ui \
 			-var "image_name=$(IMAGE_NAME)" \
 			-var-file $(PACKER_VAR_FILE) \
 			-var "release_channel=$(RELEASE_CHANNEL)" \

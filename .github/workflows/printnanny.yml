@@ -32,25 +32,54 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - name: Install platform deps
-      run: sudo apt-get install -y jq wget
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - name: Ensure ansible_extra_vars on disk
-      run: make ${{ matrix.ansible_extra_vars }}
-    - name: Make base image
-      id: packer
-      run: |
-        make dist/${{ matrix.image_name}}.img \
-          PACKER_VAR_FILE=${{ matrix.var_file }} \
-          RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
-          IMAGE_NAME=${{ matrix.image_name}} \
-          PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
-          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ${{ matrix.image_name }}
-        path: dist/
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: generic-pi.yml
+          workflow_conclusion: success
+          name: ${{ matrix.image_name }}-published
+          path: published/
+      - name: Install platform deps
+        run: sudo apt-get install -y jq wget
+      - name: Install hclq
+        run: |
+          wget https://install.hclq.sh -O install.sh
+          sh install.sh
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Ensure ansible_extra_vars on disk
+        run: make ${{ matrix.ansible_extra_vars }}
+
+      - name: Update ${{ matrix.var_file }}
+        run: |
+          export BASE_IMAGE_URL=$(cat published/image_url)
+          export BASE_CHECKSUM_URL=$(cat published/checksum_url)
+          export BASE_IMAGE_NAME=$(cat published/image_name)
+          export BASE_MANIFEST_URL=$(cat published/manifest_url)
+
+          cat ${{ matrix.var_file }} \
+          | hclq set 'base_image_url' "$BASE_IMAGE_URL" \
+          | hclq set 'base_image_checksum' "$BASE_CHECKSUM_URL" \
+          | hclq set 'base_image_name' "$BASE_IMAGE_NAME" \
+          | hclq set 'base_manifest_url' "$BASE_MANIFEST_URL" \
+          > ${{ matrix.var_file }}
+          echo "Finished updating ${{ matrix.var_file }} - contents:"
+          cat ${{ matrix.var_file }}
+
+      - name: Make base image
+        id: packer
+        run: |
+          make dist/${{ matrix.image_name}}.img \
+            PACKER_VAR_FILE=${{ matrix.var_file }} \
+            RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
+            IMAGE_NAME=${{ matrix.image_name}} \
+            PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
+            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+            
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}-dist
+          path: dist/
   # end image job
   # begin publish job
   publish-nightly:
@@ -67,7 +96,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
       - name: Set output vars
@@ -90,12 +119,12 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-buster-arm64,
-          - generic-pi-bullseye-arm64
+          - printnanny-base-buster-arm64
+          - printnanny-base-bullseye-arm64
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
       # packer-builder-arm does not support file:// URI
@@ -122,7 +151,7 @@ jobs:
       # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.image_name }}
+          name: ${{ matrix.image_name }}-published
           path: published/
       - name: Send Discord notification
         env:
