@@ -40,6 +40,8 @@ jobs:
           workflow: generic-pi.yml
           workflow_conclusion: success
           name: ${{ matrix.base_image_artifact }}
+      - name: ls artifact
+        run: ls -ahl
       - name: Install platform deps
         run: sudo apt-get install -y jq wget
       - name: Install hclq
