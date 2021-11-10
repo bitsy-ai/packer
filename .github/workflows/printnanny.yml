@@ -15,6 +15,7 @@ jobs:
         arch: [ arm64 ]
         include:
           - image_name: printnanny-base-buster-arm64
+            base_image_artifact: generic-pi-buster-arm64-published
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
@@ -23,6 +24,7 @@ jobs:
             platform: debian
 
           - image_name: printnanny-base-buster-arm64
+            base_image_artifact: generic-pi-bullseye-arm64-published
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
@@ -37,7 +39,7 @@ jobs:
         with:
           workflow: generic-pi.yml
           workflow_conclusion: success
-          name: ${{ matrix.image_name }}-published
+          name: ${{ base_image_artifact }}
           path: published/
       - name: Install platform deps
         run: sudo apt-get install -y jq wget
