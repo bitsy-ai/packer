@@ -15,7 +15,7 @@ jobs:
         arch: [ arm64 ]
         include:
           - image_name: printnanny-base-buster-arm64
-            base_image_artifact: generic-pi-buster-arm64-auto-pkrvars
+            base_image: generic-pi-buster-arm64
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
@@ -23,8 +23,8 @@ jobs:
             os: buster
             platform: debian
 
-          - image_name: printnanny-base-buster-arm64
-            base_image_artifact: generic-pi-bullseye-arm64-auto-pkrvars
+          - image_name: printnanny-base-bullseye-arm64
+            base_image: generic-pi-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
@@ -39,36 +39,18 @@ jobs:
         with:
           workflow: generic-pi.yml
           workflow_conclusion: success
-          name: ${{ matrix.base_image_artifact }}
-      - name: ls artifact
-        run: ls -ahl
-      - name: Install platform deps
-        run: sudo apt-get install -y jq wget
-      - name: Install hclq
+          name: ${{ matrix.base_image }}-output-env
+          path: input-env/
+      - name: Debug env/${{ matrix.base_image }}
         run: |
-          wget https://install.hclq.sh -O install.sh
-          sh install.sh
+          ls -ahl input-env/
+          cat input-env/${{ matrix.base_image }}.env
+          . input-env/${{ matrix.base_image }}.env
+          printenv
       - name: Checkout branch
         uses: actions/checkout@v2
       - name: Ensure ansible_extra_vars on disk
         run: make ${{ matrix.ansible_extra_vars }}
-
-      - name: Update ${{ matrix.packer_var_file }}
-        run: |
-          export BASE_IMAGE_URL=$(cat published/image_url)
-          export BASE_CHECKSUM_URL=$(cat published/checksum_url)
-          export BASE_IMAGE_NAME=$(cat published/image_name)
-          export BASE_MANIFEST_URL=$(cat published/manifest_url)
-
-          cat ${{ matrix.packer_var_file }} \
-          | hclq set 'base_image_url' "$BASE_IMAGE_URL" \
-          | hclq set 'base_image_checksum' "$BASE_CHECKSUM_URL" \
-          | hclq set 'base_image_name' "$BASE_IMAGE_NAME" \
-          | hclq set 'base_manifest_url' "$BASE_MANIFEST_URL" \
-          > ${{ matrix.packer_var_file }}
-          echo "Finished updating ${{ matrix.packer_var_file }} - contents:"
-          cat ${{ matrix.packer_var_file }}
-
       - name: Make base image
         id: packer
         run: |
@@ -93,7 +75,7 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-buster-arm64
+          - printnanny-base-buster-arm64
           - generic-pi-bullseye-arm64
     steps:
       - uses: actions/download-artifact@v2

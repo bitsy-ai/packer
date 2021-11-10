@@ -117,9 +117,7 @@ jobs:
       - name: Set output Packer vars
         id: packer
         run: |
-          mkdir -p auto-pkrvars/
-          echo "Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line."
-          echo "Upload *.auto.pkrvars.hcl files for use in next Packer workflow"
+          mkdir -p output-env/
 
           export IMAGE_NAME=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
           export IMAGE_PATH=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
@@ -127,10 +125,24 @@ jobs:
           export CHECKSUM_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
           export MANIFEST_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
 
-          echo $IMAGE_NAME > auto-pkrvars/image_name.auto.pkrvars.hcl
-          echo $IMAGE_URL > auto-pkrvars/image_url.auto.pkrvars.hcl
-          echo $CHECKSUM_URL > auto-pkrvars/checksum_url.auto.pkrvars.hcl
-          echo $MANIFEST_URL > auto-pkrvars/manifest_url.auto.pkrvars.hcl
+          cat << EOF > output-env/${{ matrix.image_name }}.env
+          #!/usr/bin/env bash
+          export IMAGE_PATH="$IMAGE_PATH"
+
+          export BASE_IMAGE_NAME="$IMAGE_NAME"
+          export PKR_VAR_base_image_name="$IMAGE_NAME"
+          
+          export IMAGE_URL="$IMAGE_URL"
+          export PKR_VAR_base_image_url="$IMAGE_URL"
+
+          export CHECKSUM_URL="$CHECKSUM_URL"
+          export PKR_VAR_base_image_checksum="$CHECKSUM_URL"
+
+          export MANIFEST_URL="$MANIFEST_URL"
+          export PKR_VAR_base_manifest_url="$MANIFEST_URL"
+          EOF
+          echo "Created output-env/${{ matrix.image_name }}.env for downstream workflows"
+          cat output-env/${{ matrix.image_name }}.env
 
           echo ::set-output name=image_name::"$IMAGE_NAME"
           echo ::set-output name=image_path::"$IMAGE_PATH"
@@ -145,8 +157,8 @@ jobs:
       # packer-builder-arm does not support file:// uri, so published cdn urls must be passed as packer vars for next workflow stage
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.image_name }}-auto-pkrvars
-          path: auto-pkrvars/
+          name: ${{ matrix.image_name }}-output-env
+          path: output-env/
       - name: Upload to GCP_BUCKET
         run: |
           gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
