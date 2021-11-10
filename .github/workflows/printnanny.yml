@@ -41,6 +41,8 @@ jobs:
           workflow_conclusion: success
           name: ${{ matrix.base_image_artifact }}
           path: published/
+      - name: ls artifact dir for science
+        run: ls -ahl published
       - name: Install platform deps
         run: sudo apt-get install -y jq wget
       - name: Install hclq
@@ -54,6 +56,7 @@ jobs:
 
       - name: Update ${{ matrix.packer_var_file }}
         run: |
+
           export BASE_IMAGE_URL=$(cat published/image_url)
           export BASE_CHECKSUM_URL=$(cat published/checksum_url)
           export BASE_IMAGE_NAME=$(cat published/image_name)
