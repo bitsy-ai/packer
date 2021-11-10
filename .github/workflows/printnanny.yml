@@ -24,7 +24,7 @@ jobs:
             platform: debian
 
           - image_name: printnanny-base-buster-arm64
-            base_image_artifact: generic-pi-bullseye-arm64-published
+            base_image_artifact: generic-pi-bullseye-arm64-auto-pkrvars
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
@@ -40,9 +40,6 @@ jobs:
           workflow: generic-pi.yml
           workflow_conclusion: success
           name: ${{ matrix.base_image_artifact }}
-          path: published
-      - name: ls artifact dir for science
-        run: ls -ahl published
       - name: Install platform deps
         run: sudo apt-get install -y jq wget
       - name: Install hclq
@@ -56,7 +53,6 @@ jobs:
 
       - name: Update ${{ matrix.packer_var_file }}
         run: |
-
           export BASE_IMAGE_URL=$(cat published/image_url)
           export BASE_CHECKSUM_URL=$(cat published/checksum_url)
           export BASE_IMAGE_NAME=$(cat published/image_name)
