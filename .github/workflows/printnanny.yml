@@ -145,6 +145,7 @@ jobs:
           echo $CHECKSUM_URL > published/checksum_url
           echo $MANIFEST_URL > published/manifest_url
 
+          echo ::set-output name=image_path::"$IMAGE_PATH"
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
