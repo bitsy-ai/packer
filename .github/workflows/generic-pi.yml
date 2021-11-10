@@ -111,21 +111,23 @@ jobs:
         run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
       # packer-builder-arm does not support file:// URI
       # so downstream builds must consume https://cdn url
-      - name: Set output vars
-        id: artifact
+      - name: Set output Packer vars
+        id: packer
         run: |
-          mkdir -p published/
+          mkdir -p auto-pkrvars/
+          echo "Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line."
+          echo "Upload *.auto.pkrvars.hcl files for use in next Packer workflow"
+
           export IMAGE_NAME=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
           export IMAGE_PATH=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
           export IMAGE_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$IMAGE_NAME"
           export CHECKSUM_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
           export MANIFEST_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
 
-          echo $IMAGE_NAME > published/image_name
-          echo $IMAGE_URL > published/image_url
-          echo $CHECKSUM_URL > published/checksum_url
-          echo $MANIFEST_URL > published/manifest_url
-
+          echo $IMAGE_NAME > auto-pkrvars/image_name.auto.pkrvars.hcl
+          echo $IMAGE_URL > auto-pkrvars/image_url.auto.pkrvars.hcl
+          echo $CHECKSUM_URL > auto-pkrvars/checksum_url.auto.pkrvars.hcl
+          echo $MANIFEST_URL > auto-pkrvars/manifest_url.auto.pkrvars.hcl
 
           echo ::set-output name=image_name::"$IMAGE_NAME"
           echo ::set-output name=image_path::"$IMAGE_PATH"
@@ -133,23 +135,25 @@ jobs:
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
 
-      # retain published urls as artifacts in published/ namespace
+      # retain published urls as automatic packer vars
+      # from: https://www.packer.io/guides/hcl/variables
+      # Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line.
       # intended for use with: https://github.com/dawidd6/action-download-artifact
-      # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
+      # packer-builder-arm does not support file:// uri, so published cdn urls must be passed as packer vars for next workflow stage
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.image_name }}-published
-          path: published/
+          name: ${{ matrix.image_name }}-auto-pkrvars
+          path: auto-pkrvars/
       - name: Upload to GCP_BUCKET
         run: |
-          gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.artifact.outputs.image_path }}/
+          gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🚀 Published `${{ steps.artifact.outputs.image_name }}`
-            [Download](${{ steps.artifact.outputs.image_url }})
-            [Manifest](${{ steps.artifact.outputs.manifest_url }})
-            [Checksum](${{ steps.artifact.outputs.checksum_url }})
+            🚀 Published `${{ steps.packer.outputs.image_name }}`
+            [Download](${{ steps.packer.outputs.image_url }})
+            [Manifest](${{ steps.packer.outputs.manifest_url }})
+            [Checksum](${{ steps.packer.outputs.checksum_url }})
