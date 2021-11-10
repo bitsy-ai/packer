@@ -40,7 +40,7 @@ jobs:
           workflow: generic-pi.yml
           workflow_conclusion: success
           name: ${{ matrix.base_image_artifact }}
-          path: published/
+          path: published
       - name: ls artifact dir for science
         run: ls -ahl published
       - name: Install platform deps
