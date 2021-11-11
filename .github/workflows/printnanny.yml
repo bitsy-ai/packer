@@ -1,5 +1,10 @@
 on:
   workflow_dispatch:
+    inputs:
+      RELEASE_CHANNEL:
+        description: 'Publish image to release channel: (nightly, stable)'     
+        required: true
+        default: 'nightly'
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
@@ -45,17 +50,20 @@ jobs:
           path: input-env/
       - name: Ensure ansible_extra_vars on disk
         run: make ${{ matrix.ansible_extra_vars }}
+      - name: Print vars (debug)
+        run: |
+          cat ${{ matrix.ansible_extra_vars }}
+          cat input-env/${{ matrix.base_image }}.env
       - name: Make base image
         id: packer
         run: |
-          . input-env/${{ matrix.base_image }}.env
           make dist/${{ matrix.image_name}}.img \
             PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
             RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
             IMAGE_NAME=${{ matrix.image_name}} \
             PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
             ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
-            ENV_FILE=input-env/${{ matrix.base_image }}.env
+            ENV_FILE=input-env/${{ matrix.base_image }}.env \
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
