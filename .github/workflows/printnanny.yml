@@ -54,6 +54,7 @@ jobs:
       - name: Make base image
         id: packer
         run: |
+          . input-env/${{ matrix.base_image }}.env
           make dist/${{ matrix.image_name}}.img \
             PACKER_VAR_FILE=${{ matrix.packer_var_file }} \
             RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
