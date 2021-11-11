@@ -6,6 +6,7 @@ PACKER_VAR_FILE ?= vars/generic-pi-bullseye-arm64.pkrvars.hcl
 PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 DIST_DIR ?= dist
 ANSIBLE_EXTRA_VARS ?= vars/generic-pi-arm64.ansiblevars.yml
+ENV_FILE ?= vars/generic.env
 
 .PHONY: clean docker-builder-image validate
 
@@ -24,7 +25,9 @@ docker-builder-image:
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
 dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
-	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
+	docker run \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		--env-file $(ENV_FILE) \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui $(PACKER_EXTRA_ARGS) \
 			-var "image_name=$(IMAGE_NAME)" \
