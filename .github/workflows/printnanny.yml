@@ -16,17 +16,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ buster, bullseye ]
+        os: [ bullseye ]
         arch: [ arm64 ]
         include:
-          - image_name: printnanny-base-buster-arm64
-            base_image: generic-pi-buster-arm64
-            template_file: templates/generic-pi.pkr.hcl
-            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
-            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
-            arch: arm64
-            os: buster
-            platform: debian
+          # - image_name: printnanny-base-buster-arm64
+          #   base_image: generic-pi-buster-arm64
+          #   template_file: templates/generic-pi.pkr.hcl
+          #   packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+          #   ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+          #   arch: arm64
+          #   os: buster
+          #   platform: debian
 
           - image_name: printnanny-base-bullseye-arm64
             base_image: generic-pi-bullseye-arm64
@@ -79,8 +79,8 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - printnanny-base-buster-arm64
-          - generic-pi-bullseye-arm64
+          # - printnanny-base-buster-arm64
+          - printnanny-base-bullseye-arm64
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - printnanny-base-buster-arm64
+          # - printnanny-base-buster-arm64
           - printnanny-base-bullseye-arm64
     steps:
       - name: Checkout branch
