@@ -124,7 +124,10 @@ jobs:
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
-
+      - name: Inspect output of dist/ (debugging)
+        run: |
+          ls -ahl dist/
+          cat dist/manifest.json
       # retain published urls as automatic packer vars
       # from: https://www.packer.io/guides/hcl/variables
       # Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line.
