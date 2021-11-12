@@ -121,16 +121,16 @@ jobs:
 
           export IMAGE_NAME=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
           export IMAGE_PATH=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
-          export IMAGE_URL=${{ format('{0}/{1}/{2}', env.CDN_BASE_URL, env.IMAGE_PATH, env.IMAGE_NAME ) }}
-          export CHECKSUM_URL=${{ format('{0}/{1}/sha256.checksum', env.CDN_BASE_URL, env.IMAGE_PATH ) }}
-          export MANIFEST_URL="${{ format('{0}/{1}/manifest.json', env.CDN_BASE_URL, env.IMAGE_PATH)}}
+          export IMAGE_URL="${CDN_BASE_URL}/${IMAGE_PATH}/${IMAGE_NAME}"
+          export CHECKSUM_URL="${CDN_BASE_URL}/${IMAGE_PATH}/sha256.checksum"
+          export MANIFEST_URL="${CDN_BASE_URL}/$IMAGE_PATH"
 
           cat << EOF > output-env/${{ matrix.image_name }}.sh
           #!/usr/bin/env bash
           export IMAGE_PATH="$IMAGE_PATH"
 
-          export BASE_IMAGE_NAME=$IMAGE_NAME
-          export PKR_VAR_base_image_name=$IMAGE_NAME
+          export BASE_IMAGE_NAME="$IMAGE_NAME"
+          export PKR_VAR_base_image_name="$IMAGE_NAME"
           
           export IMAGE_URL="$IMAGE_URL"
           export PKR_VAR_base_image_url="$IMAGE_URL"
