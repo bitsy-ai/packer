@@ -97,33 +97,44 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  post-processor "compress" {
-    output = "dist/${var.image_name}.tar.gz"
-    format = ".tar.gz"
-  }
-
-  post-processor "manifest" {
-    output     = "dist/manifest.json"
-    strip_path = true
-    strip_time = true
-    custom_data = {
-      ansible_extra_vars = file("../${var.ansible_extra_vars}")
-      image_stamp = "${local.DATESTAMP}-${var.image_name}"
-      image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-      image_filename = "${var.image_name}.tar.gz"
-      image_name = "${var.image_name}"
-      release_channel = "${var.release_channel}"
-      datestamp = "${local.DATESTAMP}"
-      base_image_name = "${var.base_image_name}"
-      base_image_manifest_url = "${var.base_image_manifest_url}"
-      base_image_checksum = "${var.base_image_checksum}"
-      base_image_ext = "${var.base_image_ext}"
-      base_image_url = "${var.base_image_url}"
+  post-processors {
+    # chain compress -> artifice -> checksum
+    # compress .img into tarball
+    post-processor "compress" {
+      output = "dist/${var.image_name}.tar.gz"
+      format = ".tar.gz"
+      # keep the img artifact so checksum is generated for both .img and .tar.gz files
+      keep_input_artifact = true
     }
-  }
-
-  post-processor "checksum" {
-    checksum_types = ["sha256"]
-    output = "dist/{{.ChecksumType}}.checksum"
-  }
+    # register tarball as new artiface
+    post-processor "artifice" {
+      files = [
+        "dist/${var.image_name}.tar.gz"
+      ]
+    }
+    post-processor "checksum" {
+        checksum_types = ["sha256"]
+        output = "dist/{{.ChecksumType}}.checksum"
+    }
+    post-processor "manifest" {
+        output     = "dist/manifest.json"
+        strip_path = true
+        strip_time = true
+        custom_data = {
+          ansible_extra_vars = file("../${var.ansible_extra_vars}")
+          image_stamp = "${local.DATESTAMP}-${var.image_name}"
+          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
+          image_filename = "${var.image_name}.tar.gz"
+          image_name = "${var.image_name}"
+          release_channel = "${var.release_channel}"
+          datestamp = "${local.DATESTAMP}"
+          base_image_name = "${var.base_image_name}"
+          base_image_manifest_url = "${var.base_image_manifest_url}"
+          base_image_checksum = "${var.base_image_checksum}"
+          base_image_ext = "${var.base_image_ext}"
+          base_image_url = "${var.base_image_url}"
+        }
+      }
+    }
 }
+
