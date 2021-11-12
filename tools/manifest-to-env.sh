@@ -13,7 +13,7 @@ export IMAGE_URL=${CDN_BASE_URL}/${IMAGE_PATH}/${IMAGE_NAME}
 export CHECKSUM_URL=${CDN_BASE_URL}/${IMAGE_PATH}/sha256.checksum
 export MANIFEST_URL=${CDN_BASE_URL}/$IMAGE_PATH/manifest.json
 
-OUTFILE="output-env/$IMAGE_NAME.sh"
+OUTFILE="$OUT_DIR/$IMAGE_NAME.sh"
 cat << EOF > $OUTFILE
 #!/usr/bin/env bash
 export IMAGE_PATH=$IMAGE_PATH
@@ -35,7 +35,7 @@ EOF
 echo "Created $OUTFILE"
 cat $OUTFILE
 
-OUTFILE="output-env/$IMAGE_NAME.env"
+OUTFILE="$OUT_DIR/$IMAGE_NAME.env"
 cat << EOF > $OUTFILE
 IMAGE_PATH=$IMAGE_PATH
 IMAGE_STAMP=$IMAGE_STAMP
