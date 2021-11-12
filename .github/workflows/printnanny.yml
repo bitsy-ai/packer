@@ -110,6 +110,8 @@ jobs:
           - printnanny-base-buster-arm64
           - printnanny-base-bullseye-arm64
     steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
