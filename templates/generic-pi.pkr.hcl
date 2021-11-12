@@ -97,11 +97,6 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  post-processor "checksum" {
-    checksum_types = ["sha256"]
-    output = "dist/{{.ChecksumType}}.checksum"
-  }
-
   post-processor "compress" {
     output = "dist/${var.image_name}.tar.gz"
     format = ".tar.gz"
@@ -125,5 +120,10 @@ build {
       base_image_ext = "${var.base_image_ext}"
       base_image_url = "${var.base_image_url}"
     }
+  }
+
+  post-processor "checksum" {
+    checksum_types = ["sha256"]
+    output = "dist/{{.ChecksumType}}.checksum"
   }
 }
