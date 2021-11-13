@@ -16,22 +16,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ buster, bullseye ]
+        os: [ bullseye ]
         arch: [ arm64 ]
         include:
-          - image_name: printnanny-base-buster-arm64
-            base_image_artifact: generic-pi-buster-arm64-published
-            template_file: templates/generic-pi.pkr.hcl
-            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
-            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
-            arch: arm64
-            os: buster
-            platform: debian
+          # - image_name: printnanny-base-buster-arm64
+          #   base_image: generic-pi-buster-arm64
+          #   template_file: templates/generic-pi.pkr.hcl
+          #   packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+          #   ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+          #   arch: arm64
+          #   os: buster
+          #   platform: debian
 
-          - image_name: printnanny-base-buster-arm64
-            base_image_artifact: generic-pi-bullseye-arm64-published
+          - image_name: printnanny-octoprint-bullseye-arm64
+            base_image: printnanny-base-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
-            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
             os: bullseye
@@ -39,40 +39,21 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: generic-pi.yml
+          workflow: printnanny.yml
           workflow_conclusion: success
-          name: ${{ matrix.base_image_artifact }}
-          path: published/
-      - name: Install platform deps
-        run: sudo apt-get install -y jq wget
-      - name: Install hclq
-        run: |
-          wget https://install.hclq.sh -O install.sh
-          sh install.sh
-      - name: Checkout branch
-        uses: actions/checkout@v2
+          name: ${{ matrix.base_image }}-env
+          path: env/
       - name: Ensure ansible_extra_vars on disk
         run: make ${{ matrix.ansible_extra_vars }}
-
-      - name: Update ${{ matrix.packer_var_file }}
+      - name: Print vars (debug)
         run: |
-          export BASE_IMAGE_URL=$(cat published/image_url)
-          export BASE_CHECKSUM_URL=$(cat published/checksum_url)
-          export BASE_IMAGE_NAME=$(cat published/image_name)
-          export BASE_MANIFEST_URL=$(cat published/manifest_url)
-
-          cat ${{ matrix.packer_var_file }} \
-          | hclq set 'base_image_url' "$BASE_IMAGE_URL" \
-          | hclq set 'base_image_checksum' "$BASE_CHECKSUM_URL" \
-          | hclq set 'base_image_name' "$BASE_IMAGE_NAME" \
-          | hclq set 'base_manifest_url' "$BASE_MANIFEST_URL" \
-          > ${{ matrix.packer_var_file }}
-          echo "Finished updating ${{ matrix.packer_var_file }} - contents:"
-          cat ${{ matrix.packer_var_file }}
-
+          cat ${{ matrix.ansible_extra_vars }}
+          cat env/${{ matrix.base_image }}.env
       - name: Make base image
         id: packer
         run: |
@@ -81,7 +62,8 @@ jobs:
             RELEASE_CHANNEL=${{ github.event.inputs.RELEASE_CHANNEL }} \
             IMAGE_NAME=${{ matrix.image_name}} \
             PACKER_TEMPLATE_FILE=${{ matrix.template_file }} \
-            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+            ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }} \
+            ENV_FILE=env/${{ matrix.base_image }}.env \
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
@@ -97,24 +79,32 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-buster-arm64
-          - generic-pi-bullseye-arm64
+          - printnanny-octoprint-bullseye-arm64
     steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
-      - name: Set output vars
+      - name: Create environment artifacts
+        id: packer
         run: |
-          echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          ./tools/manifest-to-env.sh
+          . env/${{ matrix.image_name }}.sh
+          echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+          echo ::set-output name=image_path::"$IMAGE_PATH"
+          echo ::set-output name=image_url::"$IMAGE_URL"
+          echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+          echo ::set-output name=manifest_url::"$MANIFEST_URL"
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
+            🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
@@ -125,9 +115,10 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          - printnanny-base-buster-arm64
-          - printnanny-base-bullseye-arm64
+          - printnanny-octoprint-bullseye-arm64
     steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.image_name }}-dist
@@ -138,24 +129,17 @@ jobs:
         run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
       # packer-builder-arm does not support file:// URI
       # so downstream builds must consume https://cdn url
-      - name: Set output vars
+      - name: Create environment artifacts
+        id: packer
         run: |
-          mkdir -p published/
-          export IMAGE_NAME=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')
-          export IMAGE_PATH=$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_path')
-          export IMAGE_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/$IMAGE_NAME"
-          export CHECKSUM_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/sha256.checksum"
-          export MANIFEST_URL="${{ env.CDN_BASE_URL }}/$IMAGE_PATH/manifest.json"
-
-          echo $IMAGE_NAME > published/image_name
-          echo $IMAGE_URL > published/image_url
-          echo $CHECKSUM_URL > published/checksum_url
-          echo $MANIFEST_URL > published/manifest_url
-
+          ./tools/manifest-to-env.sh
+          . env/${{ matrix.image_name }}.sh
+          echo ::set-output name=image_stamp::"$IMAGE_STAMP"
           echo ::set-output name=image_path::"$IMAGE_PATH"
           echo ::set-output name=image_url::"$IMAGE_URL"
           echo ::set-output name=checksum_url::"$CHECKSUM_URL"
           echo ::set-output name=manifest_url::"$MANIFEST_URL"
+
       # retain published urls as artifacts in published/ namespace
       # intended for use with: https://github.com/dawidd6/action-download-artifact
       # packer-builder-arm does not support file:// uri, so published cdn urls must be passed in addition to artifact files
@@ -172,7 +156,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🚀 Published `${{ steps.packer.outputs.image_name }}`
+            🚀 Published `${{ steps.packer.outputs.image_stamp }}`
             [Download](${{ steps.packer.outputs.image_url }})
             [Manifest](${{ steps.packer.outputs.manifest_url }})
             [Checksum](${{ steps.packer.outputs.checksum_url }})
