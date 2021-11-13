@@ -78,17 +78,23 @@ jobs:
           name: ${{ matrix.image_name }}-dist
           path: dist/
           if-no-files-found: error
-      - name: Set output vars
-        id: artifact
+      - name: Create environment artifacts
+        id: packer
         run: |
-          echo ::set-output name=image_name::"$(cat dist/manifest.json | jq '.builds[-1].custom_data.image_name')"
+          ./tools/manifest-to-env.sh
+          . env/${{ matrix.image_name }}.sh
+          echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+          echo ::set-output name=image_path::"$IMAGE_PATH"
+          echo ::set-output name=image_url::"$IMAGE_URL"
+          echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+          echo ::set-output name=manifest_url::"$MANIFEST_URL"
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🧪 NEW nightly `${{ steps.artifact.outputs.image_name }}`
+            🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
