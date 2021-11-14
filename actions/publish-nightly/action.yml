@@ -1,0 +1,43 @@
+name: 'Publish nightly image'
+description: 'Publish image stored as Github Artifact'
+inputs:
+  DISCORD_WEBHOOK:
+    description: 'Publish using Discord webhook'
+    required: false
+  ARTIFACT:
+    description: 'Name of artifact to publish'     
+    required: true
+    default: 'nightly'
+  IMAGE_NAME:
+    description: 'Name of image to build'
+    required: true
+
+outputs:
+  artifact:
+    description: "Reference to artifact name to be used in subsequent steps"
+    value: ${{ inputs.IMAGE_NAME }}-dist
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/download-artifact@v2
+    with:
+      name: ${{ inputs.ARTIFACT }}
+      path: dist/
+  - name: Create environment artifacts
+    id: packer
+    run: |
+      ./tools/manifest-to-env.sh
+      . env/${{ inputs.IMAGE_NAME }}.sh
+      echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_path::"$IMAGE_PATH"
+      echo ::set-output name=image_url::"$IMAGE_URL"
+      echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+      echo ::set-output name=manifest_url::"$MANIFEST_URL"
+    - name: Send Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: |
+          🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

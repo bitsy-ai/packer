@@ -1,0 +1,42 @@
+name: 'Build image'
+description: 'Build image from Packer template'
+inputs:
+  RELEASE_CHANNEL:
+    description: 'Publish image to release channel: (nightly, stable)'     
+    required: true
+    default: 'nightly'
+  IMAGE_NAME:
+    description: 'Name of image to build'
+    required: true
+  ANSIBLE_EXTRA_VARS:
+    description: 'Path to vars/*.ansiblevars.{yml,json} file to use/generate'
+    required: true
+  PACKER_VAR_FILE:
+    description: 'Path to vars/*.pkrvars.hcl file'
+    required: true
+  PACKER_TEMPLATE_FILE:
+    description: 'Path to templates/*.hcl template to build'
+    required: true
+
+outputs:
+  artifact:
+    description: "Reference to artifact name to be used in subsequent steps"
+    value: ${{ inputs.IMAGE_NAME }}-dist
+runs:
+  using: "composite"
+  steps:
+  - name: Ensure ansible_extra_vars on disk
+    run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
+  - name: Make image from Packer template
+    id: packer
+    run: |
+      make dist/${{ inputs.IMAGE_NAME }}.img \
+        PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
+        IMAGE_NAME=${{ inputs.IMAGE_NAME }} \
+        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
+        ANSIBLE_EXTRA_VARS=${{ inputs.ANSIBLE_EXTRA_VARS }}
+      ls -ahl dist/
+  - uses: actions/upload-artifact@v2
+    with:
+      name: ${{ inputs.IMAGE_NAME }}-dist
+      path: dist/

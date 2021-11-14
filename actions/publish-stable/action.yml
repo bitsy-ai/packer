@@ -1,0 +1,66 @@
+name: 'Publish image to CDN'
+description: 'Publish image to CDN via gsutils'
+inputs:
+  DISCORD_WEBHOOK:
+    description: 'Publish using Discord webhook'
+    required: false
+  ARTIFACT:
+    description: 'Name of artifact to publish'     
+    required: true
+    default: 'nightly'
+  IMAGE_NAME:
+    description: 'Name of image to build'
+    required: true
+
+outputs:
+  artifact:
+    description: "Reference to artifact name to be used in subsequent steps"
+    value: ${{ inputs.IMAGE_NAME }}-dist
+  env:
+    description: "Reference to env file to be used in subsequent steps"
+    value: ${{ inputs.IMAGE_NAME }}-env
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/download-artifact@v2
+    with:
+      name: ${{ inputs.ARTIFACT }}
+      path: dist/
+  - name: Write deploy key
+    run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+  - name: Activate Service Account
+    run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+  # packer-builder-arm does not support file:// URI
+  # so downstream builds must consume https://cdn url
+  - name: Create environment artifacts
+    id: packer
+    run: |
+      ./tools/manifest-to-env.sh
+      . env/${{ matrix.image_name }}.sh
+      echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_path::"$IMAGE_PATH"
+      echo ::set-output name=image_url::"$IMAGE_URL"
+      echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+      echo ::set-output name=manifest_url::"$MANIFEST_URL"
+  # retain published urls as automatic packer vars
+  # from: https://www.packer.io/guides/hcl/variables
+  # Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line.
+  # intended for use with: https://github.com/dawidd6/action-download-artifact
+  # packer-builder-arm does not support file:// uri, so published cdn urls must be passed as packer vars for next workflow stage
+  - uses: actions/upload-artifact@v2
+    with:
+      name: ${{ inputs.IMAGE_NAME }}-env
+      path: env
+  - name: Upload to GCP_BUCKET
+    run: |
+      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+  - name: Send Discord notification
+    env:
+      DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+    uses: Ilshidur/action-discord@master
+    with:
+      args: |
+        🚀 Published `${{ steps.packer.outputs.image_stamp }}`
+        [Download](${{ steps.packer.outputs.image_url }})
+        [Manifest](${{ steps.packer.outputs.manifest_url }})
+        [Checksum](${{ steps.packer.outputs.checksum_url }})
