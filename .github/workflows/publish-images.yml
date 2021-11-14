@@ -13,7 +13,9 @@ env:
   CDN_BASE_URL: https://cdn.print-nanny.com
 
 jobs:
-  # begin image job
+  ##
+  # begin generic image jobs
+  ##
   generic-base-image:
     strategy:
       fail-fast: false
@@ -40,7 +42,8 @@ jobs:
             arch: arm64
             os: bullseye
             platform: debian
-
+    outputs:
+      artifact: ${{ steps.build.outputs.artifact }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
@@ -53,9 +56,7 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
-        
-  # end base image job
-  # begin base image publish job
+
   publish-generic-base-image-nightly:
     # github action inputs are always strings
     environment: nightly
@@ -75,7 +76,7 @@ jobs:
       with:
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ARTIFACT:  ${{ needs.jobs.base-image.outputs.artifact }}
+        ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
         DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     
   publish-generic-base-image-stable:
@@ -95,7 +96,51 @@ jobs:
       - id: publish-stable
         uses: ./.github/workflows/scripts/publish-stable
         with:
-          RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
           IMAGE_NAME: ${{ matrix.image_name }}
-          ARTIFACT:  ${{ needs.jobs.base-image.outputs.artifact }}
-          DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
+          ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
+
+  ###
+  # begin printnanny base image jobs
+  ###
+  publish-printnanny-base-image-nightly:
+    needs: [generic-base-image, publish-generic-base-image-nightly]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [  bullseye ]
+        arch: [ arm64 ]
+        platform: [ debian ]
+        include:
+          # uncomment + edit to build additional os, arch, platform variants
+          # - image_name: generic-pi-buster-arm64
+          #   base_image: 2021-05-07-raspios-buster-arm64
+          #   packer_template_file: templates/generic-pi.pkr.hcl
+          #   packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+          #   ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+          #   arch: arm64
+          #   os: buster
+          #   platform: debian
+
+          - image_name: printnanny-base-bullseye-arm64
+            base_image: generic-pi-bullseye-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+            arch: arm64
+            os: bullseye
+            platform: debian
+    outputs:
+      artifact: ${{ steps.build.outputs.artifact }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - id: build
+      uses: ./.github/workflows/scripts/build
+      with:
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        IMAGE_NAME: ${{ matrix.image_name }}
+        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
