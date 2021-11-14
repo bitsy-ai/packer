@@ -92,3 +92,10 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
+      - id: publish-stable
+        uses: ./.github/workflows/scripts/publish-stable
+        with:
+          RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ARTIFACT:  ${{ needs.jobs.base-image.outputs.artifact }}
+          DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
