@@ -26,6 +26,7 @@ runs:
   using: "composite"
   steps:
   - name: Ensure ansible_extra_vars on disk
+    shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Make image from Packer template
     id: packer
