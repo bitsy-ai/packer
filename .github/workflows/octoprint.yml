@@ -108,7 +108,7 @@ jobs:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
-    environment: stable
+    # environment: stable
     needs: [image, publish-nightly]
     runs-on: ubuntu-latest
     strategy:

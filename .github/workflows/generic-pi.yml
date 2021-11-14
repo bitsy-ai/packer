@@ -5,6 +5,7 @@ on:
         description: 'Publish image to release channel: (nightly, stable)'     
         required: true
         default: 'nightly'
+        
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
@@ -98,7 +99,7 @@ jobs:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   publish-stable:
     # github action inputs are always strings
-    environment: stable
+    # environment: stable
     needs: [image, publish-nightly]
     runs-on: ubuntu-latest
     strategy:
