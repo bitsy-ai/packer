@@ -101,7 +101,10 @@ build {
   # https://www.freedesktop.org/software/systemd/man/machine-id.html#First%20Boot%20Semantics
   # reset machine id so systemd ConditionFirstBoot=yes units are run when user first boots images
   provisioner "shell" {
-      inline = ["echo uninitialized\n > /etc/machine-id"]
+      inline = [
+        "echo uninitialized\n > /etc/machine-id",
+        "rm /var/lib/dbus/machine-idz"
+    ]
   }
 
   post-processors {
