@@ -88,6 +88,7 @@ source "arm" "base_image" {
 build {
   sources = ["source.arm.base_image"]
   name = "ansible"
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
@@ -95,6 +96,12 @@ build {
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
+  }
+
+  # https://www.freedesktop.org/software/systemd/man/machine-id.html#First%20Boot%20Semantics
+  # reset machine id so systemd ConditionFirstBoot=yes units are run when user first boots images
+  provisioner "shell" {
+      inline = ["echo uninitialized\n > /etc/machine-id"]
   }
 
   post-processors {
