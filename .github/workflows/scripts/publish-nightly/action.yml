@@ -25,6 +25,7 @@ runs:
       path: dist/
   - name: Create environment artifacts
     id: packer
+    shell: bash
     run: |
       ./tools/manifest-to-env.sh
       . env/${{ inputs.IMAGE_NAME }}.sh

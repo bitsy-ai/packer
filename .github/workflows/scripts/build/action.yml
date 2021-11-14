@@ -29,6 +29,7 @@ runs:
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Make image from Packer template
     id: packer
+    shell: bash
     run: |
       make dist/${{ inputs.IMAGE_NAME }}.img \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \

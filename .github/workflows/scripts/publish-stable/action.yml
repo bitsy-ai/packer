@@ -27,13 +27,16 @@ runs:
       name: ${{ inputs.ARTIFACT }}
       path: dist/
   - name: Write deploy key
+    shell: bash
     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
   - name: Activate Service Account
+    shell: bash
     run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
   # packer-builder-arm does not support file:// URI
   # so downstream builds must consume https://cdn url
   - name: Create environment artifacts
     id: packer
+    shell: bash
     run: |
       ./tools/manifest-to-env.sh
       . env/${{ matrix.image_name }}.sh
