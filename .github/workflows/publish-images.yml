@@ -16,7 +16,7 @@ jobs:
   ##
   # begin generic image jobs
   ##
-  generic-base-image:
+  build-generic-base-image:
     strategy:
       fail-fast: false
       matrix:
