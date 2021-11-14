@@ -2,7 +2,7 @@
 
 set +eu
 
-OUT_DIR=env
+OUT_DIR=dist
 
 mkdir -p $OUT_DIR
 

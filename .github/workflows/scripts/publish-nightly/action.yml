@@ -22,13 +22,12 @@ runs:
   - uses: actions/download-artifact@v2
     with:
       name: ${{ inputs.ARTIFACT }}
-      path: dist/
+      path: dist
   - name: Create environment artifacts
     id: packer
     shell: bash
     run: |
-      ./tools/manifest-to-env.sh
-      . env/${{ inputs.IMAGE_NAME }}.sh
+      . dist/${{ inputs.IMAGE_NAME }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
