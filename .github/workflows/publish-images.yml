@@ -46,7 +46,7 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v2
     - id: build
-      uses: ./actions/build@main
+      uses: ./.github/workflows/scripts/build
       with:
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
@@ -68,8 +68,10 @@ jobs:
           # - generic-pi-buster-arm64
           - generic-pi-bullseye-arm64
     steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
     - id: publish-nightly
-      uses: ./actions/publish-nightly@main
+      uses: ./.github/workflows/scripts/publish-nightly
       with:
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
