@@ -34,11 +34,11 @@ runs:
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
-    - name: Send Discord notification
-      env:
-        DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
-      uses: Ilshidur/action-discord@master
-      with:
-        args: |
-          🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
-          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  - name: Send Discord notification
+    env:
+      DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+    uses: Ilshidur/action-discord@master
+    with:
+      args: |
+        🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
+        ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
