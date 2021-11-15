@@ -1,6 +1,9 @@
 name: 'Build image'
 description: 'Build image from Packer template'
 inputs:
+  IMAGE_NAME:
+    description: 'Name of image'
+    required: true
   PACKER_VAR_FILE:
     description: 'Path to vars/*.pkrvars.hcl file'
     required: true
