@@ -22,11 +22,7 @@ vars/printnanny-pi-arm64.ansiblevars.json: $(DIST_DIR)
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
-	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile .
-
-docker-builder-image2:
-	DOCKER_BUILDKIT=1 \
-	docker build -t bitsyai/packer-plugin-arm-image -f docker/builder2.Dockerfile .
+	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
 dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 	docker run \
