@@ -16,7 +16,7 @@ jobs:
   ##
   # begin generic image jobs
   ##
-  build-generic-base-image:
+  build-generic-image:
     strategy:
       fail-fast: false
       matrix:
@@ -57,10 +57,10 @@ jobs:
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
 
-  publish-generic-base-image-nightly:
+  publish-generic-nightly:
     # github action inputs are always strings
     environment: nightly
-    needs: [ generic-base-image ]
+    needs: [ build-generic-image]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -79,10 +79,10 @@ jobs:
         ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
         DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     
-  publish-generic-base-image-stable:
+  publish-generic-stable:
     # comment to require manual approval before publishing
     # environment: stable
-    needs: [generic-base-image, publish-generic-base-image-nightly]
+    needs: [build-generic-image, publish-generic-nightly]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -104,7 +104,7 @@ jobs:
   # begin printnanny base image jobs
   ###
   publish-printnanny-base-image-nightly:
-    needs: [generic-base-image, publish-generic-base-image-nightly]
+    needs: [generic-base-image]
     strategy:
       fail-fast: false
       matrix:
