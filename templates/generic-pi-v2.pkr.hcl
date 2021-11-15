@@ -57,7 +57,7 @@ variable "output_directory" {
 
 variable "target_image_size" {
   type = number
-  default = 5368709120
+  default = 6*1024*1024*1024
 }
 
 variable "image_mount_path" {
