@@ -1,4 +1,4 @@
-FROM ghcr.io/solo-io/packer-plugin-arm-image
+FROM bitsyai/packer-builder-arm
 
 RUN apt-get update -qq \
     && apt-get install -qqy --no-install-recommends \
@@ -9,3 +9,6 @@ RUN apt-get update -qq \
     unzip
 
 RUN pip install --no-cache ansible
+
+COPY templates templates
+RUN packer init templates

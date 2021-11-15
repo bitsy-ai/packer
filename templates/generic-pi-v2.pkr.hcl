@@ -84,7 +84,6 @@ source "arm-image" "base" {
   output_filename = "${var.output_directory}/${var.image_name}.img"
   mount_path = "${var.image_mount_path}"
   target_image_size = var.target_image_size
-  qemu_binary = var.qemu_binary
 }
 
 
