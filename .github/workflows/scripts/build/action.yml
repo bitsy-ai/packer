@@ -30,7 +30,6 @@ runs:
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Make image from Packer template
-    id: packer
     shell: bash
     run: |
       make packer-build \
@@ -38,7 +37,12 @@ runs:
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
         RELEASE_CHANNEL=${{ inputs.RELEASE_CHANNEL }}
-        
+
+      ./tools/manifest-to-env.sh
+      ls -ahl dist/
+  - name: Create environment var files
+    shell: bash
+    run: |
       ./tools/manifest-to-env.sh
       ls -ahl dist/
   - uses: actions/upload-artifact@v2

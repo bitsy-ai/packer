@@ -28,7 +28,7 @@ runs:
     shell: bash
     run: |
       ls dist/
-      . dist/${{ inputs.image_name }}/${{ inputs.image_name }}.sh
+      . dist/${{ inputs.image_name }}.sh
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"

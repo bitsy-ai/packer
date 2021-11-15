@@ -19,7 +19,7 @@ runs:
     shell: bash
     run: |
       ls dist/
-      . dist/${{ inputs.IMAGE_NAME }}/${{ inputs.IMAGE_NAME }}.sh
+      . dist/${{ inputs.IMAGE_NAME }}.sh
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
