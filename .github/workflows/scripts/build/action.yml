@@ -38,7 +38,7 @@ runs:
   - name: Init Packer plugins
     shell: bash
     run: |
-      packer init
+      sudo packer init
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
@@ -46,7 +46,7 @@ runs:
     id: packer
     shell: bash
     run: |
-      make packer-build \
+      sudo make packer-build \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
         IMAGE_NAME=${{ inputs.IMAGE_NAME }} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
