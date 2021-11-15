@@ -121,7 +121,7 @@ jobs:
 
           - image_name: printnanny-os-bullseye-arm64
             base_image: generic-pi-bullseye-arm64
-            template_file: templates/generic-pi.pkr.hcl
+            packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
@@ -165,7 +165,7 @@ jobs:
 
           - image_name: printnanny-os-octoprint-bullseye-arm64
             base_image: printnanny-os-bullseye-arm64
-            template_file: templates/generic-pi.pkr.hcl
+            packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
             arch: arm64
