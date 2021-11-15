@@ -148,7 +148,7 @@ jobs:
 # begin printnanny octoprint jobs
 ###
   build-printnanny-octoprint:
-    needs: [build-generic-image, build-printnanny-base]
+    needs: [build-generic-image, build-printnanny-os ]
     strategy:
       fail-fast: false
       matrix:
