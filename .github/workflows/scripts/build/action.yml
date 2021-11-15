@@ -4,6 +4,9 @@ inputs:
   IMAGE_NAME:
     description: 'Name of image'
     required: true
+  ANSIBLE_EXTRA_VARS:
+    description: 'Ensure ansible extra vars created'
+    required: true
   PACKER_VAR_FILE:
     description: 'Path to vars/*.pkrvars.hcl file'
     required: true
@@ -34,7 +37,8 @@ runs:
         PACKER_ENV_FILE=${{ inputs.PACKER_ENV_FILE }} \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
-        RELEASE_CHANNEL=${{ inputs.RELEASE_CHANNEL }} \
+        RELEASE_CHANNEL=${{ inputs.RELEASE_CHANNEL }}
+        
       ./tools/manifest-to-env.sh
       ls -ahl dist/
   - uses: actions/upload-artifact@v2
