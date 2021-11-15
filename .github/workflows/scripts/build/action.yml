@@ -34,7 +34,7 @@ runs:
   - name: Install Qemu
     shell: bash
     run: |
-      apt-get install qemu qemu-user-static binfmt-support
+      sudo apt-get install qemu qemu-user-static binfmt-support
   - name: Init Packer plugins
     shell: bash
     run: |
