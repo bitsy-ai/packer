@@ -32,7 +32,7 @@ runs:
     id: packer
     shell: bash
     run: |
-      make packer-build \
+      make dist/${{ inputs.IMAGE_NAME }}.img \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
         IMAGE_NAME=${{ inputs.IMAGE_NAME }} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
