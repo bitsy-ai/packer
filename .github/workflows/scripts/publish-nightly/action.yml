@@ -12,7 +12,7 @@ runs:
   steps:
   - uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.ARTIFACT }}
+      name: ${{ inputs.IMAGE_NAME }}
       path: dist
   - name: Create environment artifacts
     id: packer
@@ -20,7 +20,7 @@ runs:
     run: |
       ls dist/
       . dist/${{ inputs.IMAGE_NAME }}/${{ inputs.IMAGE_NAME }}.sh
-      echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
@@ -31,5 +31,5 @@ runs:
     uses: Ilshidur/action-discord@master
     with:
       args: |
-        🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
+        🧪 NEW nightly `${{ steps.packer.outputs.image_name }}`
         ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

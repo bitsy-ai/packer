@@ -29,7 +29,7 @@ runs:
     run: |
       ls dist/
       . dist/${{ inputs.image_name }}/${{ inputs.image_name }}.sh
-      echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
@@ -52,7 +52,7 @@ runs:
     uses: Ilshidur/action-discord@master
     with:
       args: |
-        🚀 Published `${{ steps.packer.outputs.image_stamp }}`
+        🚀 Published `${{ steps.packer.outputs.image_name }}`
         [Download](${{ steps.packer.outputs.image_url }})
         [Manifest](${{ steps.packer.outputs.manifest_url }})
         [Checksum](${{ steps.packer.outputs.checksum_url }})

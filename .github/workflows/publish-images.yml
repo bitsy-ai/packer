@@ -11,6 +11,8 @@ env:
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
   GCP_BUCKET: print-nanny-cdn
   CDN_BASE_URL: https://cdn.print-nanny.com
+  RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+  PKR_VAR_release_channel: ${{ inputs.RELEASE_CHANNEL }}
 
 jobs:
 ##
@@ -24,21 +26,10 @@ jobs:
         arch: [ arm64 ]
         platform: [ debian ]
         include:
-          # uncomment + edit to build additional os, arch, platform variants
-          # - image_name: generic-pi-buster-arm64
-          #   base_image: 2021-05-07-raspios-buster-arm64
-          #   packer_template_file: templates/generic-pi.pkr.hcl
-          #   packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
-          #   ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-          #   arch: arm64
-          #   os: buster
-          #   platform: debian
-
           - image_name: generic-pi-bullseye-arm64
-            base_image: 2021-10-30-raspios-bullseye-arm64
+            packer_env_file: vars/generic.env # empty in base image (no dynamic env vars)
             packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
-            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             arch: arm64
             os: bullseye
             platform: debian
@@ -51,11 +42,12 @@ jobs:
     - id: build
       uses: ./.github/workflows/scripts/build
       with:
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        PACKER_ENV_FILE: ${{ inputs.PACKER_ENV_FILE }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
+
 
   publish-generic-nightly:
     # github action inputs are always strings
@@ -66,7 +58,6 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          # - generic-pi-buster-arm64
           - generic-pi-bullseye-arm64
     steps:
     - name: Checkout branch
@@ -86,7 +77,6 @@ jobs:
       fail-fast: false
       matrix:
         image_name:
-          # - generic-pi-buster-arm64
           - generic-pi-bullseye-arm64
     steps:
       - name: Checkout branch
@@ -109,16 +99,6 @@ jobs:
         arch: [ arm64 ]
         platform: [ debian ]
         include:
-          # uncomment + edit to build additional os, arch, platform variants
-          # - image_name: generic-pi-buster-arm64
-          #   base_image: 2021-05-07-raspios-buster-arm64
-          #   packer_template_file: templates/generic-pi.pkr.hcl
-          #   packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
-          #   ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-          #   arch: arm64
-          #   os: buster
-          #   platform: debian
-
           - image_name: printnanny-os-bullseye-arm64
             base_image: generic-pi-bullseye-arm64
             packer_template_file: templates/generic-pi.pkr.hcl
@@ -127,18 +107,31 @@ jobs:
             arch: arm64
             os: bullseye
             platform: debian
-    outputs:
-      artifact: ${{ steps.build.outputs.artifact }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.base_image }}
+        path: dist
+    - name: Create environment artifacts
+      id: base
+      shell: bash
+      run: |
+        ls dist/
+        . dist/${{ matrix.base_image }}/${{ matrix.base_image }}.sh
+        echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+        echo ::set-output name=image_path::"$IMAGE_PATH"
+        echo ::set-output name=image_url::"$IMAGE_URL"
+        echo ::set-output name=checksum_url::"$CHECKSUM_URL"
+        echo ::set-output name=manifest_url::"$MANIFEST_URL"
     - id: build
       uses: ./.github/workflows/scripts/build
       with:
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        PACKER_ENV_FILE: dist/${{ matrix.base_image }}/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
 ###
@@ -164,7 +157,6 @@ jobs:
           #   platform: debian
 
           - image_name: printnanny-os-octoprint-bullseye-arm64
-            base_image: printnanny-os-bullseye-arm64
             packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
             ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
@@ -180,11 +172,11 @@ jobs:
     - id: build
       uses: ./.github/workflows/scripts/build
       with:
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        PACKER_ENV_FILE: dist/${{ matrix.base_image }}/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
-        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
+        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
 
   nightly-printnanny-octoprint:
     # github action inputs are always strings
