@@ -65,4 +65,4 @@ validate2: $(DIST_DIR) docker-builder-image2
 			$(PACKER_TEMPLATE_FILE)
 
 packer-init:
-	packer-init templates
+	packer init templates
