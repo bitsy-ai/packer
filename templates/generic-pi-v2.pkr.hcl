@@ -29,8 +29,10 @@ variable "base_image_checksum" {
   type = string
 }
 
+# TODO remove
 variable "base_image_ext" {
   type = string
+  default = ""
 }
 
 variable "base_image_manifest_url" {
@@ -55,7 +57,12 @@ variable "output_directory" {
 
 variable "target_image_size" {
   type = number
-  default = 5153960755
+  default = 5368709120
+}
+
+variable "image_mount_path" {
+  type = string
+  default = "/mnt/raspbian"
 }
 
 source "arm-image" "base" {
@@ -63,7 +70,7 @@ source "arm-image" "base" {
   iso_checksum = "${var.base_image_checksum}"
   iso_url      = "${var.base_image_url}"
   output_filename = "${var.output_directory}/${var.image_name}.img"
-  mount_path = "/tmp/rpi_chroot"
+  mount_path = "${var.image_mount_path}"
   target_image_size = var.target_image_size
 }
 
@@ -76,19 +83,11 @@ build {
   sources = ["source.arm-image.base"]
   name = "ansible"
 
-  provisioner "shell-local" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y unzip git python3-dev python3-pip",
-      "pip install --no-cache ansible"
-    ]
-  }
-
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    inventory_file_template = "default ansible_host=${var.image_mount_path} ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
   }
@@ -97,9 +96,9 @@ build {
     # chain compress -> artifice -> checksum
     # compress .img into tarball
     post-processor "compress" {
-      output = "dist/${var.image_name}.tar.gz"
-      format = ".tar.gz"
-      # keep the img artifact so checksum is generated for both .img and .tar.gz files
+      output = "dist/${var.image_name}.zip"
+      format = ".zip"
+      # keep the img artifact so checksum is generated for both .img and .zip files
       keep_input_artifact = true
     }
     # register tarball as new artiface

@@ -1,3 +1,5 @@
 base_image_ext = ".tar.gz"
 playbook_file = "./playbooks/printnanny.yml"
 ansible_extra_vars = "vars/printnanny-pi-arm64.ansiblevars.json"
+base_image_url = "file:dist/generic-pi-bullseye-arm64.zip"
+base_image_checksum = "file:dist/sha256.checksum"
