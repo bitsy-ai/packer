@@ -8,7 +8,7 @@ DIST_DIR ?= dist
 ANSIBLE_EXTRA_VARS ?= vars/generic-pi-arm64.ansiblevars.yml
 ENV_FILE ?= vars/generic.env
 
-.PHONY: clean docker-builder-image validate
+.PHONY: clean docker-builder-image validate packer-build packer-init
 
 $(DIST_DIR):
 	mkdir -p $(DIST_DIR)
@@ -63,3 +63,6 @@ validate2: $(DIST_DIR) docker-builder-image2
 			-var-file $(PACKER_VAR_FILE) \
 			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
 			$(PACKER_TEMPLATE_FILE)
+
+packer-init:
+	packer-init templates
