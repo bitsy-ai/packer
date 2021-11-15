@@ -1,3 +1,5 @@
 base_image_ext = ".tar.gz"
 playbook_file = "./playbooks/octoprint.yml"
 ansible_extra_vars = "vars/printnanny-arm64.ansiblevars.json"
+base_image_url = "file:dist/printnanny-base-bullseye-arm64.zip"
+base_image_checksum = "file:dist/sha256.checksum"

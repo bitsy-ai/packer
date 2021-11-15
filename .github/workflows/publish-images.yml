@@ -13,9 +13,9 @@ env:
   CDN_BASE_URL: https://cdn.print-nanny.com
 
 jobs:
-  ##
-  # begin generic image jobs
-  ##
+##
+# begin generic image jobs
+##
   build-generic-image:
     strategy:
       fail-fast: false
@@ -100,10 +100,10 @@ jobs:
           ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
 
-  ###
-  # begin printnanny base image jobs
-  ###
-  build-printnanny-base:
+###
+# begin printnanny base image jobs
+###
+  build-printnanny-os:
     needs: [build-generic-image]
     strategy:
       fail-fast: false
@@ -122,7 +122,7 @@ jobs:
           #   os: buster
           #   platform: debian
 
-          - image_name: printnanny-base-bullseye-arm64
+          - image_name: printnanny-os-bullseye-arm64
             base_image: generic-pi-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
@@ -144,3 +144,88 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
+###
+# begin printnanny octoprint jobs
+###
+  build-printnanny-octoprint:
+    needs: [build-generic-image, build-printnanny-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [  bullseye ]
+        arch: [ arm64 ]
+        platform: [ debian ]
+        include:
+          # uncomment + edit to build additional os, arch, platform variants
+          # - image_name: generic-pi-buster-arm64
+          #   base_image: 2021-05-07-raspios-buster-arm64
+          #   packer_template_file: templates/generic-pi.pkr.hcl
+          #   packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
+          #   ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+          #   arch: arm64
+          #   os: buster
+          #   platform: debian
+
+          - image_name: printnanny-os-octoprint-bullseye-arm64
+            base_image: printnanny-os-bullseye-arm64
+            template_file: templates/generic-pi.pkr.hcl
+            packer_var_file: vars/octoprint-pi-arm64.pkrvars.hcl
+            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+            arch: arm64
+            os: bullseye
+            platform: debian
+    outputs:
+      artifact: ${{ steps.build.outputs.artifact }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - id: build
+      uses: ./.github/workflows/scripts/build
+      with:
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        IMAGE_NAME: ${{ matrix.image_name }}
+        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
+
+  publish-printnanny-octoprint-nightly:
+    # github action inputs are always strings
+    environment: nightly
+    needs: [ build-generic-image, build-printnanny-os, build-printnanny-octoprint]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - printnanny-os-octoprint-bullseye-arm64
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - id: publish-nightly
+      uses: ./.github/workflows/scripts/publish-nightly
+      with:
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
+        IMAGE_NAME: ${{ matrix.image_name }}
+        ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
+        DEPLOY_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+    
+  publish-printnanny-octoprint-stable:
+    # comment to require manual approval before publishing
+    environment: stable
+    needs: [ build-printnanny-octoprint, publish-printnanny-octoprint-nightly ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - printnanny-os-octoprint-bullseye-arm64
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - id: publish-stable
+        uses: ./.github/workflows/scripts/publish-stable
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
