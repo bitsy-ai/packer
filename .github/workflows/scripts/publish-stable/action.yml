@@ -25,7 +25,6 @@ runs:
   - uses: actions/download-artifact@v2
     with:
       name: ${{ inputs.ARTIFACT }}
-      path: dist
   - name: Write deploy key
     shell: bash
     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
@@ -39,7 +38,7 @@ runs:
     shell: bash
     run: |
       ./tools/manifest-to-env.sh
-      . dist/${{ inputs.image_name }}.sh
+      . ${{ inputs.ARTIFACT }}/${{ inputs.image_name }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
