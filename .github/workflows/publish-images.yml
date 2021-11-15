@@ -117,17 +117,6 @@ jobs:
       with:
         name: ${{ matrix.base_image }}
         path: dist
-    - name: Create environment artifacts
-      id: base
-      shell: bash
-      run: |
-        ls dist/
-        . dist/${{ matrix.base_image }}/${{ matrix.base_image }}.sh
-        echo ::set-output name=image_stamp::"$IMAGE_STAMP"
-        echo ::set-output name=image_path::"$IMAGE_PATH"
-        echo ::set-output name=image_url::"$IMAGE_URL"
-        echo ::set-output name=checksum_url::"$CHECKSUM_URL"
-        echo ::set-output name=manifest_url::"$MANIFEST_URL"
     - id: build
       uses: ./.github/workflows/scripts/build
       with:
@@ -172,6 +161,10 @@ jobs:
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.base_image }}
+        path: dist
     - id: build
       uses: ./.github/workflows/scripts/build
       with:

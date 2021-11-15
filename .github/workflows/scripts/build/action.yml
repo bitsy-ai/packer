@@ -38,8 +38,6 @@ runs:
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
         RELEASE_CHANNEL=${{ inputs.RELEASE_CHANNEL }}
 
-      ./tools/manifest-to-env.sh
-      ls -ahl dist/
   - name: Create environment var files
     shell: bash
     run: |

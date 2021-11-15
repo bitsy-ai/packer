@@ -44,9 +44,11 @@ runs:
       name: ${{ inputs.IMAGE_NAME }}-env
       path: env
   - name: Upload to GCP_BUCKET
+    shell: bash
     run: |
       gsutil rsync -r dist/${{ inputs.image_name }} gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
   - name: Send Discord notification
+    shell: bash
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
     uses: Ilshidur/action-discord@master
