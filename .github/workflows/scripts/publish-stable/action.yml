@@ -56,7 +56,7 @@ runs:
       path: env
   - name: Upload to GCP_BUCKET
     run: |
-      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+      gsutil rsync -r dist/${{ inputs.ARTIFACT }} gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}

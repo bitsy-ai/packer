@@ -205,10 +205,9 @@ jobs:
     - id: publish-nightly
       uses: ./.github/workflows/scripts/publish-nightly
       with:
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
         ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
-        DEPLOY_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
   stable-printnanny-octoprint:
     # comment to require manual approval before publishing

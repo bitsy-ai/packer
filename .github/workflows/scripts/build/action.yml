@@ -21,7 +21,7 @@ inputs:
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
-    value: ${{ inputs.IMAGE_NAME }}-dist
+    value: ${{ inputs.IMAGE_NAME }}
 runs:
   using: "composite"
   steps:
@@ -40,5 +40,6 @@ runs:
       ls -ahl dist/
   - uses: actions/upload-artifact@v2
     with:
-      name: ${{ inputs.IMAGE_NAME }}-dist
+      name: ${{ inputs.IMAGE_NAME }}
       path: dist/
+  
