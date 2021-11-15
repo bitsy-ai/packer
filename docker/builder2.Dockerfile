@@ -1,4 +1,4 @@
-FROM bitsyai/packer-builder-arm
+FROM mkaczanowski/packer-builder-arm
 
 RUN apt-get update -qq \
     && apt-get install -qqy --no-install-recommends \

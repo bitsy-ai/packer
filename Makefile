@@ -40,10 +40,7 @@ dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
 			$(PACKER_TEMPLATE_FILE)
 
-packer-init:
-	packer init templates
-
-packer-build: $(DIST_DIR) docker-builder-image2 packer-init
+packer-build: $(DIST_DIR) docker-builder-image2
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		--env-file $(ENV_FILE) \
