@@ -43,7 +43,7 @@ jobs:
             os: bullseye
             platform: debian
     outputs:
-      artifact: ${{ steps.build.outputs.artifact }}
+      artifact: ${{ matrix.image_name }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
@@ -74,10 +74,8 @@ jobs:
     - id: publish-nightly
       uses: ./.github/workflows/scripts/publish-nightly
       with:
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ARTIFACT:  ${{ needs.jobs.build-generic-image.outputs.artifact }}
-        DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     
   publish-generic-stable:
     # comment to require manual approval before publishing
@@ -97,7 +95,6 @@ jobs:
         uses: ./.github/workflows/scripts/publish-stable
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
-          ARTIFACT:  ${{ needs.jobs.build-generic-image.outputs.artifact }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
 
 ###
@@ -206,7 +203,6 @@ jobs:
       uses: ./.github/workflows/scripts/publish-nightly
       with:
         IMAGE_NAME: ${{ matrix.image_name }}
-        ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
   stable-printnanny-octoprint:
@@ -226,5 +222,4 @@ jobs:
         uses: ./.github/workflows/scripts/publish-stable
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
-          ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
