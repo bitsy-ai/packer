@@ -104,7 +104,7 @@ jobs:
   # begin printnanny base image jobs
   ###
   publish-printnanny-base-image-nightly:
-    needs: [generic-base-image]
+    needs: [build-generic-image]
     strategy:
       fail-fast: false
       matrix:
