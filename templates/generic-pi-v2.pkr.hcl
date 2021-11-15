@@ -65,6 +65,11 @@ variable "image_mount_path" {
   default = "/mnt/raspbian"
 }
 
+variable "qumu_binary" {
+  type = string
+  default = "qemu-aarch64-static"
+}
+
 source "arm-image" "base" {
   image_mounts = ["/boot", "/"]
   iso_checksum = "${var.base_image_checksum}"
@@ -72,6 +77,7 @@ source "arm-image" "base" {
   output_filename = "${var.output_directory}/${var.image_name}.img"
   mount_path = "${var.image_mount_path}"
   target_image_size = var.target_image_size
+  qumu_binary = var.qumu_binary
 }
 
 
