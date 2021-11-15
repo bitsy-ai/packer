@@ -76,7 +76,7 @@ jobs:
       with:
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
+        ARTIFACT:  ${{ needs.jobs.build-generic-image.outputs.artifact }}
         DEPLOY_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
     
   publish-generic-stable:
@@ -97,7 +97,7 @@ jobs:
         uses: ./.github/workflows/scripts/publish-stable
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
-          ARTIFACT:  ${{ needs.jobs.generic-base-image.outputs.artifact }}
+          ARTIFACT:  ${{ needs.jobs.build-generic-image.outputs.artifact }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEPLOYS_PRIVATE }}
 
 ###
