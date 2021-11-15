@@ -37,6 +37,7 @@ runs:
         IMAGE_NAME=${{ inputs.IMAGE_NAME }} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
         ANSIBLE_EXTRA_VARS=${{ inputs.ANSIBLE_EXTRA_VARS }}
+      ./tools/manifest-to-env.sh
       ls -ahl dist/
   - uses: actions/upload-artifact@v2
     with:

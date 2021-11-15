@@ -27,7 +27,7 @@ runs:
     id: packer
     shell: bash
     run: |
-      ./tools/manifest-to-env.sh
+      ls dist/
       . dist/${{ inputs.image_name }}/${{ inputs.image_name }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_path::"$IMAGE_PATH"
