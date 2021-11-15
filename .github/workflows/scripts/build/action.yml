@@ -25,6 +25,20 @@ outputs:
 runs:
   using: "composite"
   steps:
+  - name: Install Packer
+    shell: bash
+    run: |
+      curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+      sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+      sudo apt-get update && sudo apt-get install packer
+  - name: Install Qemu
+    shell: bash
+    run: |
+      apt-get install qemu qemu-user-static binfmt-support
+  - name: Init Packer plugins
+    shell: bash
+    run: |
+      packer init
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}

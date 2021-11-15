@@ -1,4 +1,11 @@
-
+packer {
+  required_plugins {
+    arm-image = {
+      version = ">= v0.2.5"
+      source = "github.com/solo-io/arm-image"
+    }
+  }
+}
 locals {
   DATESTAMP = formatdate("YYYY-MM-DD-hhmm", timestamp())
 }

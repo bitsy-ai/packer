@@ -40,13 +40,8 @@ dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
 			$(PACKER_TEMPLATE_FILE)
 
-packer-build: $(DIST_DIR) docker-builder-image2
-	docker run \
-	--rm \
-	--privileged \
-	-v /dev:/dev \
-	-v ${PWD}:/build \
-	bitsyai/packer-plugin-arm-image build \
+packer-build: $(DIST_DIR)
+	packer build \
 		-var "image_name=$(IMAGE_NAME)" \
 		-var-file $(PACKER_VAR_FILE) \
 		templates/generic-pi-v2.pkr.hcl
