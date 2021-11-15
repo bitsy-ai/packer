@@ -189,10 +189,10 @@ jobs:
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
 
-  publish-printnanny-octoprint-nightly:
+  nightly-printnanny-octoprint:
     # github action inputs are always strings
     environment: nightly
-    needs: [ build-generic-image, build-printnanny-os, build-printnanny-octoprint]
+    needs: [ build-printnanny-octoprint]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -210,10 +210,10 @@ jobs:
         ARTIFACT:  ${{ needs.jobs.build-printnanny-octoprint.outputs.artifact }}
         DEPLOY_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
-  publish-printnanny-octoprint-stable:
+  stable-printnanny-octoprint:
     # comment to require manual approval before publishing
     environment: stable
-    needs: [ build-printnanny-octoprint, publish-printnanny-octoprint-nightly ]
+    needs: [ build-printnanny-octoprint, nightly-printnanny-octoprint ]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
