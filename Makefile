@@ -22,11 +22,11 @@ vars/printnanny-pi-arm64.ansiblevars.json: $(DIST_DIR)
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
-	docker build -t bitsyai/packer-plugin-arm-image -f docker/builder.Dockerfile docker
+	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 
 docker-builder-image2:
 	DOCKER_BUILDKIT=1 \
-	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder2.Dockerfile docker
+	docker build -t bitsyai/packer-plugin-arm-image -f docker/builder2.Dockerfile docker
 
 dist/$(IMAGE_NAME).img: $(DIST_DIR) docker-builder-image
 	docker run \
@@ -46,7 +46,7 @@ packer-build: $(DIST_DIR) docker-builder-image2
 	--privileged \
 	-v /dev:/dev \
 	-v ${PWD}:/build \
-	bitsyai/packer-builder-arm-ansible build \
+	bitsyai/packer-plugin-arm-image build \
 		-var "image_name=$(IMAGE_NAME)" \
 		-var-file $(PACKER_VAR_FILE) \
 		templates/generic-pi-v2.pkr.hcl
@@ -54,6 +54,15 @@ packer-build: $(DIST_DIR) docker-builder-image2
 validate: $(DIST_DIR) docker-builder-image
 	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible validate \
+			-var "release_channel=$(RELEASE_CHANNEL)" \
+			-var "image_name=$(IMAGE_NAME)" \
+			-var-file $(PACKER_VAR_FILE) \
+			-var "ansible_extra_vars=$(ANSIBLE_EXTRA_VARS)" \
+			$(PACKER_TEMPLATE_FILE)
+
+validate2: $(DIST_DIR) docker-builder-image2
+	docker run --rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-plugin-arm-image validate \
 			-var "release_channel=$(RELEASE_CHANNEL)" \
 			-var "image_name=$(IMAGE_NAME)" \
 			-var-file $(PACKER_VAR_FILE) \
