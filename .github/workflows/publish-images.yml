@@ -40,10 +40,11 @@ jobs:
       uses: actions/checkout@v2
     - id: build
       uses: ./.github/workflows/scripts/build
+      env: 
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         PACKER_ENV_FILE: ${{ matrix.PACKER_ENV_FILE }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
@@ -117,10 +118,11 @@ jobs:
         path: dist
     - id: build
       uses: ./.github/workflows/scripts/build
+      env: 
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         PACKER_ENV_FILE: dist/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
@@ -165,10 +167,11 @@ jobs:
         path: dist
     - id: build
       uses: ./.github/workflows/scripts/build
+      env: 
+        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
         PACKER_ENV_FILE: dist/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
