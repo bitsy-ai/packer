@@ -143,7 +143,7 @@ jobs:
   stable-printnanny-os:
     # comment to require manual approval before publishing
     environment: stable
-    needs: [ build-printnanny-octoprint, nightly-printnanny-os ]
+    needs: [ nightly-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
