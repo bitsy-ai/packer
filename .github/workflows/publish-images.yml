@@ -1,10 +1,10 @@
 on:
   workflow_dispatch:
-    inputs:
-      RELEASE_CHANNEL:
-        description: 'Publish image to release channel: (nightly, stable)'     
-        required: true
-        default: 'nightly'
+    # inputs:
+    #   RELEASE_CHANNEL:
+    #     description: 'Publish image to release channel: (nightly, stable)'     
+    #     required: true
+    #     default: 'nightly'
         
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
@@ -40,8 +40,6 @@ jobs:
       uses: actions/checkout@v2
     - id: build
       uses: ./.github/workflows/scripts/build
-      env: 
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
@@ -118,8 +116,6 @@ jobs:
         path: dist
     - id: build
       uses: ./.github/workflows/scripts/build
-      env: 
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
@@ -167,8 +163,6 @@ jobs:
         path: dist
     - id: build
       uses: ./.github/workflows/scripts/build
-      env: 
-        RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
