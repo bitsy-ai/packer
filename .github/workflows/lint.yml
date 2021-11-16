@@ -12,11 +12,6 @@ jobs:
           - generic-pi-buster-arm64
           - generic-pi-bullseye-arm64
         include:
-          - image: generic-pi-buster-arm64
-            template_file: templates/generic-pi.pkr.hcl
-            packer_var_file: vars/generic-pi-buster-arm64.pkrvars.hcl
-            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-
           - image: generic-pi-bullseye-arm64
             template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
