@@ -1,5 +1,6 @@
 RELEASE_CHANNEL ?= nightly
 PACKER_EXTRA_ARGS ?=
+RELEASE_URL ?= https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHANNEL)/latest
 PACKER_VAR_FILE ?= vars/generic-pi-bullseye-arm64.pkrvars.hcl
 PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 DIST_DIR ?= dist
