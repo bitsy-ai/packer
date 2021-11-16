@@ -4,27 +4,16 @@ inputs:
   DISCORD_WEBHOOK:
     description: 'Publish using Discord webhook'
     required: false
-  ARTIFACT:
-    description: 'Name of artifact to publish'     
-    required: true
-    default: 'nightly'
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
 
-outputs:
-  artifact:
-    description: "Reference to artifact name to be used in subsequent steps"
-    value: ${{ inputs.IMAGE_NAME }}-dist
-  env:
-    description: "Reference to env file to be used in subsequent steps"
-    value: ${{ inputs.IMAGE_NAME }}-env
 runs:
   using: "composite"
   steps:
   - uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.ARTIFACT }}
+      name: ${{ inputs.image_name }}
       path: dist
   - name: Write deploy key
     shell: bash
@@ -38,23 +27,17 @@ runs:
     id: packer
     shell: bash
     run: |
-      ./tools/manifest-to-env.sh
+      ls dist/
       . dist/${{ inputs.image_name }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
-  # retain published urls as automatic packer vars
-  # from: https://www.packer.io/guides/hcl/variables
-  # Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line.
-  # intended for use with: https://github.com/dawidd6/action-download-artifact
-  # packer-builder-arm does not support file:// uri, so published cdn urls must be passed as packer vars for next workflow stage
-  - uses: actions/upload-artifact@v2
-    with:
-      name: ${{ inputs.IMAGE_NAME }}-env
-      path: env
+
   - name: Upload to GCP_BUCKET
+    shell: bash
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
   - name: Send Discord notification

@@ -11,3 +11,4 @@ manifest.json
 
 dist/
 env/
+output-arm-image/

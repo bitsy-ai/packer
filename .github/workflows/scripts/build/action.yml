@@ -1,15 +1,11 @@
 name: 'Build image'
 description: 'Build image from Packer template'
 inputs:
-  RELEASE_CHANNEL:
-    description: 'Publish image to release channel: (nightly, stable)'     
-    required: true
-    default: 'nightly'
   IMAGE_NAME:
-    description: 'Name of image to build'
+    description: 'Name of image'
     required: true
   ANSIBLE_EXTRA_VARS:
-    description: 'Path to vars/*.ansiblevars.{yml,json} file to use/generate'
+    description: 'Ensure ansible extra vars created'
     required: true
   PACKER_VAR_FILE:
     description: 'Path to vars/*.pkrvars.hcl file'
@@ -17,11 +13,13 @@ inputs:
   PACKER_TEMPLATE_FILE:
     description: 'Path to templates/*.hcl template to build'
     required: true
-
+  PACKER_ENV_FILE:
+    description: 'Path to .pkr.env file (passed via docker run --env-file)'
+    required: true
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
-    value: ${{ inputs.IMAGE_NAME }}-dist
+    value: ${{ inputs.IMAGE_NAME }}
 runs:
   using: "composite"
   steps:
@@ -29,16 +27,19 @@ runs:
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Make image from Packer template
-    id: packer
     shell: bash
     run: |
-      make dist/${{ inputs.IMAGE_NAME }}.img \
+      make packer-build \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
-        IMAGE_NAME=${{ inputs.IMAGE_NAME }} \
-        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }} \
-        ANSIBLE_EXTRA_VARS=${{ inputs.ANSIBLE_EXTRA_VARS }}
+        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
+
+  - name: Create environment var files
+    shell: bash
+    run: |
+      ./tools/manifest-to-env.sh
       ls -ahl dist/
   - uses: actions/upload-artifact@v2
     with:
-      name: ${{ inputs.IMAGE_NAME }}-dist
+      name: ${{ inputs.IMAGE_NAME }}
       path: dist/
+  

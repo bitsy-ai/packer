@@ -1,2 +1,3 @@
 ---
-- include: bitsyai.printnanny.packer
+- ansible.builtin.import_playbook: bitsyai.printnanny.packer
+- ansible.builtin.import_playbook: bitsyai.printnanny.octoprint
