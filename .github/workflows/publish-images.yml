@@ -44,7 +44,7 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
-        PACKER_ENV_FILE: ${{ inputs.PACKER_ENV_FILE }}
+        PACKER_ENV_FILE: ${{ matrix.PACKER_ENV_FILE }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
 
@@ -121,7 +121,7 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
-        PACKER_ENV_FILE: dist/${{ matrix.base_image }}/${{ matrix.base_image }}.pkr.env
+        PACKER_ENV_FILE: dist/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
 ###
@@ -169,7 +169,7 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
         RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
-        PACKER_ENV_FILE: dist/${{ matrix.base_image }}/${{ matrix.base_image }}.pkr.env
+        PACKER_ENV_FILE: dist/${{ matrix.base_image }}.pkr.env
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
 
