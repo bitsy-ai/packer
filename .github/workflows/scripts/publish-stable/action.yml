@@ -29,31 +29,24 @@ runs:
     run: |
       ls dist/
       . dist/${{ inputs.image_name }}.sh
+      echo ::set-output name=image_name::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
-  # retain published urls as automatic packer vars
-  # from: https://www.packer.io/guides/hcl/variables
-  # Packer will automatically load any var file that matches the name *.auto.pkrvars.hcl, without the need to pass the file via the command line.
-  # intended for use with: https://github.com/dawidd6/action-download-artifact
-  # packer-builder-arm does not support file:// uri, so published cdn urls must be passed as packer vars for next workflow stage
-  - uses: actions/upload-artifact@v2
-    with:
-      name: ${{ inputs.IMAGE_NAME }}-env
-      path: env
+
   - name: Upload to GCP_BUCKET
     shell: bash
     run: |
-      gsutil rsync -r dist/${{ inputs.image_name }} gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
     uses: Ilshidur/action-discord@master
     with:
       args: |
-        🚀 Published `${{ steps.packer.outputs.image_name }}`
+        🚀 Published `${{ steps.packer.outputs.image_stamp }}`
         [Download](${{ steps.packer.outputs.image_url }})
         [Manifest](${{ steps.packer.outputs.manifest_url }})
         [Checksum](${{ steps.packer.outputs.checksum_url }})

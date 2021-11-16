@@ -28,7 +28,7 @@ runs:
   steps:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
-    run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
+    run: make ${{ inputs.ANSIBLE_EXTRA_VARS }} RELEASE_CHANNEL=${{ inputs.RELEASE_CHANNEL }}
   - name: Make image from Packer template
     shell: bash
     run: |

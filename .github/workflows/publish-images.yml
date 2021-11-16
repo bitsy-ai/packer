@@ -11,8 +11,6 @@ env:
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
   GCP_BUCKET: print-nanny-cdn
   CDN_BASE_URL: https://cdn.print-nanny.com
-  RELEASE_CHANNEL: ${{ inputs.RELEASE_CHANNEL }}
-  PKR_VAR_release_channel: ${{ inputs.RELEASE_CHANNEL }}
 
 jobs:
 ##
