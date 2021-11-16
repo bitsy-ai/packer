@@ -30,7 +30,6 @@ runs:
     shell: bash
     run: |
       make packer-build \
-        PACKER_ENV_FILE=${{ inputs.PACKER_ENV_FILE }} \
         PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
         PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
 
