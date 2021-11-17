@@ -13,9 +13,6 @@ inputs:
   PACKER_TEMPLATE_FILE:
     description: 'Path to templates/*.hcl template to build'
     required: true
-  PACKER_ENV_FILE:
-    description: 'Path to .pkr.env file (passed via docker run --env-file)'
-    required: true
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"

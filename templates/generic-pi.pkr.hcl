@@ -104,8 +104,6 @@ build {
     post-processor "compress" {
       output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
       format = ".tar.gz"
-      # keep the img artifact so checksum is generated for both .img and .tar.gz files
-      keep_input_artifact = true
     }
     # register tarball as new artiface
     post-processor "artifice" {
