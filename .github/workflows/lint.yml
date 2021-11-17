@@ -9,10 +9,5 @@ jobs:
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
-    - name: Ensure ansible variables file generated
-      run: make ${{ matrix.ansible_extra_vars }}
     - run: |
-        make validate \
-          IMAGE_NAME=${{ matrix.image_name }} \
-          PACKER_TEMPLATE_FILE=${{ matrix.packer_template_file }} \
-          ANSIBLE_EXTRA_VARS=${{ matrix.ansible_extra_vars }}
+        make validate
