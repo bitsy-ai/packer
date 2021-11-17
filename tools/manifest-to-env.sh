@@ -28,10 +28,3 @@ EOF
 
 echo "Created $OUTFILE"
 cat $OUTFILE
-
-OUTFILE="$OUT_DIR/$IMAGE_NAME.pkr.env"
-cat << EOF > $OUTFILE
-PKR_VAR_base_image_stamp="$IMAGE_STAMP"
-PKR_VAR_base_image_url="file:$OUT_DIR/$IMAGE_NAME/$IMAGE_FILENAME
-PKR_VAR_base_image_checksum="file:$OUT_DIR/$IMAGE_NAME/sha256.checksum"
-EOF

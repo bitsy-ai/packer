@@ -4,7 +4,6 @@ RELEASE_URL ?= https://webapp.sandbox.print-nanny.com/api/releases/$(RELEASE_CHA
 PACKER_VAR_FILE ?= vars/generic-pi-bullseye-arm64.pkrvars.hcl
 PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 DIST_DIR ?= dist
-PACKER_ENV_FILE ?= vars/generic.env
 
 .PHONY: clean docker-builder-image validate packer-build packer-init
 
@@ -25,7 +24,6 @@ docker-builder-image:
 packer-build: $(DIST_DIR) docker-builder-image
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		--env-file $(PACKER_ENV_FILE) \
 		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui $(PACKER_EXTRA_ARGS) \
 			-var-file "$(PACKER_VAR_FILE)" \
