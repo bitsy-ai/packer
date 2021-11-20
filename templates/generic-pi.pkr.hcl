@@ -89,9 +89,10 @@ build {
   sources = ["source.arm.base_image"]
   name = "ansible"
 
-  provisioner "file" {
-    content = "${local.DATESTAMP}-${var.image_name}"
-    destination = "/boot/image_version.txt"
+  provisioner "shell" {
+    inline = [
+      "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt"
+    ]
   }
 
   provisioner "ansible" {
