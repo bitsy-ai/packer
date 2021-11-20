@@ -89,6 +89,11 @@ build {
   sources = ["source.arm.base_image"]
   name = "ansible"
 
+  provisioner "file" {
+    content = "${local.DATESTAMP}-${var.image_name}"
+    destination = "/boot/image_version.txt"
+  }
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
