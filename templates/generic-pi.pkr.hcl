@@ -93,7 +93,7 @@ build {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    inventory_file_template = "packer ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
   }
