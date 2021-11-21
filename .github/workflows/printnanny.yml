@@ -24,7 +24,7 @@ jobs:
         platform: [ debian ]
         include:
           - image_name: printnanny-os-bullseye-arm64
-            ansible_extra_vars: vars/printnanny-pi-arm64.ansiblevars.json
+            ansible_extra_vars: vars/generic-pi.pkr.hcl
             packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
             arch: arm64
