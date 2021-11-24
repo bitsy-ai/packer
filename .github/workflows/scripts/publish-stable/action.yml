@@ -46,7 +46,7 @@ runs:
     uses: Ilshidur/action-discord@master
     with:
       args: |
-        🚀 Published `${{ steps.packer.outputs.image_stamp }}`
+        💜 New **Print Nanny OS** available `${{ steps.packer.outputs.image_stamp }}`
         [Download](${{ steps.packer.outputs.image_url }})
         [Manifest](${{ steps.packer.outputs.manifest_url }})
         [Checksum](${{ steps.packer.outputs.checksum_url }})
