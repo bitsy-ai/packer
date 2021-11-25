@@ -1,2 +1,2 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.rpi.packer
+- ansible.builtin.import_playbook: bitsyai.rpi.setup
