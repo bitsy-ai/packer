@@ -3,5 +3,5 @@ base_image_url = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios
 base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip.sha256"
 playbook_file = "./playbooks/printnanny.yml"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
-base_image_ext = ".tar.gz"
+base_image_ext = ".zip"
 image_name = "printnanny-os-bullseye-arm64"
