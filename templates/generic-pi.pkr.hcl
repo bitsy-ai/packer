@@ -101,7 +101,7 @@ build {
       "sudo reboot"
     ]
     expect_disconnect = true
-    pause_after = 10
+    pause_after = "10s"
   }
 
   provisioner "ansible" {
