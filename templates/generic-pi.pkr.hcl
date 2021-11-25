@@ -95,6 +95,15 @@ build {
     ]
   }
 
+  provisioner "shell" {
+    inline = [
+      "sudo apt-get update && sudo apt-get upgrade",
+      "sudo reboot"
+    ]
+    expect_disconnect = true
+    pause_after = 10
+  }
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
