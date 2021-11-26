@@ -3,6 +3,6 @@ base_image_url = "https://cdn.print-nanny.com/releases/2021-10-30-raspios-bullse
 base_image_checksum = "https://cdn.print-nanny.com/releases/2021-10-30-raspios-bullseye-slim-arm64/2021-11-26-2158-2021-10-30-raspios-bullseye-slim-arm64/sha256.checksum"
 playbook_file = "./playbooks/printnanny.yml"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
-base_image_ext = ".zip"
+base_image_ext = ".tar.gz"
 image_name = "printnanny-os-bullseye-arm64"
 image_size = "3.4G"
