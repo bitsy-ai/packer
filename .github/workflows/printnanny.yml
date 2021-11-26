@@ -1,3 +1,4 @@
+name: Print Nanny OS
 on:
   workflow_dispatch:
     inputs:
