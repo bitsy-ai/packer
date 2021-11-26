@@ -95,16 +95,6 @@ build {
     ]
   }
 
-  provisioner "shell" {
-    inline = [
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
-      "sudo reboot"
-    ]
-    expect_disconnect = true
-    pause_after = "10s"
-  }
-
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
@@ -113,6 +103,16 @@ build {
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
+  }
+  
+  provisioner "shell" {
+    inline = [
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
+      "sudo reboot"
+    ]
+    expect_disconnect = true
+    pause_after = "10s"
   }
 
   post-processors {

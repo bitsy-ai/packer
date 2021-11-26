@@ -19,7 +19,7 @@ jobs:
         arch: [ arm64 ]
         platform: [ debian ]
         include:
-          - image_name: generic-pi-bullseye-arm64
+          - image_name: 2021-10-30-raspios-bullseye-slim-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
@@ -39,37 +39,17 @@ jobs:
         IMAGE_NAME: ${{ matrix.image_name }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
-
-
-  publish-generic-nightly:
-    # github action inputs are always strings
-    environment: nightly
-    needs: [ build-generic-image]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        image_name:
-          - generic-pi-bullseye-arm64
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - id: publish-nightly
-      uses: ./.github/workflows/scripts/publish-nightly
-      with:
-        IMAGE_NAME: ${{ matrix.image_name }}
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK  }}
     
   publish-generic-stable:
     # comment to require manual approval before publishing
     # environment: stable
-    needs: [build-generic-image, publish-generic-nightly]
+    needs: [build-generic-image]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         image_name:
-          - generic-pi-bullseye-arm64
+          - 2021-10-30-raspios-bullseye-slim-arm64
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
@@ -77,4 +57,4 @@ jobs:
         uses: ./.github/workflows/scripts/publish-stable
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
-          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
