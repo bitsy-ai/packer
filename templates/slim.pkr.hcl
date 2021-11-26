@@ -98,7 +98,6 @@ build {
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
-        "--tags setup"
     ]
     inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
