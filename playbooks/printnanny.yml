@@ -1,3 +1,15 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.printnanny.setup
-- ansible.builtin.import_playbook: bitsyai.printnanny.octoprint
+- hosts: default
+  tasks:
+    - name: Slim image
+      ansible.builtin.import_playbook: bitsyai.printnanny.setup
+      tags:
+        - slim
+    - name: Setup playbook
+      ansible.builtin.import_playbook: bitsyai.printnanny.setup
+      tags:
+        - setup
+    - name: Setup OctoPrint
+      ansible.builtin.import_playbook: bitsyai.printnanny.octoprint
+      tags:
+        - setup
