@@ -1,4 +1,6 @@
 ---
-- ansible.builtin.import_role:
-  name: bitsyai.rpi.slim
-  tasks_from: slim
+- hosts: default
+  tasks:
+  - ansible.builtin.import_role:
+      name: bitsyai.rpi.setup
+      tasks_from: slim
