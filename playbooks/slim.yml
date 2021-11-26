@@ -1,0 +1,7 @@
+---
+- hosts: default
+  tasks:
+    - name: Slim image
+      ansible.builtin.import_playbook: bitsyai.printnanny.setup
+      tags:
+        - slim
