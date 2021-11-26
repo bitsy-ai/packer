@@ -97,7 +97,8 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo apt-get update && sudo apt-get dist-upgrade",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
       "sudo reboot"
     ]
     expect_disconnect = true
