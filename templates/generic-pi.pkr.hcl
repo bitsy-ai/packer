@@ -44,7 +44,7 @@ variable "playbook_file" {
 
 variable "image_size" {
     type = string
-    default = "6G"
+    default = "5G"
 }
 
 source "arm" "base_image" {
@@ -54,7 +54,7 @@ source "arm" "base_image" {
   file_urls             = [
     "${var.base_image_url}"
   ]
-  image_build_method    = "new"
+  image_build_method    = "resize"
   image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
