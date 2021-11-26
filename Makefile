@@ -19,7 +19,7 @@ docker-builder-image:
 packer-build: $(DIST_DIR) docker-builder-image
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible build -debug \
+		bitsyai/packer-builder-arm-ansible build \
 			-timestamp-ui $(PACKER_EXTRA_ARGS) \
 			-var-file "$(PACKER_VAR_FILE)" \
 			-var "release_channel=$(RELEASE_CHANNEL)" \
