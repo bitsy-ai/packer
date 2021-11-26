@@ -1,6 +1,6 @@
 base_image_stamp = "2021-10-30-raspios-bullseye-arm64"
-base_image_url = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip"
-base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip.sha256"
+base_image_url = "https://cdn.print-nanny.com/releases/2021-10-30-raspios-bullseye-slim-arm64/2021-11-26-2158-2021-10-30-raspios-bullseye-slim-arm64/2021-11-26-2158-2021-10-30-raspios-bullseye-slim-arm64.tar.gz"
+base_image_checksum = "https://cdn.print-nanny.com/releases/2021-10-30-raspios-bullseye-slim-arm64/2021-11-26-2158-2021-10-30-raspios-bullseye-slim-arm64/sha256.checksum"
 playbook_file = "./playbooks/printnanny.yml"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
 base_image_ext = ".zip"
