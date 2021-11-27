@@ -49,6 +49,7 @@ variable "image_size" {
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
+  image_build_method    = "resize"
 
   image_partitions {
     filesystem   = "vfat"
@@ -69,7 +70,15 @@ source "arm" "base_image" {
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
-  
+  image_size = "${var.image_size}"
+  image_build_method    = "resize"
+  image_path = "dist/${var.image_name}.img"
+  image_mount_path = "/tmp/rpi_chroot" 
+  file_checksum_url     = "${var.base_image_checksum}"
+  file_target_extension = "${var.base_image_ext}"
+  file_urls             = [
+        "${var.base_image_url}"
+    ]
 }
 
 # a build block invokes sources and runs provisioning steps on them. The
@@ -77,20 +86,7 @@ source "arm" "base_image" {
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 
 build {
-  name = "slim-resized"
-
-  // image is sized down in later builds tep
-  source "source.arm.base_image" {
-    image_size = "${var.image_size}"
-    image_build_method    = "resized"
-    image_path = "dist/${var.image_name}.img"
-    image_mount_path = "/tmp/rpi_chroot_step2"
-    file_checksum_url     = "${var.base_image_checksum}"
-    file_target_extension = "${var.base_image_ext}"
-    file_urls             = [
-      "${var.base_image_url}"
-    ]
-  }
+  sources = ["source.arm.base_image"]
 
   provisioner "shell" {
     inline = [
