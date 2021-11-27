@@ -89,12 +89,15 @@ build {
   sources = ["source.arm.base_image"]
   name = "ansible"
 
+  // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
+  // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     inline = [
-      "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt"
+      "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get install libfuse2"
     ]
   }
-
   provisioner "shell" {
     inline = [
       "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
