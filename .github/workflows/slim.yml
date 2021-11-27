@@ -45,22 +45,7 @@ jobs:
         IMAGE_NAME: ${{ matrix.image_name }}
         PACKER_VAR_FILE: vars/slim-bullseye-arm64.pkrvars.hcl
         PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
-    
-  publish-generic-stable:
-    # comment to require manual approval before publishing
-    # environment: stable
-    needs: [build-generic-image]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        image_name:
-          - raspios-bullseye-slim-arm64
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v2
-      - id: publish-stable
-        uses: ./.github/workflows/scripts/publish-stable
-        with:
-          IMAGE_NAME: ${{ matrix.image_name }}
-          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+    - id: publish-stable
+      uses: ./.github/workflows/scripts/publish-stable
+      with:
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
