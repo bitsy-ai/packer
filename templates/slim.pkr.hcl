@@ -49,8 +49,6 @@ variable "image_size" {
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
-  image_build_method    = "resize"
-
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
