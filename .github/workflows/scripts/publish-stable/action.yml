@@ -21,8 +21,6 @@ runs:
   - name: Activate Service Account
     shell: bash
     run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-  # packer-builder-arm does not support file:// URI
-  # so downstream builds must consume https://cdn url
   - name: Create environment artifacts
     id: packer
     shell: bash

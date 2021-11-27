@@ -4,5 +4,5 @@ base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/ra
 base_image_ext = "zip"
 playbook_file = "./playbooks/slim.yml"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
-image_name = "raspios-bullseye-slim-arm64"
-image_size = "6.4G"
+image_name = "raspios-bullseye-base-arm64"
+image_size = "3.2G"

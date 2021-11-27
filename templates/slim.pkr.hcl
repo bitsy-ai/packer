@@ -49,13 +49,6 @@ variable "image_size" {
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
-  file_checksum_url     = "${var.base_image_checksum}"
-  file_target_extension = "${var.base_image_ext}"
-  file_urls             = [
-    "${var.base_image_url}"
-  ]
-  image_build_method    = "resize"
-  image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
     filesystem   = "vfat"
@@ -73,8 +66,6 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/${local.DATESTAMP}-${var.image_name}.img"
-  image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
@@ -86,30 +77,27 @@ source "arm" "base_image" {
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 
 build {
-  sources = ["source.arm.base_image"]
-  name = "ansible"
+  name = "slim-base"
+
+  // image is sized down in later builds tep
+  source "source.arm.base_image" {
+    image_size = "5GB"
+    image_build_method    = "reuse"
+    image_path = "build/${local.DATESTAMP}-${var.image_name}.img"
+    image_mount_path = "/tmp/rpi_chroot_step1"
+    file_checksum_url     = "${var.base_image_checksum}"
+    file_target_extension = "${var.base_image_ext}"
+    file_urls             = [
+      "${var.base_image_url}"
+    ]
+  }
 
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
+  // do full dist-upgrade first
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     inline = [
       "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get install libfuse2"
-    ]
-  }
-
-  provisioner "ansible" {
-    extra_arguments = [
-        "--extra-vars", "@${var.ansible_extra_vars}",
-    ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
-    galaxy_file     = "./playbooks/requirements.yml"
-    playbook_file   = "${var.playbook_file}"
-  }
-  
-  provisioner "shell" {
-    inline = [
       "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
       "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
       "sudo reboot"
@@ -118,42 +106,43 @@ build {
     pause_after = "10s"
   }
 
+  provisioner "ansible" {
+    extra_arguments = [
+        "--extra-vars", "@${var.ansible_extra_vars}",
+    ]
+    inventory_file_template = "default ansible_host=/tmp/rpi_chroot_step1 ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    galaxy_file     = "./playbooks/requirements.yml"
+    playbook_file   = "${var.playbook_file}"
+  }
+
   post-processors {
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      format = ".tar.gz"
+    post-processor "checksum" {
+        checksum_types = ["sha256"]
+        output = "build/{{.ChecksumType}}.checksum"
     }
-    # register tarball as new artiface
-    post-processor "artifice" {
-      files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      ]
-    }
+  }
+}
+
+build {
+  name = "slim-resized"
+
+  // image is sized down in later builds tep
+  source "source.arm.base_image" {
+    image_size = "${var.image_size}"
+    image_build_method    = "resize"
+    image_path = "dist/${local.DATESTAMP}-${var.image_name}.img"
+    image_mount_path = "/tmp/rpi_chroot_step2"
+    file_checksum_url     = "file:build/sha256.checksum"
+    file_target_extension = ".img"
+    file_urls             = [
+      "build/${local.DATESTAMP}-${var.image_name}.img"
+    ]
+  }
+
+  post-processors {
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "dist/{{.ChecksumType}}.checksum"
     }
-    post-processor "manifest" {
-        output     = "dist/manifest.json"
-        strip_path = true
-        strip_time = true
-        custom_data = {
-          ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-          image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
-          image_stamp = "${local.DATESTAMP}-${var.image_name}"
-          image_name = "${var.image_name}"
-          release_channel = "${var.release_channel}"
-          datestamp = "${local.DATESTAMP}"
-          base_image_stamp = "${var.base_image_stamp}"
-          base_image_manifest_url = "${var.base_image_manifest_url}"
-          base_image_checksum = "${var.base_image_checksum}"
-          base_image_ext = "${var.base_image_ext}"
-          base_image_url = "${var.base_image_url}"
-        }
-      }
-    }
+  }
 }
-
