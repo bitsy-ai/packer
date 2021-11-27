@@ -44,7 +44,7 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
         PACKER_VAR_FILE: vars/slim-bullseye-arm64.pkrvars.hcl
-        PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
+        PACKER_TEMPLATE_FILE: templates/slim.pkr.hcl
     - id: publish-stable
       uses: ./.github/workflows/scripts/publish-stable
       with:
