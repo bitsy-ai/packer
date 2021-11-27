@@ -20,10 +20,8 @@ jobs:
         arch: [ arm64 ]
         platform: [ debian ]
         include:
-          - image_name: 2021-10-30-raspios-bullseye-slim-arm64
+          - image_name: raspios-bullseye-slim-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-            packer_template_file: templates/slim.pkr.hcl
-            packer_var_file: vars/generic-pi-bullseye-arm64.pkrvars.hcl
             arch: arm64
             os: bullseye
             platform: debian
@@ -33,29 +31,21 @@ jobs:
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
-    - id: build
+    - id: base
       uses: ./.github/workflows/scripts/build
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
-        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file}}
-    
-  publish-generic-stable:
-    # comment to require manual approval before publishing
-    # environment: stable
-    needs: [build-generic-image]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        image_name:
-          - 2021-10-30-raspios-bullseye-slim-arm64
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v2
-      - id: publish-stable
-        uses: ./.github/workflows/scripts/publish-stable
-        with:
-          IMAGE_NAME: ${{ matrix.image_name }}
-          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+        PACKER_VAR_FILE: vars/generic-pi-bullseye-arm64.pkrvars.hcl
+        PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
+    - id: slim
+      uses: ./.github/workflows/scripts/build
+      with:
+        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+        IMAGE_NAME: ${{ matrix.image_name }}
+        PACKER_VAR_FILE: vars/slim-bullseye-arm64.pkrvars.hcl
+        PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
+    - id: publish-stable
+      uses: ./.github/workflows/scripts/publish-stable
+      with:
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}

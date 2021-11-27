@@ -77,14 +77,14 @@ source "arm" "base_image" {
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 
 build {
-  name = "slim-resized"
+  name = "slim-base"
 
   // image is sized down in later builds tep
   source "source.arm.base_image" {
-    image_size = "${var.image_size}"
-    image_build_method    = "resized"
-    image_path = "dist/${var.image_name}.img"
-    image_mount_path = "/tmp/rpi_chroot_step2"
+    image_size = "5GB"
+    image_build_method    = "reuse"
+    image_path = "build/${var.image_name}.img"
+    image_mount_path = "/tmp/rpi_chroot_step1"
     file_checksum_url     = "${var.base_image_checksum}"
     file_target_extension = "${var.base_image_ext}"
     file_urls             = [
@@ -92,10 +92,17 @@ build {
     ]
   }
 
+  // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
+  // do full dist-upgrade first
+  // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     inline = [
-      "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
+      "sudo reboot"
     ]
+    expect_disconnect = true
+    pause_after = "10s"
   }
 
   provisioner "ansible" {
@@ -108,41 +115,9 @@ build {
   }
 
   post-processors {
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      format = ".tar.gz"
-    }
-    # register tarball as new artiface
-    post-processor "artifice" {
-      files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      ]
-    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
-        output = "dist/{{.ChecksumType}}.checksum"
+        output = "build/{{.ChecksumType}}.checksum"
     }
-    post-processor "manifest" {
-        output     = "dist/manifest.json"
-        strip_path = true
-        strip_time = true
-        custom_data = {
-          ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-          image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
-          image_stamp = "${local.DATESTAMP}-${var.image_name}"
-          image_name = "${var.image_name}"
-          release_channel = "${var.release_channel}"
-          datestamp = "${local.DATESTAMP}"
-          base_image_stamp = "${var.base_image_stamp}"
-          base_image_manifest_url = "${var.base_image_manifest_url}"
-          base_image_checksum = "${var.base_image_checksum}"
-          base_image_ext = "${var.base_image_ext}"
-          base_image_url = "${var.base_image_url}"
-        }
-      }
-    }
+  }
 }
-
