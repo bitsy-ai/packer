@@ -39,12 +39,10 @@ jobs:
         PACKER_VAR_FILE: vars/generic-pi-bullseye-arm64.pkrvars.hcl
         PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
     - id: slim
-      uses: ./.github/workflows/scripts/build
-      with:
-        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
-        IMAGE_NAME: ${{ matrix.image_name }}
-        PACKER_VAR_FILE: vars/slim-bullseye-arm64.pkrvars.hcl
-        PACKER_TEMPLATE_FILE: templates/slim.pkr.hcl
+      run: |
+        make packer-build \
+          PACKER_VAR_FILE=vars/slim-bullseye-arm64.pkrvars.hcl \
+          PACKER_TEMPLATE_FILE=templates/slim-base.pkr.hcl
     - id: publish-stable
       uses: ./.github/workflows/scripts/publish-stable
       with:
