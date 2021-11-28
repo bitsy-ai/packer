@@ -42,7 +42,7 @@ jobs:
       run: |
         make packer-build \
           PACKER_VAR_FILE=vars/slim-bullseye-arm64.pkrvars.hcl \
-          PACKER_TEMPLATE_FILE=templates/slim-base.pkr.hcl
+          PACKER_TEMPLATE_FILE=templates/slim.pkr.hcl
     - id: publish-stable
       uses: ./.github/workflows/scripts/publish-stable
       with:

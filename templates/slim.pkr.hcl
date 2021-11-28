@@ -48,7 +48,6 @@ variable "image_size" {
 }
 
 source "arm" "base_image" {
-  file_checksum_type    = "sha256"
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
@@ -72,6 +71,7 @@ source "arm" "base_image" {
   image_build_method    = "resize"
   image_path = "dist/${var.image_name}.img"
   image_mount_path = "/tmp/rpi_chroot" 
+  file_checksum_type    = "sha256"
   file_checksum_url     = "${var.base_image_checksum}"
   file_target_extension = "${var.base_image_ext}"
   file_urls             = [
