@@ -22,6 +22,7 @@ jobs:
         include:
           - image_name: raspios-bullseye-slim-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            packer_vars: vars/raspios-bullseye-slim-arm64.pkrvars.hcl
             arch: arm64
             os: bullseye
             platform: debian
@@ -41,5 +42,5 @@ jobs:
     - id: publish-stable
       uses: ./.github/workflows/scripts/publish-stable
       with:
-        IMAGE_NAME: raspios-bullseye-slim-arm64
+        IMAGE_NAME: ${{ matrix.image_name }}
         DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
