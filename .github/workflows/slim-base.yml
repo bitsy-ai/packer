@@ -1,4 +1,4 @@
-name: Debian Slim
+name: Debian Slim Base
 on:
   workflow_dispatch:
 
