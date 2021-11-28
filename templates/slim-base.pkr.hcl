@@ -72,18 +72,18 @@ source "arm" "base_image" {
   
 }
 
-# a build block invokes sources and runs provisioning steps on them. The
-# documentation for build blocks can be found here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/build
+# a dist block invokes sources and runs provisioning steps on them. The
+# documentation for dist blocks can be found here:
+# https://www.packer.io/docs/templates/hcl_templates/blocks/dist
 
-build {
+dist {
   name = "slim-base"
 
-  // image is sized down in later builds tep
+  // image is sized down in later dists tep
   source "source.arm.base_image" {
     image_size = "${var.image_size}"
-    image_build_method    = "reuse"
-    image_path = "build/${var.image_name}.img"
+    image_dist_method    = "reuse"
+    image_path = "dist/${var.image_name}.img"
     image_mount_path = "/tmp/rpi_chroot"
     file_checksum_url     = "${var.base_image_checksum}"
     file_target_extension = "${var.base_image_ext}"
@@ -128,7 +128,7 @@ build {
     }
     post-processor "checksum" {
         checksum_types = ["sha256"]
-        output = "build/{{.ChecksumType}}.checksum"
+        output = "dist/{{.ChecksumType}}.checksum"
     }
     post-processor "manifest" {
         output     = "dist/manifest.json"
