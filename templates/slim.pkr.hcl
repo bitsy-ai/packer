@@ -49,6 +49,13 @@ variable "image_size" {
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
+  file_checksum_url     = "${var.base_image_checksum}"
+  file_target_extension = "${var.base_image_ext}"
+  file_urls             = [
+    "${var.base_image_url}"
+  ]
+  image_build_method    = "resize"
+  image_mount_path      = "/tmp/rpi_chroot"
 
   image_partitions {
     filesystem   = "vfat"
@@ -66,6 +73,8 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
+  image_path                   = "dist/${local.DATESTAMP}-${var.image_name}.img"
+  image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
@@ -77,24 +86,16 @@ source "arm" "base_image" {
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 
 build {
-  name = "slim-resized"
+  sources = ["source.arm.base_image"]
+  name = "ansible"
 
-  // image is sized down in later builds tep
-  source "source.arm.base_image" {
-    image_size = "${var.image_size}"
-    image_build_method    = "resized"
-    image_path = "dist/${var.image_name}.img"
-    image_mount_path = "/tmp/rpi_chroot_step2"
-    file_checksum_url     = "${var.base_image_checksum}"
-    file_target_extension = "${var.base_image_ext}"
-    file_urls             = [
-      "${var.base_image_url}"
-    ]
-  }
-
+  // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
+  // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     inline = [
       "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get install libfuse2"
     ]
   }
 
@@ -102,9 +103,19 @@ build {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot_step1 ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
+  }
+  
+  provisioner "shell" {
+    inline = [
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
+      "sudo reboot"
+    ]
+    expect_disconnect = true
+    pause_after = "10s"
   }
 
   post-processors {
