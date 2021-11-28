@@ -3,7 +3,7 @@ description: 'Publish image to CDN via gsutils'
 inputs:
   DISCORD_WEBHOOK:
     description: 'Publish using Discord webhook'
-    required: false
+    required: true
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
@@ -21,8 +21,6 @@ runs:
   - name: Activate Service Account
     shell: bash
     run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-  # packer-builder-arm does not support file:// URI
-  # so downstream builds must consume https://cdn url
   - name: Create environment artifacts
     id: packer
     shell: bash

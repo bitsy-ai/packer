@@ -44,7 +44,7 @@ variable "playbook_file" {
 
 variable "image_size" {
     type = string
-    default = "5G"
+    default = "3.6G"
 }
 
 source "arm" "base_image" {
@@ -95,7 +95,7 @@ build {
     inline = [
       "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
       "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get install libfuse2"
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libfuse2",
     ]
   }
   provisioner "shell" {
