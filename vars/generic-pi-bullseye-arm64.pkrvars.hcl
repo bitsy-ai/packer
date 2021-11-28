@@ -1,8 +1,0 @@
-base_image_stamp = "2021-10-30-raspios-bullseye-arm64"
-base_image_url = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip"
-base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip.sha256"
-base_image_ext = ".zip"
-playbook_file = "./playbooks/slim.yml"
-ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
-image_name = "raspios-bullseye-slim-arm64"
-image_size = "3.2G"

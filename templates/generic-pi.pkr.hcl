@@ -44,7 +44,7 @@ variable "playbook_file" {
 
 variable "image_size" {
     type = string
-    default = "5G"
+    default = "3.6G"
 }
 
 source "arm" "base_image" {
