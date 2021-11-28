@@ -72,17 +72,17 @@ source "arm" "base_image" {
   
 }
 
-# a dist block invokes sources and runs provisioning steps on them. The
-# documentation for dist blocks can be found here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/dist
+# a build block invokes sources and runs provisioning steps on them. The
+# documentation for build blocks can be found here:
+# https://www.packer.io/docs/templates/hcl_templates/blocks/build
 
-dist {
+build {
   name = "slim-base"
 
-  // image is sized down in later dists tep
+  // image is sized down in later builds tep
   source "source.arm.base_image" {
     image_size = "${var.image_size}"
-    image_dist_method    = "reuse"
+    image_build_method    = "reuse"
     image_path = "dist/${var.image_name}.img"
     image_mount_path = "/tmp/rpi_chroot"
     file_checksum_url     = "${var.base_image_checksum}"
@@ -93,12 +93,12 @@ dist {
   }
 
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
-  // do full dist-upgrade first
+  // do full build-upgrade first
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     inline = [
       "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
+      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y build-upgrade",
       "sudo reboot"
     ]
     expect_disconnect = true
