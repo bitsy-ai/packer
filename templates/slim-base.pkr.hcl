@@ -81,10 +81,10 @@ build {
 
   // image is sized down in later builds tep
   source "source.arm.base_image" {
-    image_size = "5GB"
+    image_size = "${var.image_size}"
     image_build_method    = "reuse"
     image_path = "build/${var.image_name}.img"
-    image_mount_path = "/tmp/rpi_chroot_step1"
+    image_mount_path = "/tmp/rpi_chroot"
     file_checksum_url     = "${var.base_image_checksum}"
     file_target_extension = "${var.base_image_ext}"
     file_urls             = [
@@ -109,15 +109,45 @@ build {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot_step1 ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
   }
 
   post-processors {
+
+    post-processor "compress" {
+      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
+      format = ".tar.gz"
+    }
+    # register tarball as new artiface
+    post-processor "artifice" {
+      files = [
+        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
+      ]
+    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "build/{{.ChecksumType}}.checksum"
     }
+    post-processor "manifest" {
+        output     = "dist/manifest.json"
+        strip_path = true
+        strip_time = true
+        custom_data = {
+          ansible_extra_vars = file("../${var.ansible_extra_vars}")
+          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
+          image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
+          image_stamp = "${local.DATESTAMP}-${var.image_name}"
+          image_name = "${var.image_name}"
+          release_channel = "${var.release_channel}"
+          datestamp = "${local.DATESTAMP}"
+          base_image_stamp = "${var.base_image_stamp}"
+          base_image_manifest_url = "${var.base_image_manifest_url}"
+          base_image_checksum = "${var.base_image_checksum}"
+          base_image_ext = "${var.base_image_ext}"
+          base_image_url = "${var.base_image_url}"
+        }
+      }
   }
 }
