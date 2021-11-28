@@ -1,6 +1,6 @@
 RELEASE_CHANNEL ?= nightly
 PACKER_EXTRA_ARGS ?=
-PACKER_VAR_FILE ?= vars/generic-pi-bullseye-arm64.pkrvars.hcl
+PACKER_VAR_FILE ?= vars/raspios-bullseye-slim-arm64.pkrvars.hcl
 PACKER_TEMPLATE_FILE ?= templates/slim-base.pkr.hcl
 DIST_DIR ?= dist
 BUILD_DIR ?= build
