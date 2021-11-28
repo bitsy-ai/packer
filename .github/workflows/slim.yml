@@ -23,6 +23,7 @@ jobs:
           - image_name: raspios-bullseye-slim-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             packer_vars: vars/raspios-bullseye-slim-arm64.pkrvars.hcl
+            packer_template: templates/slim-base.pkr.hcl
             arch: arm64
             os: bullseye
             platform: debian
@@ -37,8 +38,8 @@ jobs:
       with:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         IMAGE_NAME: ${{ matrix.image_name }}
-        PACKER_VAR_FILE: vars/generic-pi-bullseye-arm64.pkrvars.hcl
-        PACKER_TEMPLATE_FILE: templates/slim-base.pkr.hcl
+        PACKER_VAR_FILE: ${{ matrix.packer_vars }}
+        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template }}
     - id: publish-stable
       uses: ./.github/workflows/scripts/publish-stable
       with:
