@@ -1,3 +1,4 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.printnanny.setup
-- ansible.builtin.import_playbook: bitsyai.printnanny.octoprint
+- ansible.builtin.import_playbook: bitsyai.rpi.printnanny.setup
+# TODO
+# - ansible.builtin.import_playbook: bitsyai.rpi.octoprint.setup

@@ -1,8 +1,5 @@
 ---
 collections:
-  - name: https://github.com/bitsy-ai/ansible-collection-print-nanny.git
-    type: git
-    version: main
   - name: https://github.com/bitsy-ai/ansible-collection-rpi.git
     type: git
     version: main
