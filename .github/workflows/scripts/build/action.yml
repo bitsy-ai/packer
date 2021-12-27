@@ -50,7 +50,7 @@ runs:
   - name: Receive author key
     shell: bash
     run: |
-      gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }}
+      gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
   - name: Import GPG key
     id: import_gpg
     uses: crazy-max/ghaction-import-gpg@v4
