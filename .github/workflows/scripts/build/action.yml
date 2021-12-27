@@ -57,7 +57,7 @@ runs:
     with:
       gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
       passphrase: ${{ inputs.GPG_PASSPHRASE }}
-      fingerprint: $${{ inputs.GPG_SUBKEY_FINGERPRINT }}
+      fingerprint: ${{ inputs.GPG_SUBKEY_FINGERPRINT }}
   - name: GPG user IDs
     shell: bash
     run: |
@@ -68,7 +68,7 @@ runs:
   - name: Sign the release
     shell: bash
     run: |
-      gpg --detach-sign dist/sha256.checksum
+      gpg -u {{ inputs.GPG_SUBKEY_FINGERPRINT }} --detach-sign dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
