@@ -72,7 +72,7 @@ runs:
     run: |
       mkdir -p dist/
       echo "test" > dist/sha256.checksum
-      gpg --detach-sig -u {{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
+      echo ${{ inputs.GPG_PASSPHRASE }} | gpg --batch --yes --passphrase-fd 0 --detach-sig -u {{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
