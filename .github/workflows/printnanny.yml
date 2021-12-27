@@ -78,7 +78,7 @@ jobs:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
 
-  build-octoprint-os:
+  build-octoprintprint-os:
     environment: nightly
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
@@ -88,11 +88,11 @@ jobs:
         arch: [ arm64 ]
         platform: [ debian ]
         include:
-          - image_name: printnanny-os-octo-bullseye-arm64
+          - image_name: printnanny-os-octoprint-bullseye-arm64
             base_image: printnanny-os-bullseye-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-            packer_template_file: templates/octoprint.pkr.hcl
-            packer_var_file: vars/octoprint.pkrvars.hcl
+            packer_template_file: templates/octoprintprint.pkr.hcl
+            packer_var_file: vars/octoprintprint.pkrvars.hcl
             arch: arm64
             os: bullseye
             platform: debian
@@ -110,8 +110,8 @@ jobs:
           echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
           echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
           
-          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprint.pkrvars.hcl
-          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprint.pkrvars.hcl
+          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprintprint.pkrvars.hcl
+          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprintprint.pkrvars.hcl
 
       - id: build
         uses: ./.github/workflows/scripts/build
@@ -122,3 +122,35 @@ jobs:
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
+
+  nightly-octoprint-os:
+    environment: nightly
+    needs: [ build-octoprintprint-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name: [ printnanny-os-octoprint-bullseye-arm64 ]
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - id: publish-nightly
+      uses: ./.github/workflows/scripts/publish-nightly
+      with:
+        IMAGE_NAME: ${{ matrix.image_name }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK }}
+    
+  stable-octoprint-os:
+    environment: stable
+    needs: [ build-octoprintprint-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name: [ printnanny-os-octoprint-bullseye-arm64 ]
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - id: publish-stable
+        uses: ./.github/workflows/scripts/publish-stable
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
