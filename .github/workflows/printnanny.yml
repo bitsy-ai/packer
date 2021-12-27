@@ -78,7 +78,7 @@ jobs:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
 
-  build-octoprintprint-os:
+  build-octoprint-os:
     environment: nightly
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
@@ -91,8 +91,8 @@ jobs:
           - image_name: printnanny-os-octoprint-bullseye-arm64
             base_image: printnanny-os-bullseye-arm64
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
-            packer_template_file: templates/octoprintprint.pkr.hcl
-            packer_var_file: vars/octoprintprint.pkrvars.hcl
+            packer_template_file: templates/octoprint.pkr.hcl
+            packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
             platform: debian
@@ -110,8 +110,8 @@ jobs:
           echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
           echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
           
-          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprintprint.pkrvars.hcl
-          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprintprint.pkrvars.hcl
+          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprint.pkrvars.hcl
+          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprint.pkrvars.hcl
 
       - id: build
         uses: ./.github/workflows/scripts/build
@@ -125,7 +125,7 @@ jobs:
 
   nightly-octoprint-os:
     environment: nightly
-    needs: [ build-octoprintprint-os ]
+    needs: [ build-octoprint-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
