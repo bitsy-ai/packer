@@ -85,8 +85,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image_name:
-          - printnanny-os-bullseye-arm64
+        os: [  bullseye ]
+        arch: [ arm64 ]
+        platform: [ debian ]
+        include:
+          - image_name: printnanny-os-octo-bullseye-arm64
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            packer_template_file: templates/octoprint.pkr.hcl
+            packer_var_file: vars/octoprint.pkrvars.hcl
+            arch: arm64
+            os: bullseye
+            platform: debian
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
@@ -94,5 +103,20 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.image_name }}
-      - name: Display structure of downloaded files
-        run: ls -R
+          path: img
+      - name: Rename img
+        id: manifest
+        run: |
+          echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
+          echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
+          
+          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprint.pkrvars.hcl
+          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprint.pkrvars.hcl
+
+      - id: build
+        uses: ./.github/workflows/scripts/build
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+          PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+          PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
