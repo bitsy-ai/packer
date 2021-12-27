@@ -52,21 +52,6 @@ runs:
     run: |
       gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
       echo "${{ inputs.GPG_SIGN_KEY }}" | gpg --batch --allow-secret-key-import --import
-  - name: Import GPG key
-    id: import_gpg
-    uses: crazy-max/ghaction-import-gpg@v4
-    with:
-      gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
-      passphrase: ${{ inputs.GPG_PASSPHRASE }}
-      fingerprint: ${{ inputs.GPG_SUBKEY_FINGERPRINT }}
-
-  - name: GPG user IDs
-    shell: bash
-    run: |
-      echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-      echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-      echo "name:        ${{ steps.import_gpg.outputs.name }}"
-      echo "email:       ${{ steps.import_gpg.outputs.email }}"
   - name: Sign the release
     shell: bash
     run: |
