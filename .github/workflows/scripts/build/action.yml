@@ -17,6 +17,10 @@ inputs:
     required: true
   GPG_PASSPHRASE:
     required: true
+  GPG_KEYSERVER:
+    default: https://github.com/leigh-johnson.gpg
+  GPG_KEYID:
+    default: 3853ADC1F9742FC2EC43D9ACE359E824041B36D7
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -39,6 +43,10 @@ runs:
     run: |
       ./tools/manifest-to-env.sh
       ls -ahl dist/
+  - name: Receive author key
+    shell: bash
+    run: |
+      gpg --keyserver ${{ inputs.keyserver }}  --recv-keys ${{ inputs.GPG_KEYID }}
   - name: Import GPG key
     id: import_gpg
     uses: crazy-max/ghaction-import-gpg@v4
