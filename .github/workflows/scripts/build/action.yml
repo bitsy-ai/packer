@@ -15,6 +15,8 @@ inputs:
     required: true
   GPG_SIGN_KEY:
     required: true
+  GPG_PASSPHRASE:
+    required: true
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -42,6 +44,7 @@ runs:
     uses: crazy-max/ghaction-import-gpg@v4
     with:
       gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
+      passphrase: ${{ inputs.GPG_PASSPHRASE }}
   - name: Sign the release
     shell: bash
     run: |
