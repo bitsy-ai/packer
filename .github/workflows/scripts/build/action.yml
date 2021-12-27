@@ -42,7 +42,7 @@ runs:
       gpg_private_key: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
   - name: Sign the release
     run: |
-      gpg --sign dist/sha256.checksum
+      gpg --detach-sign dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
