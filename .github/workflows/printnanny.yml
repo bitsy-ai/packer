@@ -41,10 +41,7 @@ jobs:
           ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
           PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.image_name }}
-          path: dist/
+
   nightly-printnanny-os:
     environment: nightly
     needs: [ build-printnanny-os ]
