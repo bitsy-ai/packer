@@ -18,7 +18,6 @@ jobs:
 ###
   build-printnanny-os:
     strategy:
-      fail-fast: false
       matrix:
         os: [  bullseye ]
         arch: [ arm64 ]
@@ -42,13 +41,15 @@ jobs:
         ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
         PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
         PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
-
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.image_name }}
+        path: dist/
   nightly-printnanny-os:
     environment: nightly
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         image_name:
           - printnanny-os-bullseye-arm64
@@ -66,7 +67,6 @@ jobs:
     needs: [ nightly-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         image_name:
           - printnanny-os-bullseye-arm64
@@ -78,3 +78,21 @@ jobs:
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+
+  build-octoprint-os:
+    environment: nightly
+    needs: [ build-printnanny-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name:
+          - printnanny-os-bullseye-arm64
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Download artifact
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.image_name }}
+      - name: Display structure of downloaded files
+        run: ls -R
