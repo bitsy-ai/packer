@@ -13,6 +13,18 @@ inputs:
   PACKER_TEMPLATE_FILE:
     description: 'Path to templates/*.hcl template to build'
     required: true
+  GPG_SIGN_KEY:
+    required: true
+  GPG_PASSPHRASE:
+    required: true
+  GPG_KEYSERVER:
+    default: https://github.com/leigh-johnson.gpg
+  GPG_AUTHOR_FINGERPRINT:
+    default: E359E824041B36D7
+  GPG_PROJECT_FINGERPRINT:
+    default: 5B656A39DDA22020
+  GPG_SUBKEY_FINGERPRINT:
+    default: 9E3B2AB15DB076E4
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -35,6 +47,30 @@ runs:
     run: |
       ./tools/manifest-to-env.sh
       ls -ahl dist/
+  - name: Receive author key
+    shell: bash
+    run: |
+      gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
+      echo "${{ inputs.GPG_SIGN_KEY }}" | gpg --batch --allow-secret-key-import --import
+  - name: Import GPG key
+    id: import_gpg
+    uses: crazy-max/ghaction-import-gpg@v4
+    with:
+      gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
+      passphrase: ${{ inputs.GPG_PASSPHRASE }}
+      fingerprint: ${{ inputs.GPG_SUBKEY_FINGERPRINT }}
+
+  - name: GPG user IDs
+    shell: bash
+    run: |
+      echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+      echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+      echo "name:        ${{ steps.import_gpg.outputs.name }}"
+      echo "email:       ${{ steps.import_gpg.outputs.email }}"
+  - name: Sign the release
+    shell: bash
+    run: |
+      echo ${{ inputs.GPG_PASSPHRASE }} | gpg --pinentry-mode loopback --batch --yes --passphrase-fd 0 --detach-sig -u ${{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}

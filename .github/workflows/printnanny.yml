@@ -18,7 +18,6 @@ jobs:
 ###
   build-printnanny-os:
     strategy:
-      fail-fast: false
       matrix:
         os: [  bullseye ]
         arch: [ arm64 ]
@@ -33,22 +32,23 @@ jobs:
             platform: debian
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - id: build
-      uses: ./.github/workflows/scripts/build
-      with:
-        IMAGE_NAME: ${{ matrix.image_name }}
-        ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
-        PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
-        PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - id: build
+        uses: ./.github/workflows/scripts/build
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+          PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+          PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
+          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
 
   nightly-printnanny-os:
     environment: nightly
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         image_name:
           - printnanny-os-bullseye-arm64
@@ -66,10 +66,86 @@ jobs:
     needs: [ nightly-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         image_name:
           - printnanny-os-bullseye-arm64
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - id: publish-stable
+        uses: ./.github/workflows/scripts/publish-stable
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+
+  build-octoprintprint-os:
+    environment: nightly
+    needs: [ build-printnanny-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [  bullseye ]
+        arch: [ arm64 ]
+        platform: [ debian ]
+        include:
+          - image_name: printnanny-os-octoprint-bullseye-arm64
+            base_image: printnanny-os-bullseye-arm64
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            packer_template_file: templates/octoprintprint.pkr.hcl
+            packer_var_file: vars/octoprintprint.pkrvars.hcl
+            arch: arm64
+            os: bullseye
+            platform: debian
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.base_image }}
+          path: img
+      - name: Rename img
+        id: manifest
+        run: |
+          echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
+          echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
+          
+          echo "base_image_url=\"file:img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprintprint.pkrvars.hcl
+          echo "base_image_stamp=\"file:img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprintprint.pkrvars.hcl
+
+      - id: build
+        uses: ./.github/workflows/scripts/build
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+          PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+          PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
+          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
+
+  nightly-octoprint-os:
+    environment: nightly
+    needs: [ build-octoprintprint-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name: [ printnanny-os-octoprint-bullseye-arm64 ]
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+    - id: publish-nightly
+      uses: ./.github/workflows/scripts/publish-nightly
+      with:
+        IMAGE_NAME: ${{ matrix.image_name }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK }}
+    
+  stable-octoprint-os:
+    environment: stable
+    needs: [ nightly-octoprint-os ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name: [ printnanny-os-octoprint-bullseye-arm64 ]
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
