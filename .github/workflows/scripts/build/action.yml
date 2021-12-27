@@ -45,6 +45,12 @@ runs:
     with:
       gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
       passphrase: ${{ inputs.GPG_PASSPHRASE }}
+  - name: GPG user IDs
+    run: |
+      echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+      echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+      echo "name:        ${{ steps.import_gpg.outputs.name }}"
+      echo "email:       ${{ steps.import_gpg.outputs.email }}"
   - name: Sign the release
     shell: bash
     run: |
