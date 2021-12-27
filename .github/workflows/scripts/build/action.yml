@@ -43,6 +43,7 @@ runs:
     with:
       gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
   - name: Sign the release
+    shell: bash
     run: |
       gpg --detach-sign dist/sha256.checksum
   - uses: actions/upload-artifact@v2
