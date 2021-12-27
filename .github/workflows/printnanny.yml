@@ -141,7 +141,7 @@ jobs:
     
   stable-octoprint-os:
     environment: stable
-    needs: [ build-octoprintprint-os ]
+    needs: [ nightly-octoprint-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
