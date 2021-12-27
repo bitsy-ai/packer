@@ -51,7 +51,7 @@ runs:
     shell: bash
     run: |
       gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
-      cat gpg ${{ inputs.GPG_SIGN_KEY }} | gpg --batch --allow-secret-key-import --import
+      echo ${{ inputs.GPG_SIGN_KEY }} | gpg --batch --allow-secret-key-import --import
   # - name: Import GPG key
   #   id: import_gpg
   #   uses: crazy-max/ghaction-import-gpg@v4
