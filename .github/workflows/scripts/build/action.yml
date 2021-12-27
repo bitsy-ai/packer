@@ -35,18 +35,18 @@ runs:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
-  - name: Make image from Packer template
-    shell: bash
-    run: |
-      make packer-build \
-        PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
-        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
+  # - name: Make image from Packer template
+  #   shell: bash
+  #   run: |
+  #     make packer-build \
+  #       PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
+  #       PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
 
-  - name: Create environment var files
-    shell: bash
-    run: |
-      ./tools/manifest-to-env.sh
-      ls -ahl dist/
+  # - name: Create environment var files
+  #   shell: bash
+  #   run: |
+  #     ./tools/manifest-to-env.sh
+  #     ls -ahl dist/
   - name: Receive author key
     shell: bash
     run: |
@@ -70,7 +70,9 @@ runs:
   - name: Sign the release
     shell: bash
     run: |
-      gpg -u {{ inputs.GPG_SUBKEY_FINGERPRINT }} --detach-sig dist/sha256.checksum
+      mkdir -p dist/
+      echo "test" > dist/sha256.checksum
+      gpg --detach-sig -u {{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
