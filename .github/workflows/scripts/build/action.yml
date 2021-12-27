@@ -35,43 +35,41 @@ runs:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
-  # - name: Make image from Packer template
-  #   shell: bash
-  #   run: |
-  #     make packer-build \
-  #       PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
-  #       PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
+  - name: Make image from Packer template
+    shell: bash
+    run: |
+      make packer-build \
+        PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
+        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
 
-  # - name: Create environment var files
-  #   shell: bash
-  #   run: |
-  #     ./tools/manifest-to-env.sh
-  #     ls -ahl dist/
+  - name: Create environment var files
+    shell: bash
+    run: |
+      ./tools/manifest-to-env.sh
+      ls -ahl dist/
   - name: Receive author key
     shell: bash
     run: |
       gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
       echo "${{ inputs.GPG_SIGN_KEY }}" | gpg --batch --allow-secret-key-import --import
-  # - name: Import GPG key
-  #   id: import_gpg
-  #   uses: crazy-max/ghaction-import-gpg@v4
-  #   with:
-  #     gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
-  #     passphrase: ${{ inputs.GPG_PASSPHRASE }}
-  #     fingerprint: ${{ inputs.GPG_SUBKEY_FINGERPRINT }}
+  - name: Import GPG key
+    id: import_gpg
+    uses: crazy-max/ghaction-import-gpg@v4
+    with:
+      gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
+      passphrase: ${{ inputs.GPG_PASSPHRASE }}
+      fingerprint: ${{ inputs.GPG_SUBKEY_FINGERPRINT }}
 
-  # - name: GPG user IDs
-  #   shell: bash
-  #   run: |
-  #     echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-  #     echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-  #     echo "name:        ${{ steps.import_gpg.outputs.name }}"
-  #     echo "email:       ${{ steps.import_gpg.outputs.email }}"
+  - name: GPG user IDs
+    shell: bash
+    run: |
+      echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+      echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+      echo "name:        ${{ steps.import_gpg.outputs.name }}"
+      echo "email:       ${{ steps.import_gpg.outputs.email }}"
   - name: Sign the release
     shell: bash
     run: |
-      mkdir -p dist/
-      echo "test" > dist/sha256.checksum
       echo ${{ inputs.GPG_PASSPHRASE }} | gpg --pinentry-mode loopback --batch --yes --passphrase-fd 0 --detach-sig -u ${{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
   - uses: actions/upload-artifact@v2
     with:
