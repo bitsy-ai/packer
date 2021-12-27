@@ -20,7 +20,7 @@ inputs:
   GPG_KEYSERVER:
     default: https://github.com/leigh-johnson.gpg
   GPG_KEYID:
-    default: 3853ADC1F9742FC2EC43D9ACE359E824041B36D7
+    default: 106B63268D10AD071B6925175B656A39DDA22020
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
