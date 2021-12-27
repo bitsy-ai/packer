@@ -46,7 +46,7 @@ runs:
   - name: Receive author key
     shell: bash
     run: |
-      gpg --keyserver ${{ inputs.GPG_KEYID }}  --recv-keys ${{ inputs.GPG_KEYID }}
+      gpg --keyserver ${{ inputs.GPG_KEYSERVER }}  --recv-keys ${{ inputs.GPG_KEYID }}
   - name: Import GPG key
     id: import_gpg
     uses: crazy-max/ghaction-import-gpg@v4
