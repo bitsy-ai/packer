@@ -41,7 +41,7 @@ jobs:
           ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
           PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
-
+          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
   nightly-printnanny-os:
     environment: nightly
     needs: [ build-printnanny-os ]
@@ -118,3 +118,4 @@ jobs:
           ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
           PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
+          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}

@@ -13,6 +13,8 @@ inputs:
   PACKER_TEMPLATE_FILE:
     description: 'Path to templates/*.hcl template to build'
     required: true
+  GPG_SIGN_KEY:
+    required: true
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -39,7 +41,7 @@ runs:
     id: import_gpg
     uses: crazy-max/ghaction-import-gpg@v4
     with:
-      gpg_private_key: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
+      gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
   - name: Sign the release
     run: |
       gpg --detach-sign dist/sha256.checksum
