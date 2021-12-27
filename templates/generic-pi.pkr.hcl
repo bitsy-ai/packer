@@ -119,7 +119,7 @@ build {
 
   provisioner "shell-local" {
     inline = [
-      "./tools/pishrink.sh -p ${local.DATESTAMP}-${var.image_name}",
+      "./tools/pishrink.sh -sp ${local.DATESTAMP}-${var.image_name}",
     ]
   }
 
