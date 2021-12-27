@@ -19,7 +19,9 @@ inputs:
     required: true
   GPG_KEYSERVER:
     default: https://github.com/leigh-johnson.gpg
-  GPG_KEYID:
+  GPG_PROJECT_FINGERPRINT:
+    default: 106B63268D10AD071B6925175B656A39DDA22020
+  GPG_SUBKEY_FINGERPRINT:
     default: 106B63268D10AD071B6925175B656A39DDA22020
 outputs:
   artifact:
@@ -46,13 +48,14 @@ runs:
   - name: Receive author key
     shell: bash
     run: |
-      gpg --keyserver ${{ inputs.GPG_KEYSERVER }}  --recv-keys ${{ inputs.GPG_KEYID }}
+      gpg --keyserver ${{ inputs.GPG_KEYSERVER }}  --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }}
   - name: Import GPG key
     id: import_gpg
     uses: crazy-max/ghaction-import-gpg@v4
     with:
       gpg_private_key: ${{ inputs.GPG_SIGN_KEY }}
       passphrase: ${{ inputs.GPG_PASSPHRASE }}
+      fingerprint: $${{ inputs.GPG_SUBKEY_FINGERPRINT }}
   - name: GPG user IDs
     shell: bash
     run: |
