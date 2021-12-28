@@ -104,6 +104,9 @@ jobs:
         with:
           name: ${{ matrix.base_image }}
           path: img
+      - name: ls artifact contents
+        run: |
+          ls -ahl img
       - name: Rename img
         id: manifest
         run: |
