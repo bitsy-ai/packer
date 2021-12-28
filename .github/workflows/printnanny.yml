@@ -118,6 +118,7 @@ jobs:
           echo "base_image_url=\"file:/build/img/$(cat dist/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprint.pkrvars.hcl
           echo "base_image_stamp=\"file:/build/img/$(cat dist/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprint.pkrvars.hcl
           echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> vars/octoprint.pkrvars.hcl
+          cat vars/octoprint.pkrvars.hcl
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
