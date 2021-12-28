@@ -59,7 +59,7 @@ jobs:
       uses: ./.github/workflows/scripts/publish-nightly
       with:
         IMAGE_NAME: ${{ matrix.image_name }}
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
   stable-printnanny-os:
     environment: stable
@@ -143,7 +143,7 @@ jobs:
       uses: ./.github/workflows/scripts/publish-nightly
       with:
         IMAGE_NAME: ${{ matrix.image_name }}
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_NIGHTLY_DEPLOY_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
   stable-octoprint-os:
     environment: stable
