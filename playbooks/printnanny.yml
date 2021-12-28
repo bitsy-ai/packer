@@ -1,2 +1,2 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.rpi.printnanny.setup
+- ansible.builtin.import_playbook: bitsyai.rpi.printnanny.base_image
