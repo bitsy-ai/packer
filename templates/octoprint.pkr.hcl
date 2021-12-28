@@ -98,11 +98,11 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  provisioner "shell-local" {
-    inline = [
-      "./tools/pishrink.sh -sp dist/${local.DATESTAMP}-${var.image_name}.img",
-    ]
-  }
+  // provisioner "shell-local" {
+  //   inline = [
+  //     "./tools/pishrink.sh -sp dist/${local.DATESTAMP}-${var.image_name}.img",
+  //   ]
+  // }
 
   post-processors {
     # chain compress -> artifice -> checksum
