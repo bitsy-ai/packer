@@ -1,11 +1,6 @@
 name: Print Nanny OS
 on:
   workflow_dispatch:
-    inputs:
-      RELEASE_CHANNEL:
-        description: 'Publish image to release channel: (nightly, stable)'     
-        required: true
-        default: 'nightly'
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
@@ -90,7 +85,6 @@ jobs:
         include:
           - image_name: printnanny-os-octoprint-bullseye-arm64
             base_image: printnanny-os-bullseye-arm64
-            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             packer_template_file: templates/octoprint.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64

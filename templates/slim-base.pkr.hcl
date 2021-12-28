@@ -2,11 +2,6 @@ locals {
   DATESTAMP = formatdate("YYYY-MM-DD-hhmm", timestamp())
 }
 
-variable "release_channel" {
-    type = string
-    default = "nightly"
-}
-
 variable "ansible_extra_vars" {
   type    = string
   default = "vars/generic-pi.ansiblevars.yml"
