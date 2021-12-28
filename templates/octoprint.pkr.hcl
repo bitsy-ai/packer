@@ -49,7 +49,7 @@ variable "image_size" {
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
-  file_checksum_url     = "${var.base_image_checksum}"
+  file_checksum     = "${var.base_image_checksum}"
   file_target_extension = "${var.base_image_ext}"
   file_urls             = [
     "${var.base_image_url}"
