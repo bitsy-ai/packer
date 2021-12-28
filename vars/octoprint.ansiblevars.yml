@@ -1,7 +1,7 @@
 ---
 camera_enabled: true
 build_libcamera_apps: false
-install_octoprint: false
+install_octoprint: true
 install_mainsail: false
 install_fluidd: false
 install_klipper: false
