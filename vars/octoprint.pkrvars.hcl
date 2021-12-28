@@ -1,6 +1,5 @@
 playbook_file = "./playbooks/octoprint.yml"
 base_image_ext = ".tar.gz"
-base_image_checksum = "file:img/sha256.checksum"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
 image_name = "printnanny-os-octoprint-bullseye-arm64"
 image_size = "5G"
