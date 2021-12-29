@@ -36,8 +36,10 @@ runs:
 
   - name: Upload to GCP_BUCKET
     shell: bash
+    id: release
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+      ./tools/nightly-release.sh
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
@@ -46,5 +48,6 @@ runs:
       args: |
         💜 New image: `${{ steps.packer.outputs.image_stamp }}`
         [Download](${{ steps.packer.outputs.image_url }})
+        [Release Page](${{ steps.release.url }})
         [Manifest](${{ steps.packer.outputs.manifest_url }})
         [Checksum](${{ steps.packer.outputs.checksum_url }})
