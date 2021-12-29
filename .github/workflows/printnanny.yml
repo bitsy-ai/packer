@@ -64,8 +64,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-      - id: publish-stable
-        uses: ./.github/workflows/scripts/publish-stable
+      - id: publish-nightly
+        uses: ./.github/workflows/scripts/publish-nightly
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
@@ -143,8 +143,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-      - id: publish-stable
-        uses: ./.github/workflows/scripts/publish-stable
+      - id: publish-nightly
+        uses: ./.github/workflows/scripts/publish-nightly
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
