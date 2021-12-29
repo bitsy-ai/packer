@@ -42,7 +42,7 @@ runs:
     shell: bash
     run: |
       echo "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }} >> ${{ inputs.PACKER_VAR_FILE }}"
-    if: ${{ inputs.ANSIBLE_PLAYBOOK != "" }}
+    if: ${{ inputs.ANSIBLE_PLAYBOOK }} != ""
   - name: Make image from Packer template
     shell: bash
     run: |
