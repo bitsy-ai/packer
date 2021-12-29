@@ -41,7 +41,7 @@ runs:
   - name: Append ansible_playbook to packer vars
     shell: bash
     run: |
-      echo "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}\n" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo 'playbook_file="${{ inputs.ANSIBLE_PLAYBOOK }}"\n' >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
     if: ${{ inputs.ANSIBLE_PLAYBOOK }} != ""
   - name: Make image from Packer template
