@@ -135,7 +135,6 @@ build {
           image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_stamp = "${local.DATESTAMP}-${var.image_name}"
           image_name = "${var.image_name}"
-          release_channel = "${var.release_channel}"
           datestamp = "${local.DATESTAMP}"
           base_image_stamp = "${var.base_image_stamp}"
           base_image_manifest_url = "${var.base_image_manifest_url}"
