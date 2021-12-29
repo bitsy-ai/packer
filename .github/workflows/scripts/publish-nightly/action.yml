@@ -37,7 +37,7 @@ runs:
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
       echo ::set-output name=sig_url::"$SIG_URL"
 
-  - name: Upload to GCP_BUCKET
+  - name: Publish nightly releases
     shell: bash
     id: release
     env:
@@ -50,7 +50,14 @@ runs:
       SIG_URL: ${{ steps.packer.outputs.manifest_url }}
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-      ./tools/nightly-release.sh
+      res=$(PRINTNANNY_API_URL="${{ inputs.SANDBOX_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.SANDBOX_API_TOKEN }} ./tools/nightly-release.sh)
+      echo "Published to ${{ inputs.SANDBOX_API_URL }}"
+      echo "$res"
+    # TODO enable after prod rollout
+    # res=$(PRINTNANNY_API_URL="${{ inputs.PROD_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.PROD_API_TOKEN }} ./tools/nightly-release.sh)
+    # echo "Published to ${{ inputs.PROD_API_URL }}"
+    # echo "$res"
+
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
