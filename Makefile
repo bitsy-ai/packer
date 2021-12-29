@@ -4,7 +4,7 @@ PACKER_TEMPLATE_FILE ?= templates/slim-base.pkr.hcl
 DIST_DIR ?= dist
 BUILD_DIR ?= build
 
-.PHONY: clean docker-builder-image validate packer-build packer-init
+.PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -34,3 +34,6 @@ validate: $(DIST_DIR) $(BUILD_DIR) docker-builder-image
 		bitsyai/packer-builder-arm-ansible validate \
 			-var-file $(PACKER_VAR_FILE) \
 			$(PACKER_TEMPLATE_FILE)
+
+shellcheck:
+	shellcheck ./tools/*.sh

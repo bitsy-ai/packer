@@ -6,16 +6,18 @@ OUT_DIR=dist
 
 mkdir -p $OUT_DIR
 
-export IMAGE_FILENAME=$(cat dist/manifest.json | jq --raw-output '.builds[-1].custom_data.image_filename')
-export IMAGE_NAME=$(cat dist/manifest.json | jq --raw-output '.builds[-1].custom_data.image_name')
-export IMAGE_STAMP=$(cat dist/manifest.json | jq --raw-output '.builds[-1].custom_data.image_stamp')
-export IMAGE_PATH=$(cat dist/manifest.json | jq --raw-output '.builds[-1].custom_data.image_path')
-export IMAGE_URL=${CDN_BASE_URL}/${IMAGE_PATH}/${IMAGE_FILENAME}
-export CHECKSUM_URL=${CDN_BASE_URL}/${IMAGE_PATH}/sha256.checksum
-export MANIFEST_URL=${CDN_BASE_URL}/$IMAGE_PATH/manifest.json
+IMAGE_FILENAME=$(jq --raw-output '.builds[-1].custom_data.image_filename < dist/manifest.json')
+IMAGE_NAME=$(jq --raw-output '.builds[-1].custom_data.image_name' < dist/manifest.json)
+IMAGE_STAMP=$(jq --raw-output '.builds[-1].custom_data.image_stamp' < dist/manifest.json)
+IMAGE_PATH=$(jq --raw-output '.builds[-1].custom_data.image_path' < dist/manifest.json)
+IMAGE_URL=${CDN_BASE_URL}/${IMAGE_PATH}/${IMAGE_FILENAME}
+CHECKSUM_URL=${CDN_BASE_URL}/${IMAGE_PATH}/sha256.checksum
+MANIFEST_URL=${CDN_BASE_URL}/$IMAGE_PATH/manifest.json
+SIG_URL="${CDN_BASE_URL}.sig"
+CHECKSUM=$(cat dist/sha256.checksum)
 
 OUTFILE="$OUT_DIR/$IMAGE_NAME.sh"
-cat << EOF > $OUTFILE
+cat << EOF > "$OUTFILE"
 #!/usr/bin/env bash
 export IMAGE_FILENAME=$IMAGE_FILENAME
 export IMAGE_PATH=$IMAGE_PATH
@@ -24,7 +26,9 @@ export BASE_IMAGE_NAME=$IMAGE_NAME
 export IMAGE_URL=$IMAGE_URL
 export CHECKSUM_URL=$CHECKSUM_URL
 export MANIFEST_URL=$MANIFEST_URL
+export CHECKSUM=$CHECKSUM
+export SIG_URL=$SIG_URL
 EOF
 
 echo "Created $OUTFILE"
-cat $OUTFILE
+cat "$OUTFILE"

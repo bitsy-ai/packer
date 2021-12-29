@@ -27,16 +27,27 @@ runs:
     run: |
       ls dist/
       . dist/${{ inputs.image_name }}.sh
+      echo ::set-output name=image_filename::"$IMAGE_FILENAME"
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
+      echo ::set-output name=checksum::"$CHECKSUM"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
+      echo ::set-output name=sig_url::"$SIG_URL"
 
   - name: Upload to GCP_BUCKET
     shell: bash
     id: release
+    env:
+      IMAGE_VARIANT: ${{ inputs.IMAGE_VARIANT }}
+      IMAGE_FILENAME: ${{ steps.packer.outputs.image_filename }}
+      IMAGE_URL: ${{ steps.packer.outputs.image_url }}
+      CHECKSUM: ${{ steps.packer.outputs.checksum }}
+      CHECKSUM_URL: ${{ steps.packer.outputs.checksum_url }}
+      MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
+      SIG_URL: ${{ steps.packer.outputs.manifest_url }}
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
       ./tools/nightly-release.sh
