@@ -12,7 +12,7 @@ BODY=$(cat <<EOF
   "sig_url": "$SIG_URL",
   "checksum": "$CHECKSUM",
   "checksum_url": "$CHECKSUM_URL",
-  "release_channel": "stable"
+  "release_channel": "nightly"
 }
 EOF
 )

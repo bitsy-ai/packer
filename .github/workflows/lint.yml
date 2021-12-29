@@ -1,13 +1,24 @@
+name: Lint
 on: 
   push:
     branches: [ main, devel ]
   pull_request:
     branches: [ main, devel ]
 jobs:
-  lint:
+  packer-validate:
+    name: Packer Validate
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
     - run: |
         make validate
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+       scandir: './tools'
