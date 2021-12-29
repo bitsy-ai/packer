@@ -1,36 +1,50 @@
-name: 'Publish nightly image'
-description: 'Publish image stored as Github Artifact'
+name: 'Publish image to CDN'
+description: 'Publish image to CDN via gsutils'
 inputs:
   DISCORD_WEBHOOK:
     description: 'Publish using Discord webhook'
-    required: false
+    required: true
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
+
 runs:
   using: "composite"
   steps:
   - uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.IMAGE_NAME }}
+      name: ${{ inputs.image_name }}
       path: dist
+  - name: Write deploy key
+    shell: bash
+    run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
+  - name: Activate Service Account
+    shell: bash
+    run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
   - name: Create environment artifacts
     id: packer
     shell: bash
     run: |
       ls dist/
-      . dist/${{ inputs.IMAGE_NAME }}.sh
+      . dist/${{ inputs.image_name }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
+
+  - name: Upload to GCP_BUCKET
+    shell: bash
+    run: |
+      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
     uses: Ilshidur/action-discord@master
     with:
       args: |
-        🧪 NEW nightly `${{ steps.packer.outputs.image_stamp }}`
-        ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        💜 New image: `${{ steps.packer.outputs.image_stamp }}`
+        [Download](${{ steps.packer.outputs.image_url }})
+        [Manifest](${{ steps.packer.outputs.manifest_url }})
+        [Checksum](${{ steps.packer.outputs.checksum_url }})

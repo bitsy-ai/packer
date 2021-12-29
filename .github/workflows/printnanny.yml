@@ -40,25 +40,8 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
 
   nightly-printnanny-os:
-    environment: nightly
-    needs: [ build-printnanny-os ]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image_name:
-          - printnanny-os-bullseye-arm64
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - id: publish-nightly
-      uses: ./.github/workflows/scripts/publish-nightly
-      with:
-        IMAGE_NAME: ${{ matrix.image_name }}
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-    
-  stable-printnanny-os:
     environment: stable
-    needs: [ nightly-printnanny-os ]
+    needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -122,26 +105,9 @@ jobs:
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
-
-  nightly-octoprint-os:
-    environment: nightly
-    needs: [ build-octoprint-os ]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image_name: [ printnanny-os-octoprint-bullseye-arm64 ]
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v2
-    - id: publish-nightly
-      uses: ./.github/workflows/scripts/publish-nightly
-      with:
-        IMAGE_NAME: ${{ matrix.image_name }}
-        DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
     
-  stable-octoprint-os:
-    environment: stable
-    needs: [ nightly-octoprint-os ]
+  nightly-octoprint-os:
+    needs: [ build-octoprint-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
