@@ -11,6 +11,10 @@ variable "image_name" {
   type = string
 }
 
+variable "base_image_id" {
+    type = string
+}
+
 variable "base_image_name" {
   type = string
 }
