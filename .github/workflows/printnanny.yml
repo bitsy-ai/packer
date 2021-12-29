@@ -82,6 +82,7 @@ jobs:
         variant: [ desktop, slim ]
         include:
           - image_name: printnanny-os-desktop-bullseye-arm64--octoprint
+            ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
@@ -90,6 +91,7 @@ jobs:
             platform: debian
             variant: desktop
           - image_name: printnanny-os-slim-bullseye-arm64--octoprint
+            ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
@@ -124,6 +126,7 @@ jobs:
         uses: ./.github/workflows/scripts/build
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
+          ANSIBLE_PLAYBOOK: ${{ matrix.ansible_playbook }}
           ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
           PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
