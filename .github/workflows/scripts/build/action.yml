@@ -4,6 +4,8 @@ inputs:
   IMAGE_NAME:
     description: 'Name of image'
     required: true
+  ANSIBLE_PLAYBOOK:
+    required: false
   ANSIBLE_EXTRA_VARS:
     description: 'Ensure ansible extra vars created'
     required: true
@@ -35,6 +37,11 @@ runs:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
+  - name: Append ansible_playbook to packer vars
+    shell: bash
+    run: |
+      echo "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }} >> ${{ inputs.PACKER_VAR_FILE }}"
+    if: ${{ inputs.ANSIBLE_PLAYBOOK }}
   - name: Make image from Packer template
     shell: bash
     run: |
