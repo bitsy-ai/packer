@@ -12,7 +12,8 @@ variable "image_name" {
 }
 
 variable "base_image_id" {
-    type = string
+  type = string
+  default = ""
 }
 
 variable "base_image_stamp" {
