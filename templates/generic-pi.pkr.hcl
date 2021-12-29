@@ -2,11 +2,6 @@ locals {
   DATESTAMP = formatdate("YYYY-MM-DD-hhmm", timestamp())
 }
 
-variable "release_channel" {
-    type = string
-    default = "nightly"
-}
-
 variable "ansible_extra_vars" {
   type    = string
   default = "vars/generic-pi.ansiblevars.yml"
@@ -14,6 +9,11 @@ variable "ansible_extra_vars" {
 
 variable "image_name" {
   type = string
+}
+
+variable "base_image_id" {
+  type = string
+  default = ""
 }
 
 variable "base_image_stamp" {
@@ -150,10 +150,9 @@ build {
           image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_stamp = "${local.DATESTAMP}-${var.image_name}"
           image_name = "${var.image_name}"
-          release_channel = "${var.release_channel}"
           datestamp = "${local.DATESTAMP}"
+          base_image_id = "${var.base_image_id}"
           base_image_stamp = "${var.base_image_stamp}"
-          base_image_manifest_url = "${var.base_image_manifest_url}"
           base_image_checksum = "${var.base_image_checksum}"
           base_image_ext = "${var.base_image_ext}"
           base_image_url = "${var.base_image_url}"
