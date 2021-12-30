@@ -51,6 +51,11 @@ variable "image_size" {
     default = "3.6G"
 }
 
+variable "dryrun" {
+  type = bool
+  default = false
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum     = "${var.base_image_checksum}"
