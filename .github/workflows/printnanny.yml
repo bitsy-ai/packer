@@ -46,8 +46,6 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-      - run: |
-          echo "image_name=\"${{ matrix.image_name }}\"" >> ${{ matrix.packer_var_file }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
