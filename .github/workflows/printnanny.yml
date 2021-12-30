@@ -76,7 +76,6 @@ jobs:
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-          DRYRUN: ${{ github.event.inputs.dryrun }}
 
   build-octoprint-os:
     environment: nightly
@@ -157,7 +156,6 @@ jobs:
         with:
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-          DRYRUN: ${{ github.event.inputs.dryrun }}
 
   build-repetier-os:
     environment: nightly

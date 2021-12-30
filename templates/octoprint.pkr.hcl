@@ -107,12 +107,6 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  // provisioner "shell-local" {
-  //   inline = [
-  //     "./tools/pishrink.sh -sp dist/${local.DATESTAMP}-${var.image_name}.img",
-  //   ]
-  // }
-
   post-processors {
     # chain compress -> artifice -> checksum
     # compress .img into tarball
@@ -146,6 +140,7 @@ build {
           base_image_checksum = "${var.base_image_checksum}"
           base_image_ext = "${var.base_image_ext}"
           base_image_url = "${var.base_image_url}"
+          dryrun = "${var.dryrun}
         }
       }
     }
