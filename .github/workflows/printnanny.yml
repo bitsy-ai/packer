@@ -1,6 +1,11 @@
 name: Print Nanny OS
 on:
   workflow_dispatch:
+    inputs:
+      dryrun:
+        description: 'Dry run: false|true'    
+        required: true
+        default: 'false'
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
@@ -53,7 +58,7 @@ jobs:
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
-
+          DRYRUN: ${{ github.event.inputs.dryrun }}
   nightly-printnanny-os:
     environment: stable
     needs: [ build-printnanny-os ]
@@ -135,6 +140,7 @@ jobs:
           PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
+          DRYRUN: ${{ github.event.inputs.dryrun }}
 
   nightly-octoprint-os:
     needs: [ build-octoprint-os ]

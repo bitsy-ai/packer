@@ -29,7 +29,7 @@ inputs:
   GPG_SUBKEY_FINGERPRINT:
     default: 9E3B2AB15DB076E4
   DRYRUN:
-    default: '0'
+    default: 'false'
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -49,7 +49,11 @@ runs:
   - name: Make image from Packer template
     shell: bash
     run: |
-      PACKER_CMD="build --timestamp-ui -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" -var "dryrun=${{ fromJSON(inputs.DRYRUN) }}" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}"
+      PACKER_CMD='build --timestamp-ui \
+        -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" \
+        -var "dryrun=${{ fromJSON(inputs.DRYRUN) }}"\
+        -var-file ${{ inputs.PACKER_VAR_FILE }} \
+        ${{ inputs.PACKER_TEMPLATE_FILE }}'
       make packer-build
 
   - name: Create environment var files
