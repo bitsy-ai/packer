@@ -4,8 +4,8 @@ PACKER_TEMPLATE_FILE ?= templates/generic-pi.pkr.hcl
 PLAYBOOK_FILE ?= playbooks/printnanny/slim.yml
 DIST_DIR ?= dist
 BUILD_DIR ?= build
-DRYRUN ?= false
 
+DRYRUN ?= false
 PACKER_CMD ?= build --timestamp-ui -var "playbook_file=${PLAYBOOK_FILE}" -var "dryrun=${DRYRUN}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var "dryrun=${DRYRUN}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
