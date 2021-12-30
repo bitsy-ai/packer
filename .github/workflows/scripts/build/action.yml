@@ -46,6 +46,10 @@ runs:
       echo 'playbook_file="${{ inputs.ANSIBLE_PLAYBOOK }}"' >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
     if: ${{ inputs.ANSIBLE_PLAYBOOK }} != ""
+  - name: Cat packer vars
+    shell: bash
+    run: |
+      cat ${{ inputs.PACKER_VAR_FILE }}
   - name: Make image from Packer template
     shell: bash
     run: |
