@@ -5,3 +5,4 @@ ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
 base_image_ext = ".zip"
 image_size = "5G"
 image_name = "printnanny-os"
+dryrun = false

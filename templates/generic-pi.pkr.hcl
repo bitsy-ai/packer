@@ -97,11 +97,11 @@ build {
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     scripts = [
-      "tools/dist-upgrade"
+      "tools/dist-upgrade.sh"
     ]
     environment_vars = [
       "DATESTAMP=${local.DATESTAMP}",
-      "IMAGE_VERSION=${local.DATESTAMP}-${var.image_name}"
+      "IMAGE_VERSION=${local.DATESTAMP}-${var.image_name}",
       "DRYRUN=${var.dryrun}"
     ]
   }
