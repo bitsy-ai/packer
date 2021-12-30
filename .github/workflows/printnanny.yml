@@ -42,7 +42,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v2
       - run: |
-          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/${{ matrix.packer_var_file }}
+          echo "image_name=\"${{ matrix.image_name }}\"" >> ${{ matrix.packer_var_file }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
@@ -119,11 +119,11 @@ jobs:
           echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
           echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
 
-          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/${{ matrix.packer_var_file }}
-          echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> vars/${{ matrix.packer_var_file }}
-          echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/${{ matrix.packer_var_file }}
-          echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/${{ matrix.packer_var_file }}
-          echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> vars/${{ matrix.packer_var_file }}
+          echo "image_name=\"${{ matrix.image_name }}\"" >> ${{ matrix.packer_var_file }}
+          echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ matrix.packer_var_file }}
+          echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ matrix.packer_var_file }}
+          echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ matrix.packer_var_file }}
+          echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> ${{ matrix.packer_var_file }}
           cat vars/octoprint.pkrvars.hcl
       - id: build
         uses: ./.github/workflows/scripts/build
