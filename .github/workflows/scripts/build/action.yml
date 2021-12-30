@@ -49,12 +49,12 @@ runs:
   - name: Make image from Packer template
     shell: bash
     run: |
-      make packer-build PACKER_CMD=build --timestamp-ui \
+      make packer-build PACKER_CMD=(build --timestamp-ui \
         -var "image_name=${{ inputs.IMAGE_NAME }}" \
         -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" \
         -var "dryrun=${{ fromJSON(inputs.DRYRUN) }}" \
         -var-file ${{ inputs.PACKER_VAR_FILE }} \
-        ${{ inputs.PACKER_TEMPLATE_FILE }}
+        ${{ inputs.PACKER_TEMPLATE_FILE }})
 
   - name: Create environment var files
     shell: bash
