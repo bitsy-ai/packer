@@ -42,7 +42,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v2
       - run: |
-          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/octoprint.pkrvars.hcl
+          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/${{ matrifx.packer_var_file }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
@@ -119,11 +119,11 @@ jobs:
           echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
           echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
 
-          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/octoprint.pkrvars.hcl
-          echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> vars/octoprint.pkrvars.hcl
-          echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/octoprint.pkrvars.hcl
-          echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/octoprint.pkrvars.hcl
-          echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> vars/octoprint.pkrvars.hcl
+          echo "image_name=\"${{ matrix.image_name }}\"" >> vars/${{ matrifx.packer_var_file }}
+          echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> vars/${{ matrifx.packer_var_file }}
+          echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> vars/${{ matrifx.packer_var_file }}
+          echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> vars/${{ matrifx.packer_var_file }}
+          echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> vars/${{ matrifx.packer_var_file }}
           cat vars/octoprint.pkrvars.hcl
       - id: build
         uses: ./.github/workflows/scripts/build
