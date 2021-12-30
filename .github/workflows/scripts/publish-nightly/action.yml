@@ -7,6 +7,8 @@ inputs:
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
+  DRYRUN:
+    default: 'false'
 
 runs:
   using: "composite"
@@ -37,9 +39,25 @@ runs:
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
       echo ::set-output name=sig_url::"$SIG_URL"
 
+  - name: (DRYRUN) Publish nightly releases
+    shell: bash
+    id: release
+    if: ${{ fromJSON(inputs.DRYRUN) == true }}
+    env:
+      IMAGE_VARIANT: ${{ inputs.IMAGE_VARIANT }}
+      IMAGE_FILENAME: ${{ steps.packer.outputs.image_filename }}
+      IMAGE_URL: ${{ steps.packer.outputs.image_url }}
+      CHECKSUM: ${{ steps.packer.outputs.checksum }}
+      CHECKSUM_URL: ${{ steps.packer.outputs.checksum_url }}
+      MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
+      SIG_URL: ${{ steps.packer.outputs.manifest_url }}
+    run: |
+      echo "(DRYRUN) gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/"
+
   - name: Publish nightly releases
     shell: bash
     id: release
+    if: ${{ fromJSON(inputs.DRYRUN) == false }}
     env:
       IMAGE_VARIANT: ${{ inputs.IMAGE_VARIANT }}
       IMAGE_FILENAME: ${{ steps.packer.outputs.image_filename }}
@@ -62,6 +80,7 @@ runs:
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
     uses: Ilshidur/action-discord@master
+    if: ${{ fromJSON(inputs.DRYRUN) == false }}
     with:
       args: |
         💜 New image: `${{ steps.packer.outputs.image_stamp }}`
