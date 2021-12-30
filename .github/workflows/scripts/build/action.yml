@@ -50,6 +50,7 @@ runs:
     shell: bash
     run: |
       PACKER_CMD='build --timestamp-ui \
+        -var "image_name=${{ inputs.IMAGE_NAME }}" \
         -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" \
         -var "dryrun=${{ fromJSON(inputs.DRYRUN) }}"\
         -var-file ${{ inputs.PACKER_VAR_FILE }} \
