@@ -108,7 +108,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo reboot"
+      "reboot"
     ]
     expect_disconnect = true
     pause_after = "10s"

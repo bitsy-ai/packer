@@ -15,7 +15,7 @@ then
     echo "(DRYRUN) DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade"
 
 else
-    DEBIAN_FRONTEND=noninteractive sudo apt-get update
-    DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libfuse2
-    DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade
+    DEBIAN_FRONTEND=noninteractive apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y libfuse2
+    DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
 fi
