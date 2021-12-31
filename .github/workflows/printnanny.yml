@@ -46,6 +46,10 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
+      - name: Echo inputs
+        run: |
+          echo dryrun=${{ fromJSON(inputs.DRYRUN) == false }}
+          echo dryrun=${{ fromJSON(inputs.DRYRUN) == true }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
@@ -122,7 +126,6 @@ jobs:
           echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
           echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
 
-          echo "image_name=\"${{ matrix.image_name }}\"" >> ${{ matrix.packer_var_file }}
           echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ matrix.packer_var_file }}
           echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ matrix.packer_var_file }}
           echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ matrix.packer_var_file }}
