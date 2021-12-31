@@ -263,7 +263,6 @@ jobs:
   publish:
     needs: [ build-printnanny-os, build-octoprint-os ]
     runs-on: ubuntu-latest
-    environment: stable
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
