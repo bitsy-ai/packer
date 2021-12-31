@@ -5,13 +5,9 @@ set -ue
 
 BODY=$(cat <<EOF
 {
-  "name": "${IMAGE_FILENAME}",
+  "name": "$IMAGE_FILENAME",
   "variant": "$IMAGE_VARIANT",
-  "image_url": "$IMAGE_URL",
-  "manifest_url": "$MANIFEST_URL",
-  "sig_url": "$SIG_URL",
-  "checksum": "$CHECKSUM",
-  "checksum_url": "$CHECKSUM_URL",
+  "zip_url": "$ZIP_URL",
   "release_channel": "nightly"
 }
 EOF
