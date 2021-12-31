@@ -1,0 +1,36 @@
+name: Publish OS Images
+on:
+  workflow_dispatch:
+
+env:
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  GCP_BUCKET: print-nanny-cdn
+  CDN_BASE_URL: https://cdn.print-nanny.com
+jobs:
+  publish:
+    strategy:
+      matrix:
+        artifact:
+          - printnanny-os-desktop-bullseye-arm64
+          - printnanny-os-slim-bullseye-arm64
+          - printnanny-os-desktop-bullseye-arm64-octprint
+          - printnanny-os-slim-bullseye-arm64-octoprint
+        include:
+          - artifact: printnanny-os-desktop-bullseye-arm64
+            variant: base_desktop
+          - artifact: printnanny-os-slim-bullseye-arm64
+            variant: slim_desktop
+          - artifact: printnanny-os-desktop-bullseye-arm64-octoprint
+            variant: base_desktop
+          - artifact: printnanny-os-slim-bullseye-arm64-octoprint
+            variant: slim_desktop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build-printnanny.yml
+          workflow_conclusion: success
