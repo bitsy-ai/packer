@@ -7,7 +7,9 @@ inputs:
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
-
+  PRINTNANNY_API_TOKEN:
+    description: 'Release Service user API token'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -35,11 +37,12 @@ runs:
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
 
-  - name: Upload to GCP_BUCKET
+  - name: Publish Release
     shell: bash
     id: release
     env:
-      PRINT_NANNY_API_TOKEN: ${{ Secrets }}
+      PRINTNANNY_API_TOKEN: ${{ inputs.PRINTNANNY_API_TOKEN }}
+      PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
       ./tools/nightly-release.sh
