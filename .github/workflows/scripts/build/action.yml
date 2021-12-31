@@ -68,6 +68,7 @@ runs:
     run: |
       echo ${{ inputs.GPG_PASSPHRASE }} | gpg --pinentry-mode loopback --batch --yes --passphrase-fd 0 --detach-sig -u ${{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
   - name: Tar dist
+    shell: bash
     run: tar -cvzf dist.tar.gz -C dist .
   - uses: actions/upload-artifact@v2
     with:
