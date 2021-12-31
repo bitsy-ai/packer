@@ -45,13 +45,13 @@ runs:
     run: |
       cat ${{ inputs.PACKER_VAR_FILE }}
       make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
-    if: ${{ fromJSON(inputs.DRYRUN) }}
+    if: ${{ fromJSON(inputs.DRYRUN) == false }}
   - name: Make image from Packer template
     shell: bash
     run: |
       cat ${{ inputs.PACKER_VAR_FILE }}
       make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=playbooks/dryrun.yml" -var "dryrun=true" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
-    if: ${{ fromJSON(inputs.DRYRUN) }}
+    if: ${{ fromJSON(inputs.DRYRUN) == true }}
 
   - name: Create environment var files
     shell: bash
