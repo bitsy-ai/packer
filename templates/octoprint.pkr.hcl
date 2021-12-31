@@ -118,7 +118,7 @@ build {
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
+          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_stamp = "${local.DATESTAMP}-${var.image_name}"
           image_name = "${var.image_name}"

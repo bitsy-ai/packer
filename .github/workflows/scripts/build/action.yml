@@ -30,16 +30,47 @@ inputs:
     default: 9E3B2AB15DB076E4
   DRYRUN:
     default: 'false'
+  
+  artifact:
+    description: 'Optional artifact to use as base image'
+    default: ''
+    required: false
+
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
     value: ${{ inputs.IMAGE_NAME }}
+  image_path:
+    description: "Desired cdn upload path"
+    value: ${{ steps.manifest.image_path }}
+
 runs:
   using: "composite"
   steps:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
+  - name: Download source artifact
+    if: ${{ inputs.artifact != '' }}
+    uses: actions/download-artifact@v2
+    with:
+      name: ${{ inputs.artifact }}
+      path: src
+  - name: Unpack source artifact and set packer vars
+    if: ${{ inputs.artifact != '' }}
+    shell: bash
+    run: |
+      ls -ahl src/
+      tar -zxf src/artifact.tar.gz
+      echo ::set-output name=base_image_checksum::"$(cat src/sha256.checksum | cut -d $'\t' -f 1)"
+      echo ::set-output name=base_image_file::"$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)"
+      echo ::set-output name=base_image_stamp::"$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
+
+      echo "base_image_name=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_url=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_stamp=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_checksum=\"$(cat src/sha256.checksum | cut -d $'\t' -f 1)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      cat ${{ inputs.PACKER_VAR_FILE }}
   - name: (DRYRUN) Make image from Packer template
     shell: bash
     run: |
@@ -53,11 +84,10 @@ runs:
       make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=playbooks/dryrun.yml" -var "dryrun=true" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
     if: ${{ inputs.DRYRUN == 'true' }}
 
-  - name: Create environment var files
+  - name: Create env.sh
     shell: bash
     run: |
       ./tools/manifest-to-env.sh
-      ls -ahl dist/
   - name: Receive author key
     shell: bash
     run: |
@@ -67,8 +97,25 @@ runs:
     shell: bash
     run: |
       echo ${{ inputs.GPG_PASSPHRASE }} | gpg --pinentry-mode loopback --batch --yes --passphrase-fd 0 --detach-sig -u ${{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
+  - name: Set outputs from env.sh
+    shell: bash
+    run: |
+      . dist/env.sh
+      echo ::set-output name=image_path::"$IMAGE_PATH"    
+      ls -ahl dist/
+  - name: Create tarball
+    shell: bash
+    run: |
+        tar -C dist/ -cvf artifact.tar.gz .
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
-      path: dist/
-  
+      path: artifact.tar.gz
+  - id: cdn
+    uses: ./.github/workflows/scripts/cdn-upload
+    with:
+      src: dist/
+      dest: ${{ steps.build.outputs.image_path }}
+      service_account: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+      service_key: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+      bucket: ${{ env.GCP_BUCKET }}

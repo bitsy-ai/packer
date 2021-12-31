@@ -1,0 +1,59 @@
+name: 'Publish image to CDN'
+description: 'Publish image to CDN via gsutils'
+inputs:
+  src:
+    description: 'Path to local directory to publish. Default: dist/'
+    required: true
+    default: 'dist/'
+  service_account:
+    description: 'Name of service account'
+    required: true
+  service_key:
+    description: 'key.json belonging to GCP Service Account'
+    required: true
+  dest:
+    description: 'GCP Storage key to publish artifact under (excluding bucket name)'
+    required: true
+  bucket:
+    description: 'GCP Storage bucket name. Default: print-nanny-cdn'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Write deploy key
+    shell: bash
+    run: echo ${{ inputs.service_key }} > key.json
+  - name: Activate Service Account
+    shell: bash
+    run: gcloud auth activate-service-account ${{ inputs.GCP_SERVICE_ACCOUNT }} --key-file=key.json
+  - name: Print Env
+    id: manifest
+    shell: bash
+    run: |
+      ls -ahl ${{ inputs.src }}
+      cat ${{ inputs.src}}/env.sh
+      . ${{ inputs.src}}/env.sh
+      echo ::set-output name=image_stamp::"$IMAGE_STAMP"
+      echo ::set-output name=image_name::"$IMAGE_NAME"
+      echo ::set-output name=image_path::"$IMAGE_PATH"
+  - name: Publish Release to CDN
+    shell: bash
+    id: release
+    env:
+      PRINTNANNY_API_TOKEN: ${{ inputs.PRINTNANNY_API_TOKEN }}
+      PRINTNANNY_API_URL: "https://print-nanny.com"
+    run: |
+      gsutil rsync artifact.tar.gz gs://${{ inputs.bucket}}/${{ inputs.dest }}
+
+  # - name: Send Discord notification
+  #   env:
+  #     DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+  #   uses: Ilshidur/action-discord@master
+  #   with:
+  #     args: |
+  #       💜 New image: `${{ steps.manifest.outputs.image_stamp }}`
+  #       [Download](${{ steps.manifest.outputs.image_url }})
+  #       [Release Page](${{ steps.release.url }})
+  #       [Manifest](${{ steps.manifest.outputs.manifest_url }})
+  #       [Checksum](${{ steps.manifest.outputs.checksum_url }})
