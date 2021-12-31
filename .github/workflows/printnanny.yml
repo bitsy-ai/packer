@@ -97,7 +97,7 @@ jobs:
         platform: [ debian ]
         variant: [ desktop, slim ]
         include:
-          - image_name: printnanny-os-desktop-bullseye-arm64--octoprint
+          - image_name: printnanny-os-desktop-bullseye-arm64-octoprint
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -106,7 +106,7 @@ jobs:
             os: bullseye
             platform: debian
             variant: desktop
-          - image_name: printnanny-os-slim-bullseye-arm64--octoprint
+          - image_name: printnanny-os-slim-bullseye-arm64-octoprint
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -161,19 +161,19 @@ jobs:
           - slim
         include:
           - variant: desktop
-            image_name: printnanny-os-desktop-bullseye-arm64--octoprint
+            image_name: printnanny-os-desktop-bullseye-arm64-octoprint
           - variant: slim
-            image_image: printnanny-os-slim-bullseye-arm64--octoprint
+            image_image: printnanny-os-slim-bullseye-arm64-octoprint
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
       - id: publish-nightly
         uses: ./.github/workflows/scripts/publish-nightly
         with:
-          IMAGE_VARIANT: ${{ matrix.variant }}
-          IMAGE_NAME: ${{ matrix.image_name }}
-          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-          PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
+          IMAGE_VARIANT: '${{ matrix.variant }}'
+          IMAGE_NAME: '${{ matrix.image_name }}'
+          DISCORD_WEBHOOK: '${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}'
+          PRINTNANNY_API_TOKEN: '${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}'
   build-repetier-os:
     environment: nightly
     needs: [ build-printnanny-os ]
@@ -185,7 +185,7 @@ jobs:
         platform: [ debian ]
         variant: [ desktop, slim ]
         include:
-          - image_name: printnanny-os-desktop-bullseye-arm64--repetier
+          - image_name: printnanny-os-desktop-bullseye-arm64-repetier
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -194,7 +194,7 @@ jobs:
             os: bullseye
             platform: debian
             variant: desktop
-          - image_name: printnanny-os-slim-bullseye-arm64--repetier
+          - image_name: printnanny-os-slim-bullseye-arm64-repetier
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -212,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image_name: [ printnanny-os-desktop-bullseye-arm64--repetier ]
+        image_name: [ printnanny-os-desktop-bullseye-arm64-repetier ]
     steps:
       - name: Echo Step
         run: echo "TODO publishing ${{ matrix.image_name }}"
@@ -228,7 +228,7 @@ jobs:
         platform: [ debian ]
         variant: [ desktop, slim ]
         include:
-          - image_name: printnanny-os-desktop-bullseye-arm64--mainsail
+          - image_name: printnanny-os-desktop-bullseye-arm64-mainsail
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -237,7 +237,7 @@ jobs:
             os: bullseye
             platform: debian
             variant: desktop
-          - image_name: printnanny-os-slim-bullseye-arm64--mainsail
+          - image_name: printnanny-os-slim-bullseye-arm64-mainsail
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
             packer_template_file: templates/octoprint.pkr.hcl
@@ -255,7 +255,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image_name: [ printnanny-os-desktop-bullseye-arm64--mainsail ]
+        image_name: [ printnanny-os-desktop-bullseye-arm64-mainsail ]
     steps:
       - name: Echo Step
         run: echo "TODO publishing ${{ matrix.image_name }}"

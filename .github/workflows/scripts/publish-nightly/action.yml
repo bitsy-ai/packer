@@ -12,6 +12,7 @@ inputs:
     required: true
   IMAGE_VARIANT:
     required: true
+    description: 'desktop|slim'
 runs:
   using: "composite"
   steps:
