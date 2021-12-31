@@ -140,7 +140,7 @@ build {
           base_image_checksum = "${var.base_image_checksum}"
           base_image_ext = "${var.base_image_ext}"
           base_image_url = "${var.base_image_url}"
-          dryrun = "${var.dryrun}
+          dryrun = "${var.dryrun}"
         }
       }
     }
