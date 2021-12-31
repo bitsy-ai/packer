@@ -26,43 +26,27 @@ runs:
     shell: bash
     run: |
       ls dist/
+      cat dist/${{ inputs.image_name }}.sh
       . dist/${{ inputs.image_name }}.sh
-      echo ::set-output name=image_filename::"$IMAGE_FILENAME"
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
-      echo ::set-output name=checksum::"$CHECKSUM"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
-      echo ::set-output name=sig_url::"$SIG_URL"
 
-  - name: Publish nightly releases
+  - name: Upload to GCP_BUCKET
     shell: bash
     id: release
     env:
-      IMAGE_VARIANT: ${{ inputs.IMAGE_VARIANT }}
-      IMAGE_FILENAME: ${{ steps.packer.outputs.image_filename }}
-      IMAGE_URL: ${{ steps.packer.outputs.image_url }}
-      CHECKSUM: ${{ steps.packer.outputs.checksum }}
-      CHECKSUM_URL: ${{ steps.packer.outputs.checksum_url }}
-      MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
-      SIG_URL: ${{ steps.packer.outputs.manifest_url }}
+      PRINT_NANNY_API_TOKEN: ${{ Secrets }}
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-      res=$(PRINTNANNY_API_URL="${{ inputs.SANDBOX_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.SANDBOX_API_TOKEN }} ./tools/nightly-release.sh)
-      echo "Published to ${{ inputs.SANDBOX_API_URL }}"
-      echo "$res"
-    # TODO enable after prod rollout
-    # res=$(PRINTNANNY_API_URL="${{ inputs.PROD_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.PROD_API_TOKEN }} ./tools/nightly-release.sh)
-    # echo "Published to ${{ inputs.PROD_API_URL }}"
-    # echo "$res"
-
+      ./tools/nightly-release.sh
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
     uses: Ilshidur/action-discord@master
-    if: ${{ fromJSON(inputs.DRYRUN) == false }}
     with:
       args: |
         💜 New image: `${{ steps.packer.outputs.image_stamp }}`
