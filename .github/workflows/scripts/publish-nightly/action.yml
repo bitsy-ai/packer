@@ -17,6 +17,11 @@ runs:
     with:
       name: ${{ inputs.image_name }}
       path: dist
+  - name: Untar artifact
+    run: |
+      ls -ahl dist
+      tar -xzf dist/dist.tar.gz
+      ls -ahl dist
   - name: Write deploy key
     shell: bash
     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
