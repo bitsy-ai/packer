@@ -10,6 +10,8 @@ inputs:
   PRINTNANNY_API_TOKEN:
     description: 'Release Service user API token'
     required: true
+  IMAGE_VARIANT:
+    required: true
 runs:
   using: "composite"
   steps:
@@ -52,7 +54,7 @@ runs:
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
       . dist/${{ inputs.image_name }}.sh
-      ./tools/nightly-release.sh
+      IMAGE_VARIANT=${{ inputs.IMAGE_VARIANT }}./tools/nightly-release.sh
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
