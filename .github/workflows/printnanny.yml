@@ -58,7 +58,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
   nightly-printnanny-os:
-    environment: stable
+    environment: nightly
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
