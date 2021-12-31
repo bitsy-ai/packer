@@ -119,7 +119,7 @@ jobs:
           path: img
       - name: Untar artifact
         run: |
-          tar -xzf dist.tar.gz -C img/
+          tar -xzf img/dist.tar.gz -C img/
           ls -ahl img
       - name: ls artifact contents
         run: |
