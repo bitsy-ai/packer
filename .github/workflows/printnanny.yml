@@ -116,7 +116,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ${{ matrix.base_image }}
-          path: img
+          path: dist.tar.gz
+      - name: Untar artifact
+        run: mkdir img; tar -xzf dist.tar.gz img
       - name: ls artifact contents
         run: |
           ls -ahl img

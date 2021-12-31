@@ -124,18 +124,6 @@ build {
   }
 
   post-processors {
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      format = ".tar.gz"
-    }
-    # register tarball as new artiface
-    post-processor "artifice" {
-      files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      ]
-    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "dist/{{.ChecksumType}}.checksum"
