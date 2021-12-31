@@ -26,13 +26,13 @@ runs:
   - name: Activate Service Account
     shell: bash
     run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
-  - name: Create environment artifacts
-    id: packer
+  - name: Print Env
+    id: manifest
     shell: bash
     run: |
-      ls dist/
-      cat dist/${{ inputs.IMAGE_NAME }}.sh
-      . dist/${{ inputs.IMAGE_NAME }}.sh
+      ls -ahl ${{ inputs.IMAGE_NAME }}/
+      cat ${{ inputs.IMAGE_NAME }}/env.sh
+      . ${{ inputs.IMAGE_NAME }}/env.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
@@ -40,24 +40,25 @@ runs:
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
 
-  - name: Publish Release
+  - name: Publish Release to CDN
     shell: bash
     id: release
     env:
       PRINTNANNY_API_TOKEN: ${{ inputs.PRINTNANNY_API_TOKEN }}
       PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
-      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-      . dist/${{ inputs.IMAGE_NAME }}.sh
+      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.manifest.outputs.image_path }}/
+      . ${{ inputs.IMAGE_NAME }}/env.sh
       IMAGE_VARIANT=${{ inputs.IMAGE_VARIANT }} ./tools/nightly-release.sh
-  - name: Send Discord notification
-    env:
-      DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
-    uses: Ilshidur/action-discord@master
-    with:
-      args: |
-        💜 New image: `${{ steps.packer.outputs.image_stamp }}`
-        [Download](${{ steps.packer.outputs.image_url }})
-        [Release Page](${{ steps.release.url }})
-        [Manifest](${{ steps.packer.outputs.manifest_url }})
-        [Checksum](${{ steps.packer.outputs.checksum_url }})
+
+  # - name: Send Discord notification
+  #   env:
+  #     DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}
+  #   uses: Ilshidur/action-discord@master
+  #   with:
+  #     args: |
+  #       💜 New image: `${{ steps.manifest.outputs.image_stamp }}`
+  #       [Download](${{ steps.manifest.outputs.image_url }})
+  #       [Release Page](${{ steps.release.url }})
+  #       [Manifest](${{ steps.manifest.outputs.manifest_url }})
+  #       [Checksum](${{ steps.manifest.outputs.checksum_url }})
