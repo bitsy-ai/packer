@@ -127,10 +127,7 @@ jobs:
         run: |
           tar -xzf img/dist.tar.gz -C img/
           ls -ahl img
-      - name: ls artifact contents
-        run: |
-          ls -ahl img
-      - name: Rename img
+      - name: Read img manifest
         id: manifest
         run: |
           echo ::set-output name=base_image_checksum::"$(cat img/sha256.checksum | cut -d $'\t' -f 1)"
@@ -173,7 +170,7 @@ jobs:
       - id: publish-nightly
         uses: ./.github/workflows/scripts/publish-nightly
         with:
-          IMAGE_VARIENT: ${{ matrix.variant }}
+          IMAGE_VARIANT: ${{ matrix.variant }}
           IMAGE_NAME: ${{ matrix.image_name }}
           DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
           PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
