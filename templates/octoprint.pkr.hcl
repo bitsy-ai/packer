@@ -51,6 +51,11 @@ variable "image_size" {
     default = "3.6G"
 }
 
+variable "dryrun" {
+  type = bool
+  default = false
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum     = "${var.base_image_checksum}"
@@ -102,25 +107,7 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  // provisioner "shell-local" {
-  //   inline = [
-  //     "./tools/pishrink.sh -sp dist/${local.DATESTAMP}-${var.image_name}.img",
-  //   ]
-  // }
-
   post-processors {
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      format = ".tar.gz"
-    }
-    # register tarball as new artiface
-    post-processor "artifice" {
-      files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      ]
-    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "dist/{{.ChecksumType}}.checksum"
@@ -141,6 +128,7 @@ build {
           base_image_checksum = "${var.base_image_checksum}"
           base_image_ext = "${var.base_image_ext}"
           base_image_url = "${var.base_image_url}"
+          dryrun = "${var.dryrun}"
         }
       }
     }

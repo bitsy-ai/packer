@@ -33,8 +33,8 @@ variable "base_image_ext" {
 }
 
 variable "base_image_manifest_url" {
-    type = string
-    default = ""
+  type = string
+  default = ""
 }
 
 variable "playbook_file" {
@@ -43,8 +43,13 @@ variable "playbook_file" {
 }
 
 variable "image_size" {
-    type = string
-    default = "3.6G"
+  type = string
+  default = "3.6G"
+}
+
+variable "dryrun" {
+  type = bool
+  default = false
 }
 
 source "arm" "base_image" {
@@ -84,7 +89,6 @@ source "arm" "base_image" {
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
-
 build {
   sources = ["source.arm.base_image"]
   name = "ansible"
@@ -92,17 +96,19 @@ build {
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
-    inline = [
-      "echo ${local.DATESTAMP}-${var.image_name} > /boot/image_version.txt",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get install -y libfuse2",
+    scripts = [
+      "tools/dist-upgrade.sh"
+    ]
+    environment_vars = [
+      "DATESTAMP=${local.DATESTAMP}",
+      "IMAGE_VERSION=${local.DATESTAMP}-${var.image_name}",
+      "DRYRUN=${var.dryrun}"
     ]
   }
+
   provisioner "shell" {
     inline = [
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get update",
-      "DEBIAN_FRONTEND=noninteractive sudo apt-get -y dist-upgrade",
-      "sudo reboot"
+      "reboot"
     ]
     expect_disconnect = true
     pause_after = "10s"
@@ -117,25 +123,7 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  // provisioner "shell-local" {
-  //   inline = [
-  //     "./tools/pishrink.sh -sp dist/${local.DATESTAMP}-${var.image_name}.img",
-  //   ]
-  // }
-
   post-processors {
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      format = ".tar.gz"
-    }
-    # register tarball as new artiface
-    post-processor "artifice" {
-      files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
-      ]
-    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "dist/{{.ChecksumType}}.checksum"
@@ -156,6 +144,7 @@ build {
           base_image_checksum = "${var.base_image_checksum}"
           base_image_ext = "${var.base_image_ext}"
           base_image_url = "${var.base_image_url}"
+          dryrun = "${var.dryrun}"
         }
       }
     }

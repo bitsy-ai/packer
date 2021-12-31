@@ -7,14 +7,24 @@ inputs:
   IMAGE_NAME:
     description: 'Name of image to build'
     required: true
-
+  PRINTNANNY_API_TOKEN:
+    description: 'Release Service user API token'
+    required: true
+  IMAGE_VARIANT:
+    required: true
 runs:
   using: "composite"
   steps:
   - uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.image_name }}
+      name: ${{ inputs.IMAGE_NAME }}
       path: dist
+  - name: Untar artifact
+    shell: bash
+    run: |
+      mkdir -p dist
+      tar -xzf dist/dist.tar.gz -C dist/
+      ls -ahl dist
   - name: Write deploy key
     shell: bash
     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
@@ -26,38 +36,25 @@ runs:
     shell: bash
     run: |
       ls dist/
-      . dist/${{ inputs.image_name }}.sh
-      echo ::set-output name=image_filename::"$IMAGE_FILENAME"
+      cat dist/${{ inputs.IMAGE_NAME }}.sh
+      . dist/${{ inputs.IMAGE_NAME }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
       echo ::set-output name=image_url::"$IMAGE_URL"
-      echo ::set-output name=checksum::"$CHECKSUM"
       echo ::set-output name=checksum_url::"$CHECKSUM_URL"
       echo ::set-output name=manifest_url::"$MANIFEST_URL"
-      echo ::set-output name=sig_url::"$SIG_URL"
 
-  - name: Publish nightly releases
+  - name: Publish Release
     shell: bash
     id: release
     env:
-      IMAGE_VARIANT: ${{ inputs.IMAGE_VARIANT }}
-      IMAGE_FILENAME: ${{ steps.packer.outputs.image_filename }}
-      IMAGE_URL: ${{ steps.packer.outputs.image_url }}
-      CHECKSUM: ${{ steps.packer.outputs.checksum }}
-      CHECKSUM_URL: ${{ steps.packer.outputs.checksum_url }}
-      MANIFEST_URL: ${{ steps.packer.outputs.manifest_url }}
-      SIG_URL: ${{ steps.packer.outputs.manifest_url }}
+      PRINTNANNY_API_TOKEN: ${{ inputs.PRINTNANNY_API_TOKEN }}
+      PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-      res=$(PRINTNANNY_API_URL="${{ inputs.SANDBOX_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.SANDBOX_API_TOKEN }} ./tools/nightly-release.sh)
-      echo "Published to ${{ inputs.SANDBOX_API_URL }}"
-      echo "$res"
-    # TODO enable after prod rollout
-    # res=$(PRINTNANNY_API_URL="${{ inputs.PROD_API_URL }}" PRINTNANNY_API_TOKEN=${{ inputs.PROD_API_TOKEN }} ./tools/nightly-release.sh)
-    # echo "Published to ${{ inputs.PROD_API_URL }}"
-    # echo "$res"
-
+      . dist/${{ inputs.IMAGE_NAME }}.sh
+      IMAGE_VARIANT=${{ inputs.IMAGE_VARIANT }} ./tools/nightly-release.sh
   - name: Send Discord notification
     env:
       DISCORD_WEBHOOK: ${{ inputs.DISCORD_WEBHOOK }}

@@ -28,6 +28,8 @@ inputs:
     default: 5B656A39DDA22020
   GPG_SUBKEY_FINGERPRINT:
     default: 9E3B2AB15DB076E4
+  DRYRUN:
+    default: 'false'
 outputs:
   artifact:
     description: "Reference to artifact name to be used in subsequent steps"
@@ -38,18 +40,18 @@ runs:
   - name: Ensure ansible_extra_vars on disk
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
-  - name: Append ansible_playbook to packer vars
+  - name: (DRYRUN) Make image from Packer template
     shell: bash
     run: |
-      echo 'playbook_file="${{ inputs.ANSIBLE_PLAYBOOK }}"' >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
-    if: ${{ inputs.ANSIBLE_PLAYBOOK }} != ""
+      make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
+    if: ${{ inputs.DRYRUN == 'false' }}
   - name: Make image from Packer template
     shell: bash
     run: |
-      make packer-build \
-        PACKER_VAR_FILE=${{ inputs.PACKER_VAR_FILE}} \
-        PACKER_TEMPLATE_FILE=${{ inputs.PACKER_TEMPLATE_FILE }}
+      cat ${{ inputs.PACKER_VAR_FILE }}
+      make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=playbooks/dryrun.yml" -var "dryrun=true" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
+    if: ${{ inputs.DRYRUN == 'true' }}
 
   - name: Create environment var files
     shell: bash
@@ -65,8 +67,11 @@ runs:
     shell: bash
     run: |
       echo ${{ inputs.GPG_PASSPHRASE }} | gpg --pinentry-mode loopback --batch --yes --passphrase-fd 0 --detach-sig -u ${{ inputs.GPG_SUBKEY_FINGERPRINT }} dist/sha256.checksum
+  - name: Tar dist
+    shell: bash
+    run: tar -cvzf dist.tar.gz -C dist .
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}
-      path: dist/
+      path: dist.tar.gz
   
