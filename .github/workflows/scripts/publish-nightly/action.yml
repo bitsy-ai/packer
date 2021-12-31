@@ -17,13 +17,14 @@ runs:
   steps:
   - uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.image_name }}
-      path: dist
+      name: ${{ inputs.IMAGE_NAME }}
+      path: ${{ inputs.IMAGE_NAME }}
   - name: Untar artifact
     shell: bash
     run: |
+
       mkdir -p dist
-      tar -xzf dist/dist.tar.gz -C dist/
+      tar -xzf ${{ inputs.IMAGE_NAME }}/dist.tar.gz -C dist/
       ls -ahl dist
   - name: Write deploy key
     shell: bash
@@ -36,8 +37,8 @@ runs:
     shell: bash
     run: |
       ls dist/
-      cat dist/${{ inputs.image_name }}.sh
-      . dist/${{ inputs.image_name }}.sh
+      cat dist/${{ inputs.IMAGE_NAME }}.sh
+      . dist/${{ inputs.IMAGE_NAME }}.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
@@ -53,7 +54,7 @@ runs:
       PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
-      . dist/${{ inputs.image_name }}.sh
+      . dist/${{ inputs.IMAGE_NAME }}.sh
       IMAGE_VARIANT=${{ inputs.IMAGE_VARIANT }} ./tools/nightly-release.sh
   - name: Send Discord notification
     env:
