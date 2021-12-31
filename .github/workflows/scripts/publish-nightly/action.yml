@@ -51,6 +51,7 @@ runs:
       PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
       gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.packer.outputs.image_path }}/
+      . dist/${{ inputs.image_name }}.sh
       ./tools/nightly-release.sh
   - name: Send Discord notification
     env:
