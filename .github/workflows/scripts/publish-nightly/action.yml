@@ -22,7 +22,7 @@ runs:
     run: |
       ls -ahl dist
       tar -xzf dist/dist.tar.gz
-      ls -ahl distchin4rum
+      ls -ahl dist
   - name: Write deploy key
     shell: bash
     run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
