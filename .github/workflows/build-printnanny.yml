@@ -123,10 +123,6 @@ jobs:
         with:
           name: ${{ matrix.base_image }}
           path: img
-      - name: Untar artifact
-        run: |
-          tar -xzf img/dist.tar.gz -C img/
-          ls -ahl img
       - name: Read img manifest
         id: manifest
         run: |
