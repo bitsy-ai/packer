@@ -66,7 +66,6 @@ jobs:
         with:
           src: dist/
           dest: ${{ steps.build.outputs.image_path }}
-          service_account: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
           service_key: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
           bucket: ${{ env.GCP_BUCKET }}
   build-octoprint-os:

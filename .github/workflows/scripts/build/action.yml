@@ -106,7 +106,7 @@ runs:
   - name: Create tarball
     shell: bash
     run: |
-        tar -C dist/ -cvf artifact.tar.gz .
+        tar -C dist/ -czvf artifact.tar.gz .
   - uses: actions/upload-artifact@v2
     with:
       name: ${{ inputs.IMAGE_NAME }}

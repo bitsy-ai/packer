@@ -5,9 +5,6 @@ inputs:
     description: 'Path to local directory to publish. Default: dist/'
     required: true
     default: 'dist/'
-  service_account:
-    description: 'Name of service account'
-    required: true
   service_key:
     description: 'key.json belonging to GCP Service Account'
     required: true
@@ -21,12 +18,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Write deploy key
-    shell: bash
-    run: echo ${{ inputs.service_key }} > key.json
-  - name: Activate Service Account
-    shell: bash
-    run: gcloud auth activate-service-account ${{ inputs.GCP_SERVICE_ACCOUNT }} --key-file=key.json
+  - id: 'auth'
+    uses: 'google-github-actions/auth@v0'
+    with:
+    credentials_json: '${{ inputs.service_key }}'
+  - name: 'Set up Cloud SDK'
+    uses: 'google-github-actions/setup-gcloud@v0'
   - name: Print Env
     id: manifest
     shell: bash
