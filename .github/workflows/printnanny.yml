@@ -48,8 +48,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Echo inputs
         run: |
-          echo dryrun=${{ fromJSON(inputs.DRYRUN) == false }}
-          echo dryrun=${{ fromJSON(inputs.DRYRUN) == true }}
+          echo dryrun=${{ inputs.DRYRUN == 'false' }}
+          echo dryrun=${{ inputs.DRYRUN == 'true' }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
