@@ -8,4 +8,4 @@ RUN apt-get update -qq \
     git \
     unzip
 
-RUN pip install --no-cache ansible
+RUN pip3 install ansible
