@@ -20,8 +20,8 @@ runs:
   - name: Untar artifact
     shell: bash
     run: |
-      ls -ahl dist
-      tar -xzf dist/dist.tar.gz
+      mkdir -p dist
+      tar -xzf dist.tar.gz -C dist/
       ls -ahl dist
   - name: Write deploy key
     shell: bash
