@@ -24,18 +24,19 @@ clean:
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
+	docker push bitsyai/packer-builder-arm-ansible
 
-packer-build: $(DIST_DIR) $(BUILD_DIR) docker-builder-image
+packer-build: $(DIST_DIR) $(BUILD_DIR)
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible ${PACKER_CMD}
 
-dryrun: $(DIST_DIR) $(BUILD_DIR) docker-builder-image
+dryrun: $(DIST_DIR) $(BUILD_DIR)
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible ${DRYRUN_CMD}
 
-validate: $(DIST_DIR) $(BUILD_DIR) docker-builder-image
+validate: $(DIST_DIR) $(BUILD_DIR)
 	docker run \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible ${VALIDATE_CMD}
