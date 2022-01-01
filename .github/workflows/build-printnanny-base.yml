@@ -83,13 +83,6 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPO_GITHUB_TOKEN }}
-          repository: bitsy-ai/printnanny-webapp
-          event-type: deploy-stable
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
       - name: Invoke workflow without inputs
         uses: benc-uk/workflow-dispatch@v1
         with:
