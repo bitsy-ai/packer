@@ -1,4 +1,5 @@
 name: PrintNanny OS Base
+id: printnanny-os-base
 on:
   workflow_dispatch:
     inputs:

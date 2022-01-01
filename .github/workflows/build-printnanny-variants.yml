@@ -45,7 +45,7 @@ jobs:
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: build-printnanny-base.yml
+          workflow: printnanny-os-base
           workflow_conclusion: success
           name: ${{ matrix.base_image }}
       - id: build
