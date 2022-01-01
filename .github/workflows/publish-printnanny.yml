@@ -33,6 +33,6 @@ jobs:
         uses: ./.github/workflows/scripts/cdn-upload
         with:
           DISCORD_WEBHOOK: ''
-          IMAGE_NAME: ${{ matrix.artifact }}
+          image_name: ${{ matrix.artifact }}
           PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
           IMAGE_VARIANT: ${{ matrix.variant }}
