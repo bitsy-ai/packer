@@ -96,7 +96,7 @@ runs:
     shell: bash
     run: |
       ./tools/manifest-to-env.sh
-      echo ::set-output name=image_path::"$(cat dist/manifest.json| jq '.builds[0].custom_data.image_path' -r)"
+      echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[0].custom_data.image_path' -r)"
   - name: Receive author key
     shell: bash
     run: |

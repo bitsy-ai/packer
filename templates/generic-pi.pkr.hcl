@@ -57,6 +57,10 @@ variable "base_publish_path" {
   default = "printnanny-os"
 }
 
+variable "hostgroup" {
+  type = string
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum_url     = "${var.base_image_checksum}"
@@ -123,7 +127,7 @@ build {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
     ]
-    inventory_file_template = "default ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
     playbook_file   = "${var.playbook_file}"
   }

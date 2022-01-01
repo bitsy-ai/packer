@@ -24,7 +24,7 @@ jobs:
           - image_name: printnanny-os-desktop-bullseye-arm64-octoprint
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
@@ -33,7 +33,7 @@ jobs:
           - image_name: printnanny-os-slim-bullseye-arm64-octoprint
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
@@ -68,7 +68,7 @@ jobs:
           - image_name: printnanny-os-desktop-bullseye-arm64-repetier
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
@@ -77,7 +77,7 @@ jobs:
           - image_name: printnanny-os-slim-bullseye-arm64-repetier
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
@@ -99,7 +99,7 @@ jobs:
           - image_name: printnanny-os-desktop-bullseye-arm64-mainsail
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-desktop-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye
@@ -108,7 +108,7 @@ jobs:
           - image_name: printnanny-os-slim-bullseye-arm64-mainsail
             ansible_playbook: ./playbooks/octoprint/generic.yml
             base_image: printnanny-os-slim-bullseye-arm64
-            packer_template_file: templates/octoprint.pkr.hcl
+            packer_template_file: templates/generic.pkr.hcl
             packer_var_file: vars/octoprint.pkrvars.hcl
             arch: arm64
             os: bullseye

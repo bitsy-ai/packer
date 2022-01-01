@@ -6,3 +6,4 @@ base_image_ext = ".zip"
 image_size = "5G"
 image_name = "printnanny-os"
 dryrun = false
+hostgroup = "printnanny"
