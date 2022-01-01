@@ -61,13 +61,7 @@ jobs:
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
-      - id: cdn
-        uses: ./.github/workflows/scripts/cdn-upload
-        with:
-          src: dist/
-          dest: ${{ steps.build.outputs.image_path }}
-          service_key: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
-          bucket: ${{ env.GCP_BUCKET }}
+
   build-octoprint-os:
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
