@@ -47,6 +47,7 @@ jobs:
         with:
           workflow: build-printnanny-base.yml
           workflow_conclusion: success
+          name: ${{ matrix.base_image }}
       - id: build
         uses: ./.github/workflows/scripts/build
         with:

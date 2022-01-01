@@ -2,8 +2,8 @@ name: Publish Image
 on:
   workflow_dispatch:
     inputs:
-      artifact:
-        description: 'Name of artifact to download'    
+      workflow:
+        description: 'workflow.yml containing artifacts'    
         required: true
       bucket:
         description: 'Destination bucket'
@@ -19,22 +19,6 @@ env:
   GCP_BUCKET: printnanny-downloads
 jobs:
   publish:
-    strategy:
-      matrix:
-        artifact:
-          - printnanny-os-desktop-bullseye-arm64
-          - printnanny-os-slim-bullseye-arm64
-          - printnanny-os-desktop-bullseye-arm64-octprint
-          - printnanny-os-slim-bullseye-arm64-octoprint
-        include:
-          - artifact: printnanny-os-desktop-bullseye-arm64
-            variant: base_desktop
-          - artifact: printnanny-os-slim-bullseye-arm64
-            variant: slim_desktop
-          - artifact: printnanny-os-desktop-bullseye-arm64-octoprint
-            variant: base_desktop
-          - artifact: printnanny-os-slim-bullseye-arm64-octoprint
-            variant: slim_desktop
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -42,7 +26,7 @@ jobs:
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: build-printnanny.yml
+          workflow: ${{ inputs.workflow }}
           workflow_conclusion: success
       - name: Publish artifact to downloads.print-nanny.com
         id: publish
