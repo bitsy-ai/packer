@@ -47,7 +47,7 @@ jobs:
           packer_template_file: ${{ matrix.packer_template_file }}
           gpg_sign_key: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
-          dryrun ${{ github.event.inputs.dryrun }}
+          dryrun: ${{ github.event.inputs.dryrun }}
       - name: Trigger downstream image builds
         uses: benc-uk/workflow-dispatch@v1
         with:
