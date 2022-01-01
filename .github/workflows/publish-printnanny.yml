@@ -5,8 +5,7 @@ on:
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
-  GCP_BUCKET: print-nanny-cdn
-  CDN_BASE_URL: https://cdn.print-nanny.com
+  GCP_BUCKET: printnanny-downloads
 jobs:
   publish:
     strategy:
