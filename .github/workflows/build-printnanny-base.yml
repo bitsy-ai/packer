@@ -16,7 +16,7 @@ jobs:
         variant: [ desktop, slim ]
         include:
           - image_name: printnanny-os-desktop-bullseye-arm64
-            ansible_playbook: ./playbooks/printnanny/slim.yml
+            ansible_playbook: ./playbooks/printnanny/desktop.yml
             ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
             packer_template_file: templates/generic-pi.pkr.hcl
             packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
