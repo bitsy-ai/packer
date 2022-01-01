@@ -1,45 +1,39 @@
 name: 'Publish image to CDN'
 description: 'Publish image to CDN via gsutils'
 inputs:
-  DISCORD_WEBHOOK:
-    description: 'Publish using Discord webhook'
+  src:
+    description: 'Path to local directory to publish. Default: dist/'
     required: true
-  IMAGE_NAME:
-    description: 'Name of image to build'
+    default: 'dist/'
+  service_key:
+    description: 'key.json belonging to GCP Service Account'
     required: true
-  PRINTNANNY_API_TOKEN:
-    description: 'Release Service user API token'
+  dest:
+    description: 'GCP Storage key to publish artifact under (excluding bucket name)'
     required: true
-  IMAGE_VARIANT:
+  bucket:
+    description: 'GCP Storage bucket name. Default: print-nanny-cdn'
     required: true
-    description: 'desktop|slim'
+
 runs:
   using: "composite"
   steps:
-  - uses: actions/download-artifact@v2
+  - id: 'auth'
+    uses: 'google-github-actions/auth@v0'
     with:
-      name: ${{ inputs.IMAGE_NAME }}
-      path: dist
-  - name: Write deploy key
-    shell: bash
-    run: echo $GCP_SERVICE_ACCOUNT_KEY > key.json
-  - name: Activate Service Account
-    shell: bash
-    run: gcloud auth activate-service-account $GCP_SERVICE_ACCOUNT --key-file=key.json
+        credentials_json: '${{ inputs.service_key }}'
+  - name: 'Set up Cloud SDK'
+    uses: 'google-github-actions/setup-gcloud@v0'
   - name: Print Env
     id: manifest
     shell: bash
     run: |
-      ls -ahl ${{ inputs.IMAGE_NAME }}/
-      cat ${{ inputs.IMAGE_NAME }}/env.sh
-      . ${{ inputs.IMAGE_NAME }}/env.sh
+      ls -ahl ${{ inputs.src }}
+      cat ${{ inputs.src}}/env.sh
+      . ${{ inputs.src}}/env.sh
       echo ::set-output name=image_stamp::"$IMAGE_STAMP"
       echo ::set-output name=image_name::"$IMAGE_NAME"
       echo ::set-output name=image_path::"$IMAGE_PATH"
-      echo ::set-output name=image_url::"$IMAGE_URL"
-      echo ::set-output name=checksum_url::"$CHECKSUM_URL"
-      echo ::set-output name=manifest_url::"$MANIFEST_URL"
-
   - name: Publish Release to CDN
     shell: bash
     id: release
@@ -47,9 +41,7 @@ runs:
       PRINTNANNY_API_TOKEN: ${{ inputs.PRINTNANNY_API_TOKEN }}
       PRINTNANNY_API_URL: "https://print-nanny.com"
     run: |
-      gsutil rsync -r dist/ gs://$GCP_BUCKET/${{ steps.manifest.outputs.image_path }}/
-      . ${{ inputs.IMAGE_NAME }}/env.sh
-      IMAGE_VARIANT=${{ inputs.IMAGE_VARIANT }} ./tools/nightly-release.sh
+      gsutil rsync artifact.tar.gz gs://${{ inputs.bucket}}/${{ inputs.dest }}
 
   # - name: Send Discord notification
   #   env:

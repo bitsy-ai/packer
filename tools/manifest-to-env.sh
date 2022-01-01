@@ -16,7 +16,7 @@ MANIFEST_URL=${CDN_BASE_URL}/$IMAGE_PATH/manifest.json
 SIG_URL="${CDN_BASE_URL}.sig"
 CHECKSUM=$(cat dist/sha256.checksum)
 
-OUTFILE="$OUT_DIR/$IMAGE_NAME.sh"
+OUTFILE="$OUT_DIR/env.sh"
 cat << EOF > "$OUTFILE"
 #!/usr/bin/env bash
 export IMAGE_FILENAME="$IMAGE_FILENAME"

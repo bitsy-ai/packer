@@ -5,8 +5,7 @@ on:
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
-  GCP_BUCKET: print-nanny-cdn
-  CDN_BASE_URL: https://cdn.print-nanny.com
+  GCP_BUCKET: printnanny-downloads
 jobs:
   publish:
     strategy:
@@ -34,3 +33,11 @@ jobs:
         with:
           workflow: build-printnanny.yml
           workflow_conclusion: success
+      - name: Publish artifact to downloads.print-nanny.com
+        id: publish
+        uses: ./.github/workflows/scripts/cdn-upload
+        with:
+          DISCORD_WEBHOOK: ''
+          IMAGE_NAME: ${{ matrix.artifact }}
+          PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
+          IMAGE_VARIANT: ${{ matrix.variant }}
