@@ -1,6 +1,11 @@
-name: Publish OS Images
+name: Publish Image
 on:
   workflow_dispatch:
+    inputs:
+      artifact:
+        description: 'Name of artifact to download'    
+        required: true
+        default: 'false'
 
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}

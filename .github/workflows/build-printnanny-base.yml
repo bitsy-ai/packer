@@ -57,25 +57,14 @@ jobs:
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
-
-  # publish:
-  #   needs: [ build-printnanny-os ]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout branch
-  #       uses: actions/checkout@v2
-  #     - name: Repository Dispatch
-  #       uses: peter-evans/repository-dispatch@v1
-  #       with:
-  #         token: ${{ secrets.REPO_GITHUB_TOKEN }}
-  #         repository: bitsy-ai/printnanny-webapp
-  #         event-type: deploy-stable
-  #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
-  #     - name: Invoke workflow without inputs
-  #       uses: benc-uk/workflow-dispatch@v1
-  #       with:
-  #         workflow: Publish OS Images
-  #         token: ${{ secrets.REPO_GITHUB_TOKEN }}
+      - name: Publish artifact to downloads.print-nanny.com
+        id: publish
+        uses: ./.github/workflows/scripts/cdn-upload
+        with:
+          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
+          IMAGE_NAME: ${{ matrix.artifact }}
+          PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
+          IMAGE_VARIANT: ${{ matrix.variant }}
 
   variants:
     needs: [ build-printnanny-os ]
