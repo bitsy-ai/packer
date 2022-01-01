@@ -48,12 +48,12 @@ jobs:
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
-      - name: Invoke workflow without inputs
+      - name: Trigger downstream image builds
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: PrintNanny OS Variants
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-      - name: Invoke workflow without inputs
+      - name: Publish image
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Publish Image
