@@ -61,7 +61,6 @@ jobs:
           ARTIFACT: ${{ matrix.base_image }}
 
   build-repetier-os:
-    needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -93,7 +92,6 @@ jobs:
         run: echo "TODO building ${{ matrix.image_name }}"
 
   build-mainsail-os:
-    needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
