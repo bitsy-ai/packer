@@ -5,7 +5,13 @@ on:
       artifact:
         description: 'Name of artifact to download'    
         required: true
-        default: 'false'
+      bucket:
+        description: 'Destination bucket'
+        default: 'printnanny-downloads'
+        required: true
+      path:
+        description: 'Upload path (without bucket name)'
+        required: true
 
 env:
   GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}

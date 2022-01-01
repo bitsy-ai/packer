@@ -6,16 +6,7 @@ on:
         description: 'Dry run: false|true'    
         required: true
         default: 'false'
-env:
-  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
-  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
-  GCP_BUCKET: print-nanny-cdn
-  CDN_BASE_URL: https://cdn.print-nanny.com
 jobs:
-
-###
-# begin printnanny base image jobs
-###
   build-printnanny-os:
     strategy:
       matrix:
@@ -57,22 +48,16 @@ jobs:
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
-      - name: Publish artifact to downloads.print-nanny.com
-        id: publish
-        uses: ./.github/workflows/scripts/cdn-upload
-        with:
-          artifact: ${{ steps.build.outputs.artifact }}
-          dest: ${{ steps.build.outputs.image_path }}
-          survice_key: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
-          bucket: printnanny-downloads
-  variants:
-    needs: [ build-printnanny-os ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v2
       - name: Invoke workflow without inputs
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: PrintNanny OS Variants
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
+      - name: Invoke workflow without inputs
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Publish Image
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          inputs:
+            artifact: ${{ steps.build.outputs.artifact }}
+            path: ${{ steps.build.outputs.image_path }}
