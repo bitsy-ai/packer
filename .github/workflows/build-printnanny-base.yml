@@ -61,11 +61,10 @@ jobs:
         id: publish
         uses: ./.github/workflows/scripts/cdn-upload
         with:
-          DISCORD_WEBHOOK: ${{ secrets.PRINT_NANNY_DISCORD_DEPLOY_WEBHOOK }}
-          IMAGE_NAME: ${{ matrix.artifact }}
-          PRINTNANNY_API_TOKEN: ${{ secrets.PROD_RELEASE_SERVICE_TOKEN }}
-          IMAGE_VARIANT: ${{ matrix.variant }}
-
+          artifact: ${{ steps.build.outputs.artifact }}
+          dest: ${{ steps.build.outputs.image_path }}
+          survice_key: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+          bucket: printnanny-downloads
   variants:
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest

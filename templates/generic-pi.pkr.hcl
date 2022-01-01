@@ -139,8 +139,7 @@ build {
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          base_publish_path = "${var.base_publish_path}"
-          image_path = "${var.base_publish_path}/${var.image_name}/${local.DATESTAMP}-${var.image_name}.tar.gz"
+          image_path = "printnanny-os/${var.image_name}/nightly/${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
           image_stamp = "${local.DATESTAMP}-${var.image_name}"
           image_name = "${var.image_name}"

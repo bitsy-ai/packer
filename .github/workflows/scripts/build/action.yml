@@ -42,7 +42,7 @@ outputs:
     value: ${{ inputs.IMAGE_NAME }}
   image_path:
     description: "Desired cdn upload path"
-    value: ${{ steps.manifest.image_path }}
+    value: ${{ steps.manifest.outputs.image_path }}
 
 runs:
   using: "composite"
@@ -85,9 +85,11 @@ runs:
     if: ${{ inputs.DRYRUN == 'true' }}
 
   - name: Create env.sh
+    id: manifest
     shell: bash
     run: |
       ./tools/manifest-to-env.sh
+      echo ::set-output name=image_path::"$(cat dist/manifest.json| jq '.builds[0].custom_data.image_path' -r)"
   - name: Receive author key
     shell: bash
     run: |
