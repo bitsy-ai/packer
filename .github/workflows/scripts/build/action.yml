@@ -76,7 +76,7 @@ runs:
       echo "base_image_name=\"file:${PWD}/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
       echo "base_image_url=\"file:${PWD}/src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
       echo "base_image_stamp=\"file:${PWD}/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_checksum=\"file:${PWD}/src/sha256.checksum \"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_checksum=\"file:${PWD}/src/sha256.checksum\"" >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
   - name: (dryrun) Make image from Packer template
     shell: bash
