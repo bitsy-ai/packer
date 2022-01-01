@@ -73,9 +73,9 @@ runs:
       echo ::set-output name=base_image_file::"$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)"
       echo ::set-output name=base_image_stamp::"$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
 
-      echo "base_image_name=\"file:src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_url=\"file:src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_stamp=\"file:src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_name=\"file:./src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_url=\"file:./src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_stamp=\"file:./src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
       echo "base_image_checksum=\"$(cat src/sha256.checksum | cut -d $'\t' -f 1)\"" >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
   - name: (dryrun) Make image from Packer template
