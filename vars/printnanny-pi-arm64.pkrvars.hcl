@@ -1,7 +1,7 @@
 base_image_stamp = "2021-10-30-raspios-bullseye-arm64"
 base_image_name = "2021-10-30-raspios-bullseye-arm64"
 base_image_url = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip"
-base_image_checksum = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/2021-10-30-raspios-bullseye-arm64.zip.sha256"
+base_image_checksum = "b35425de5b4c5b08959aa9f29b9c0f730cd0819fe157c3e37c56a6d0c5c13ed8"
 ansible_extra_vars = "vars/generic-pi-arm64.ansiblevars.yml"
 base_image_ext = ".zip"
 image_size = "5G"
