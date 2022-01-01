@@ -40,14 +40,14 @@ jobs:
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
-          IMAGE_NAME: ${{ matrix.image_name }}
-          ANSIBLE_PLAYBOOK: ${{ matrix.ansible_playbook }}
-          ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
-          PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
-          PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
-          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
-          DRYRUN: ${{ github.event.inputs.dryrun }}
+          image_name: ${{ matrix.image_name }}
+          ansible_playbook: ${{ matrix.ansible_playbook }}
+          ansible_extra_vars: ${{ matrix.ansible_extra_vars }}
+          packer_var_file: ${{ matrix.packer_var_file }}
+          packer_template_file: ${{ matrix.packer_template_file }}
+          gpg_sign_key: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
+          dryrun: ${{ github.event.inputs.dryrun }}
       - name: Trigger downstream image builds
         uses: benc-uk/workflow-dispatch@v1
         with:

@@ -4,7 +4,7 @@ inputs:
   DISCORD_WEBHOOK:
     description: 'Publish using Discord webhook'
     required: true
-  IMAGE_NAME:
+  image_name:
     description: 'Name of image to build'
     required: true
   PRINTNANNY_API_TOKEN:

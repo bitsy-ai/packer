@@ -1,37 +1,42 @@
 name: 'Build image'
 description: 'Build image from Packer template'
 inputs:
-  IMAGE_NAME:
+  image_name:
     description: 'Name of image'
     required: true
-  ANSIBLE_PLAYBOOK:
+  ansible_playbook:
     required: false
     default: ""
-  ANSIBLE_EXTRA_VARS:
+  ansible_extra_vars:
     description: 'Ensure ansible extra vars created'
     required: true
-  PACKER_VAR_FILE:
+  packer_var_file:
     description: 'Path to vars/*.pkrvars.hcl file'
     required: true
-  PACKER_TEMPLATE_FILE:
+  packer_template_file:
     description: 'Path to templates/*.hcl template to build'
     required: true
-  GPG_SIGN_KEY:
+  gpg_sign_key:
     required: true
-  GPG_PASSPHRASE:
+  gpg_passphrase:
     required: true
-  GPG_KEYSERVER:
+  gog_keyserver:
     default: https://github.com/leigh-johnson.gpg
-  GPG_AUTHOR_FINGERPRINT:
+  gpg_author_fingerprint:
     default: E359E824041B36D7
-  GPG_PROJECT_FINGERPRINT:
+  gpg_project_fingerprint:
     default: 5B656A39DDA22020
-  GPG_SUBKEY_FINGERPRINT:
+  gpg_subkey_fingerprint:
     default: 9E3B2AB15DB076E4
-  DRYRUN:
+  dryrun:
+    description: 'Skip ansible run'
     default: 'false'
   
-  ARTIFACT:
+  artifact_name:
+    description: 'Optional artifact to use as base image'
+    default: ''
+    required: false
+  artifact_workflow:
     description: 'Optional artifact to use as base image'
     default: ''
     required: false
@@ -51,13 +56,15 @@ runs:
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Download source artifact
-    if: ${{ inputs.ARTIFACT != '' }}
-    uses: actions/download-artifact@v2
+    if: ${{ inputs.artifact_name != '' }}
+    uses: dawidd6/action-download-artifact@v2
     with:
-      name: ${{ inputs.ARTIFACT }}
+      workflow: build-printnanny-base.yml
+      workflow_conclusion: success
+      name: ${{ inputs.artifact_name }}
       path: src
   - name: Unpack source artifact and set packer vars
-    if: ${{ inputs.ARTIFACT != '' }}
+    if: ${{ inputs.artifact_name != '' }}
     shell: bash
     run: |
       ls -ahl src/
@@ -66,35 +73,35 @@ runs:
       echo ::set-output name=base_image_file::"$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)"
       echo ::set-output name=base_image_stamp::"$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
 
-      echo "base_image_name=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_url=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_stamp=\"file:/build/src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
-      echo "base_image_checksum=\"$(cat src/sha256.checksum | cut -d $'\t' -f 1)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_name=\"file:src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_url=\"file:src/$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_stamp=\"file:src/$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ inputs.PACKER_VAR_FILE }}
+      echo "base_image_checksum=\"file:src/sha256.checksum \"" >> ${{ inputs.PACKER_VAR_FILE }}
       cat ${{ inputs.PACKER_VAR_FILE }}
-  - name: (DRYRUN) Make image from Packer template
+  - name: (dryrun) Make image from Packer template
     shell: bash
     run: |
       cat ${{ inputs.PACKER_VAR_FILE }}
       make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=${{ inputs.ANSIBLE_PLAYBOOK }}" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
-    if: ${{ inputs.DRYRUN == 'false' }}
+    if: ${{ inputs.dryrun == 'false' }}
   - name: Make image from Packer template
     shell: bash
     run: |
       cat ${{ inputs.PACKER_VAR_FILE }}
       make packer-build PACKER_CMD='build --timestamp-ui -var "image_name=${{ inputs.IMAGE_NAME }}" -var "playbook_file=playbooks/dryrun.yml" -var "dryrun=true" -var-file ${{ inputs.PACKER_VAR_FILE }} ${{ inputs.PACKER_TEMPLATE_FILE }}'
-    if: ${{ inputs.DRYRUN == 'true' }}
+    if: ${{ inputs.dryrun == 'true' }}
 
   - name: Create env.sh
     id: manifest
     shell: bash
     run: |
       ./tools/manifest-to-env.sh
-      echo ::set-output name=image_path::"$(cat dist/manifest.json| jq '.builds[0].custom_data.image_path' -r)"
+      echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[0].custom_data.image_path' -r)"
   - name: Receive author key
     shell: bash
     run: |
       gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
-      echo "${{ inputs.GPG_SIGN_KEY }}" | gpg --batch --allow-secret-key-import --import
+      echo "${{ inputs.gpg_sign_key }}" | gpg --batch --allow-secret-key-import --import
   - name: Sign the release
     shell: bash
     run: |
