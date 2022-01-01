@@ -1,0 +1,97 @@
+name: PrintNanny OS Base
+on:
+  workflow_dispatch:
+    inputs:
+      dryrun:
+        description: 'Dry run: false|true'    
+        required: true
+        default: 'false'
+env:
+  GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.PACKER_SERVICE_ACCOUNT_KEY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.PACKER_SERVICE_ACCOUNT }}
+  GCP_BUCKET: print-nanny-cdn
+  CDN_BASE_URL: https://cdn.print-nanny.com
+jobs:
+
+###
+# begin printnanny base image jobs
+###
+  build-printnanny-os:
+    strategy:
+      matrix:
+        os: [  bullseye ]
+        arch: [ arm64 ]
+        platform: [ debian ]
+        variant: [ desktop, slim ]
+        include:
+          - image_name: printnanny-os-desktop-bullseye-arm64
+            ansible_playbook: ./playbooks/printnanny/slim.yml
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            packer_template_file: templates/generic-pi.pkr.hcl
+            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            arch: arm64
+            os: bullseye
+            platform: debian
+            variant: desktop
+          - image_name: printnanny-os-slim-bullseye-arm64
+            ansible_playbook: ./playbooks/printnanny/slim.yml
+            ansible_extra_vars: vars/generic-pi-arm64.ansiblevars.yml
+            packer_template_file: templates/generic-pi.pkr.hcl
+            packer_var_file: vars/printnanny-pi-arm64.pkrvars.hcl
+            arch: arm64
+            os: bullseye
+            platform: debian
+            variant: slim
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - id: build
+        uses: ./.github/workflows/scripts/build
+        with:
+          IMAGE_NAME: ${{ matrix.image_name }}
+          ANSIBLE_PLAYBOOK: ${{ matrix.ansible_playbook }}
+          ANSIBLE_EXTRA_VARS: ${{ matrix.ansible_extra_vars }}
+          PACKER_VAR_FILE: ${{ matrix.packer_var_file }}
+          PACKER_TEMPLATE_FILE: ${{ matrix.packer_template_file }}
+          GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
+          DRYRUN: ${{ github.event.inputs.dryrun }}
+
+  # publish:
+  #   needs: [ build-printnanny-os ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout branch
+  #       uses: actions/checkout@v2
+  #     - name: Repository Dispatch
+  #       uses: peter-evans/repository-dispatch@v1
+  #       with:
+  #         token: ${{ secrets.REPO_GITHUB_TOKEN }}
+  #         repository: bitsy-ai/printnanny-webapp
+  #         event-type: deploy-stable
+  #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+  #     - name: Invoke workflow without inputs
+  #       uses: benc-uk/workflow-dispatch@v1
+  #       with:
+  #         workflow: Publish OS Images
+  #         token: ${{ secrets.REPO_GITHUB_TOKEN }}
+
+  variants:
+    needs: [ build-printnanny-os ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          repository: bitsy-ai/printnanny-webapp
+          event-type: deploy-stable
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      - name: Invoke workflow without inputs
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: PrintNanny OS Variants
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}

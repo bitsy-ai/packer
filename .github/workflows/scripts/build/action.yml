@@ -61,7 +61,7 @@ runs:
     shell: bash
     run: |
       ls -ahl src/
-      tar -zxf src/artifact.tar.gz
+      tar -zxvf src/artifact.tar.gz -C src/
       echo ::set-output name=base_image_checksum::"$(cat src/sha256.checksum | cut -d $'\t' -f 1)"
       echo ::set-output name=base_image_file::"$(cat src/manifest.json| jq '.builds[0].files[0].name' -r)"
       echo ::set-output name=base_image_stamp::"$(cat src/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
