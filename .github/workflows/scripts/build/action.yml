@@ -20,7 +20,7 @@ inputs:
     required: true
   gpg_passphrase:
     required: true
-  gog_keyserver:
+  gpg_keyserver:
     default: https://github.com/leigh-johnson.gpg
   gpg_author_fingerprint:
     default: E359E824041B36D7
@@ -95,12 +95,13 @@ runs:
     id: manifest
     shell: bash
     run: |
+      cat dist/manifest.json
       ./tools/manifest-to-env.sh
       echo ::set-output name=image_path::"$(cat dist/manifest.json | jq '.builds[0].custom_data.image_path' -r)"
   - name: Receive author key
     shell: bash
     run: |
-      gpg --keyserver ${{ inputs.GPG_KEYSERVER }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
+      gpg --keyserver ${{ inputs.gpg_keyserver }} --keyserver-options no-self-sigs-only --recv-keys ${{ inputs.GPG_PROJECT_FINGERPRINT }} ${{ inputs.GPG_AUTHOR_FINGERPRINT }}
       echo "${{ inputs.gpg_sign_key }}" | gpg --batch --allow-secret-key-import --import
   - name: Sign the release
     shell: bash
