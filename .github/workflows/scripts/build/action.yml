@@ -26,7 +26,7 @@ inputs:
     default: E359E824041B36D7
   gpg_project_fingerprint:
     default: 5B656A39DDA22020
-  gpg_subkey_fingerprint
+  gpg_subkey_fingerprint:
     default: 9E3B2AB15DB076E4
   dryrun:
     description: 'Skip ansible run'
