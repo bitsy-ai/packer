@@ -31,7 +31,7 @@ inputs:
   DRYRUN:
     default: 'false'
   
-  artifact:
+  ARTIFACT:
     description: 'Optional artifact to use as base image'
     default: ''
     required: false
@@ -51,13 +51,13 @@ runs:
     shell: bash
     run: make ${{ inputs.ANSIBLE_EXTRA_VARS }}
   - name: Download source artifact
-    if: ${{ inputs.artifact != '' }}
+    if: ${{ inputs.ARTIFACT != '' }}
     uses: actions/download-artifact@v2
     with:
-      name: ${{ inputs.artifact }}
+      name: ${{ inputs.ARTIFACT }}
       path: src
   - name: Unpack source artifact and set packer vars
-    if: ${{ inputs.artifact != '' }}
+    if: ${{ inputs.ARTIFACT != '' }}
     shell: bash
     run: |
       ls -ahl src/

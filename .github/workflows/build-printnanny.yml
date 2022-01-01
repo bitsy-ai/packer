@@ -99,23 +99,6 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: ${{ matrix.base_image }}
-      #     path: img
-      # - name: Read img manifest
-      #   id: manifest
-      #   run: |
-      #     echo ::set-output name=base_image_checksum::"$(cat img/sha256.checksum | cut -d $'\t' -f 1)"
-      #     echo ::set-output name=base_image_file::"$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)"
-      #     echo ::set-output name=base_image_stamp::"$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)"
-
-      #     echo "base_image_name=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_name' -r)\"" >> ${{ matrix.packer_var_file }}
-      #     echo "base_image_url=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].files[0].name' -r)\"" >> ${{ matrix.packer_var_file }}
-      #     echo "base_image_stamp=\"file:/build/img/$(cat img/manifest.json| jq '.builds[0].custom_data.image_stamp' -r)\"" >> ${{ matrix.packer_var_file }}
-      #     echo "base_image_checksum=\"$(cat img/sha256.checksum | cut -d $'\t' -f 1)\"" >> ${{ matrix.packer_var_file }}
-      #     cat vars/octoprint.pkrvars.hcl
       - id: build
         uses: ./.github/workflows/scripts/build
         with:
@@ -127,7 +110,7 @@ jobs:
           GPG_SIGN_KEY: ${{ secrets.PRINTNANNY_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.PRINTNANNY_GPG_PASSPHRASE }}
           DRYRUN: ${{ github.event.inputs.dryrun }}
-
+          ARTIFACT: ${{ matrix.base_image }}
   build-repetier-os:
     needs: [ build-printnanny-os ]
     runs-on: ubuntu-latest

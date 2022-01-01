@@ -33,9 +33,9 @@ jobs:
         with:
           workflow: build-printnanny.yml
           workflow_conclusion: success
-      - name: Publish artifact via /api/releases
+      - name: Publish artifact to downloads.print-nanny.com
         id: publish
-        uses: ./.github/workflows/scripts/build
+        uses: ./.github/workflows/scripts/cdn-upload
         with:
           DISCORD_WEBHOOK: ''
           IMAGE_NAME: ${{ matrix.artifact }}
