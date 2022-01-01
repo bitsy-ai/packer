@@ -61,6 +61,10 @@ variable "hostgroup" {
   type = string
 }
 
+variable "base_image_name" {
+  type = string
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum_url     = "${var.base_image_checksum}"
