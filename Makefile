@@ -10,8 +10,6 @@ PACKER_CMD ?= build --timestamp-ui -var "playbook_file=${PLAYBOOK_FILE}" -var-fi
 VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
 $(DIST_DIR):
 	mkdir -p $(DIST_DIR)
 
@@ -43,3 +41,26 @@ validate: $(DIST_DIR) $(BUILD_DIR)
 
 shellcheck:
 	shellcheck ./tools/*.sh
+
+
+printnanny-desktop: $(DIST_DIR)
+	mkdir -p $(DIST_DIR)/$@
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=${DIST_DIR}" \
+			-var-file printnanny-desktop-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+printnanny-slim: $(DIST_DIR)
+	mkdir -p $(DIST_DIR)/$@
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=${DIST_DIR}" \
+			-var-file printnanny-slim-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
