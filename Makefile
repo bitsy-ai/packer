@@ -51,7 +51,7 @@ printnanny-desktop: $(DIST_DIR)
 			build \
 			--timestamp-ui \
 			-var "output=${DIST_DIR}" \
-			-var-file printnanny-desktop-arm64.pkrvars.hcl \
+			-var-file vars/printnanny-desktop-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
 
 printnanny-slim: $(DIST_DIR)
@@ -62,5 +62,5 @@ printnanny-slim: $(DIST_DIR)
 			build \
 			--timestamp-ui \
 			-var "output=${DIST_DIR}" \
-			-var-file printnanny-slim-arm64.pkrvars.hcl \
+			-var-file vars/printnanny-slim-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
