@@ -10,7 +10,7 @@ PACKER_CMD ?= build --timestamp-ui -var "playbook_file=${PLAYBOOK_FILE}" -var-fi
 VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
-OUTPUT ?= ${DIST_DIR}/$@/$(shell date +'%Y-%M-%d-%k%m')
+OUTPUT ?= ${DIST_DIR}/$@/$(shell date +'%Y-%m-%d-%k%m')
 
 test: $(OUTPUT)
 	mkdir -p $(OUTPUT)
