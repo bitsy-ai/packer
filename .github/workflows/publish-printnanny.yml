@@ -2,6 +2,9 @@ name: Publish Image
 on:
   workflow_dispatch:
     inputs:
+      artifact: 
+        description: Artifact to publish
+        required: true
       workflow:
         description: 'workflow.yml containing artifacts'    
         required: true
@@ -28,6 +31,7 @@ jobs:
         with:
           workflow: ${{ inputs.workflow }}
           workflow_conclusion: success
+          name: ${{ inputs.artifact }}
       - name: Publish artifact to downloads.print-nanny.com
         id: publish
         uses: ./.github/workflows/scripts/cdn-upload
