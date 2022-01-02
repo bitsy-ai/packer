@@ -51,7 +51,7 @@ printnanny-desktop:
 		bitsyai/packer-builder-arm-ansible \
 			build \
 			--timestamp-ui \
-			-var "output=${DIST_DIR}" \
+			-var "output=$(OUTPUT)" \
 			-var-file vars/printnanny-desktop-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
 
@@ -62,6 +62,28 @@ printnanny-slim:
 		bitsyai/packer-builder-arm-ansible \
 			build \
 			--timestamp-ui \
-			-var "output=${DIST_DIR}" \
+			-var "output=$(OUTPUT)" \
 			-var-file vars/printnanny-slim-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+octoprint-desktop:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/octoprint-desktop-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+octoprint-slim:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/octoprint-slim-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
