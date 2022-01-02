@@ -59,4 +59,3 @@ jobs:
           workflow: Publish Image
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
           inputs: '{ "artifact": "{{ steps.build.outputs.artifact }}", "path": "${{ steps.build.outputs.image_path }}", "workflow": "build-printnanny-base.yml" }'
-

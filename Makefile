@@ -10,11 +10,11 @@ PACKER_CMD ?= build --timestamp-ui -var "playbook_file=${PLAYBOOK_FILE}" -var-fi
 VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-$(DIST_DIR):
-	mkdir -p $(DIST_DIR)
+OUTPUT ?= ${DIST_DIR}/$@/$(shell date +'%Y-%m-%d-%k%m')
 
+test: $(OUTPUT)
+	mkdir -p $(OUTPUT)
+	touch $(OUTPUT)/foo.txt
 clean:
 	rm -rf $(DIST_DIR)
 	rm -rf $(BUILD_DIR)
@@ -43,3 +43,47 @@ validate: $(DIST_DIR) $(BUILD_DIR)
 
 shellcheck:
 	shellcheck ./tools/*.sh
+
+printnanny-desktop:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/printnanny-desktop-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+printnanny-slim:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/printnanny-slim-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+octoprint-desktop:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/octoprint-desktop-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl
+
+octoprint-slim:
+	mkdir -p $(OUTPUT)
+	docker run -it \
+		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
+		bitsyai/packer-builder-arm-ansible \
+			build \
+			--timestamp-ui \
+			-var "output=$(OUTPUT)" \
+			-var-file vars/octoprint-slim-arm64.pkrvars.hcl \
+			templates/generic-pi.pkr.hcl

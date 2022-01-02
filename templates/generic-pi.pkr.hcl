@@ -65,6 +65,11 @@ variable "base_image_name" {
   type = string
 }
 
+variable "output" {
+  type = string
+  default = "dist"
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum     = "${var.base_image_checksum}"
@@ -91,7 +96,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "dist/${local.DATESTAMP}-${var.image_name}.img"
+  image_path                   = "${var.output}/${local.DATESTAMP}-${var.image_name}.img"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -139,10 +144,10 @@ build {
   post-processors {
     post-processor "checksum" {
         checksum_types = ["sha256"]
-        output = "dist/{{.ChecksumType}}.checksum"
+        output = "${var.output}/{{.ChecksumType}}.checksum"
     }
     post-processor "manifest" {
-        output     = "dist/manifest.json"
+        output     = "${var.output}/manifest.json"
         strip_path = true
         strip_time = true
         custom_data = {
