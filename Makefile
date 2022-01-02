@@ -42,9 +42,7 @@ validate: $(DIST_DIR) $(BUILD_DIR)
 shellcheck:
 	shellcheck ./tools/*.sh
 
-
 printnanny-desktop: $(DIST_DIR)
-	mkdir -p $(DIST_DIR)/$@
 	docker run -it \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible \
@@ -55,7 +53,6 @@ printnanny-desktop: $(DIST_DIR)
 			templates/generic-pi.pkr.hcl
 
 printnanny-slim: $(DIST_DIR)
-	mkdir -p $(DIST_DIR)/$@
 	docker run -it \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible \
