@@ -42,6 +42,11 @@ variable "image_size" {
     default = "2.4G"
 }
 
+variable "datestamp" {
+  type = string
+  default = local.DATESTAMP
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
 
@@ -112,13 +117,13 @@ build {
   post-processors {
 
     post-processor "compress" {
-      output = "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
+      output = "dist/${var.datestamp}-${var.image_name}.tar.gz"
       format = ".tar.gz"
     }
     # register tarball as new artiface
     post-processor "artifice" {
       files = [
-        "dist/${local.DATESTAMP}-${var.image_name}.tar.gz"
+        "dist/${var.datestamp}-${var.image_name}.tar.gz"
       ]
     }
     post-processor "checksum" {
@@ -131,11 +136,11 @@ build {
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "releases/${var.image_name}/${local.DATESTAMP}-${var.image_name}"
-          image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
-          image_stamp = "${local.DATESTAMP}-${var.image_name}"
+          image_path = "releases/${var.image_name}/${var.datestamp}-${var.image_name}"
+          image_filename = "${var.datestamp}-${var.image_name}.tar.gz"
+          image_stamp = "${var.datestamp}-${var.image_name}"
           image_name = "${var.image_name}"
-          datestamp = "${local.DATESTAMP}"
+          datestamp = "${var.datestamp}"
           base_image_stamp = "${var.base_image_stamp}"
           base_image_manifest_url = "${var.base_image_manifest_url}"
           base_image_checksum = "${var.base_image_checksum}"

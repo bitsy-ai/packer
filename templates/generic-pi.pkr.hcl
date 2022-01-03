@@ -70,6 +70,11 @@ variable "output" {
   default = "dist"
 }
 
+variable "datestamp" {
+  type = string
+  default = local.DATESTAMP
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum     = "${var.base_image_checksum}"
@@ -96,7 +101,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${var.output}/${local.DATESTAMP}-${var.image_name}.img"
+  image_path                   = "${var.output}/${var.datestamp}-${var.image_name}.img"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -118,8 +123,8 @@ build {
       "tools/dist-upgrade.sh"
     ]
     environment_vars = [
-      "DATESTAMP=${local.DATESTAMP}",
-      "IMAGE_VERSION=${local.DATESTAMP}-${var.image_name}",
+      "DATESTAMP=${var.datestamp}",
+      "IMAGE_VERSION=${var.datestamp}-${var.image_name}",
       "DRYRUN=${var.dryrun}"
     ]
   }
@@ -152,11 +157,11 @@ build {
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "printnanny-os/${var.image_name}/nightly/${local.DATESTAMP}-${var.image_name}.tar.gz"
-          image_filename = "${local.DATESTAMP}-${var.image_name}.tar.gz"
-          image_stamp = "${local.DATESTAMP}-${var.image_name}"
+          image_path = "printnanny-os/${var.image_name}/nightly/${var.datestamp}-${var.image_name}.tar.gz"
+          image_filename = "${var.datestamp}-${var.image_name}.tar.gz"
+          image_stamp = "${var.datestamp}-${var.image_name}"
           image_name = "${var.image_name}"
-          datestamp = "${local.DATESTAMP}"
+          datestamp = "${var.datestamp}"
           base_image_id = "${var.base_image_id}"
           base_image_stamp = "${var.base_image_stamp}"
           base_image_checksum = "${var.base_image_checksum}"
