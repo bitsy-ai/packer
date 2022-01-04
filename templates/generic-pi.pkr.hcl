@@ -7,10 +7,6 @@ variable "ansible_extra_vars" {
   default = "vars/generic-pi.ansiblevars.yml"
 }
 
-variable "image_name" {
-  type = string
-}
-
 variable "base_image_family" {
   type = string
 }
@@ -83,6 +79,17 @@ variable "release_channel" {
   default = "nightly"
 }
 
+variable "image_ext" {
+  type = string
+}
+
+locals {
+  image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
+  image_filename = "${locals.image_name}.tar.gz"
+  image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}"
+  image_url = "file:${locals.image_path}/${locals.image_filename}"
+}
+
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
   file_checksum     = "${var.base_image_checksum}"
@@ -93,6 +100,7 @@ source "arm" "base_image" {
   image_build_method    = "resize"
   image_mount_path      = "/tmp/rpi_chroot"
 
+  # TODO parameterize partition scheme for A/B swap
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
@@ -109,7 +117,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${var.output}/${var.datestamp}-${var.image_name}.img"
+  image_path                   = "${var.output}/${locals.image_path}/${locals.image_name}.img"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -120,6 +128,16 @@ source "arm" "base_image" {
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
+
+build {
+  # ensure outdir exists
+  provisioner "shell-local" {
+    inline = [
+      "mkdir -p ${locals.image_path}"
+    ]
+  }
+}
+
 build {
   sources = ["source.arm.base_image"]
   name = "ansible"
@@ -157,32 +175,56 @@ build {
   post-processors {
     post-processor "checksum" {
         checksum_types = ["sha256"]
-        output = "${var.output}/{{.ChecksumType}}.checksum"
+        output = "${var.output}/${locals.image_path}/{{.ChecksumType}}.checksum"
+        keep_input_artifact = true
+    }
+    # chain compress -> artifice -> checksum
+    # compress .img into tarball
+    post-processor "compress" {
+      output = "${var.output}/${locals.image_path}/${locals.image_filename}"
+      format = "${var.image_ext}"
     }
     post-processor "manifest" {
-        output     = "${var.output}/manifest.json"
+        output     = "${var.output}/${locals.image_path}/manifest.json"
         strip_path = true
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_datestamp = "${var.datestamp}"
-          image_ext = "tar.gz"
-          image_family = "${var.image_family}"
-          image_filename = "${var.datestamp}-${var.image_family}.tar.gz"
-          image_os_version = "${var.image_os_version}"
-          image_variant = "${var.image_variant}"
-          image_name = "${var.datestamp}-${var.image_family}"
-          image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}/${var.datestamp}-${var.image_name}.tar.gz"
-          cpu_arch = "${var.cpu_arch}"
           base_image_checksum = "${var.base_image_checksum}"
           base_image_datestamp = "${var.base_image_datestamp}"
           base_image_ext = "${var.base_image_ext}"
-          base_image_name = "${var.base_image_name}"
           base_image_family = "${var.base_image_family}"
+          base_image_name = "${var.base_image_name}"
           base_image_url = "${var.base_image_url}"
+          cpu_arch = "${var.cpu_arch}"
+          image_datestamp = "${var.datestamp}"
+          image_ext = "${var.image_ext}"
+          image_family = "${var.image_family}"
+          image_filename = "${var.image_filename}"
+          image_name = "${var.datestamp}-${var.image_family}"
+          image_os_version = "${var.image_os_version}"
+          image_path = "${local.image_path}"
+          image_variant = "${var.image_variant}"
+          image_url = "${var.image_url}"
           dryrun = "${var.dryrun}"
         }
       }
+    post-processor "shell-local" {
+      environment_vars = [
+        "OUTPUT=${var.output}/${locals.image_path}/packer.env",
+        "CHECKSUM_FILE=${var.output}/${locals.image_path}/{{.ChecksumType}}.checksum",
+        "MANIFEST_FILE=${var.output}/${locals.image_path}/manifest.json"
+      ]
+      inline = ["./tools/manifest-to-packer-env.sh"]
     }
+    post-processor "artifice" {
+      files = [
+        "${var.output}/${locals.image_path}/manifest.json",
+        "${var.output}/${locals.image_path}/packer.env",
+        "${var.output}/${locals.image_path}/${locals.image_filename}",
+        "${var.output}/${locals.image_path}/{{.ChecksumType}}.checksum"
+      ]
+    }
+  }
 }
 

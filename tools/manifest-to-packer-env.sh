@@ -4,38 +4,32 @@
 # which can be used in a downstream build to use manifest.json referenced build as base
 set +eu
 
-OUT_DIR=dist
-BUILD_ROOT=/build
+echo "Creating packer.env from $MANIFEST_FILE"
+cat "$MANIFEST_FILE"
 
-mkdir -p $OUT_DIR
 
-IMAGE_FILENAME=$(jq --raw-output '.builds[-1].custom_data.image_filename < dist/manifest.json')
-IMAGE_NAME=$(jq --raw-output '.builds[-1].custom_data.image_name' < dist/manifest.json)
-IMAGE_DATESTAMP=$(jq --raw-output '.builds[-1].custom_data.image_datestamp' < dist/manifest.json)
-IMAGE_STAMP=$(jq --raw-output '.builds[-1].custom_data.image_stamp' < dist/manifest.json)
-IMAGE_PATH=$(jq --raw-output '.builds[-1].custom_data.image_path' < dist/manifest.json)
-IMAGE_URL=${CDN_BASE_URL}/${IMAGE_PATH}/${IMAGE_FILENAME}
-CHECKSUM_URL=${CDN_BASE_URL}/${IMAGE_PATH}/sha256.checksum
-MANIFEST_URL=${CDN_BASE_URL}/$IMAGE_PATH/manifest.json
-SIG_URL="${CDN_BASE_URL}.sig"
-CHECKSUM=$(cat dist/sha256.checksum)
-
-OUTFILE="$OUT_DIR/packer-env.sh"
-cat << EOF > "$OUTFILE"
+echo "Using checksum $CHECKSUM_FILE"
+BASE_IMAGE_CHECKSUM=$(cat "$CHECKSUM_FILE" | cut -d $'\t' -f 1)
+BASE_IMAGE_DATESTAMP=$(jq --raw-output '.builds[-1].custom_data.image_datestamp' < "$MANIFEST_FILE")
+BASE_IMAGE_EXT=$(jq --raw-output '.builds[-1].custom_data.image_ext' < "$MANIFEST_FILE")
+BASE_IMAGE_FAMILY=$(jq --raw-output '.builds[-1].custom_data.image_family' < "$MANIFEST_FILE")
+BASE_IMAGE_FILENAME=$(jq --raw-output '.builds[-1].custom_data.image_filename' < "$MANIFEST_FILE")
+BASE_IMAGE_NAME=$(jq --raw-output '.builds[-1].custom_data.image_name' < "$MANIFEST_FILE")
+BASE_IMAGE_OS_VERSION=$(jq --raw-output '.builds[-1].custom_data.image_os_verion' < "$MANIFEST_FILE")
+BASE_IMAGE_PATH=$(jq --raw-output '.builds[-1].custom_data.image_path' < "$MANIFEST_FILE")
+BASE_IMAGE_URL=$(jq --raw-output '.builds[-1].custom_data.image_url' < "$MANIFEST_FILE")
+BASE_IMAGE_VARIANT=$(jq --raw-output '.builds[-1].custom_data.image_variant' < "$MANIFEST_FILE")
+# re-export as base_image_ vars prefixed with PACKER_VAR
+cat << EOF > "$OUTPUT"
 #!/usr/bin/env bash
 
-export PACKER_VAR_BASE_IMAGE_NAME="$IMAGE_NAME"
-export PACKER_VAR_BASE_IMAGE_URL="$
-export IMAGE_FILENAME="$IMAGE_FILENAME"
-export IMAGE_PATH="$IMAGE_PATH"
-export IMAGE_STAMP="$IMAGE_STAMP"
-export BASE_IMAGE_NAME="$IMAGE_NAME"
-export IMAGE_URL="$IMAGE_URL"
-export CHECKSUM_URL="$CHECKSUM_URL"
-export MANIFEST_URL="$MANIFEST_URL"
-export CHECKSUM="$CHECKSUM"
-export SIG_URL="$SIG_URL"
+export PACKER_VAR_BASE_IMAGE_CHECKSUM="$BASE_IMAGE_CHECKSUM"
+export PACKER_VAR_BASE_IMAGE_DATESTAMP="$BASE_IMAGE_DATESTAMP"
+export PACKER_VAR_BASE_IMAGE_EXT="$BASE_IMAGE_EXT"
+export PACKER_VAR_BASE_IMAGE_FAMILY="$BASE_IMAGE_FAMILY"
+export PACKER_VAR_BASE_IMAGE_NAME="$BASE_IMAGE_NAME"
+export PACKER_VAR_BASE_IMAGE_URL="$BASE_IMAGE_URL"
 EOF
 
-echo "Created $OUTFILE"
-cat "$OUTFILE"
+echo "Created $OUTPUT"
+cat "$OUTPUT"
