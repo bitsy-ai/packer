@@ -83,13 +83,13 @@ locals {
   image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
   image_filename = "${local.image_name}.tar.gz"
   image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}"
-  image_url = "file:${local.image_path}/${local.image_filename}"
   output = "${var.output}/${var.datestamp}"
+  image_url = "./${local.output}/${local.image_filename}"
 }
 
 source "arm" "base_image" {
   file_checksum_type    = "sha256"
-  file_checksum     = "${var.base_image_checksum}"
+  file_checksum_url    = "${var.base_image_checksum}"
   file_target_extension = "${var.base_image_ext}"
   file_urls             = [
     "${var.base_image_url}"
@@ -114,7 +114,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${var.output}/${local.image_name}.img"
+  image_path                   = "${local.output}/${local.image_name}.img"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -128,15 +128,15 @@ build {
 
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
-  provisioner "shell" {
-    scripts = [
-      "tools/image-version.sh",
-      "tools/dist-upgrade.sh"
-    ]
-    environment_vars=[
-      "IMAGE_VERSION=${local.image_name}"
-    ]
-  }
+  // provisioner "shell" {
+  //   scripts = [
+  //     "tools/image-version.sh",
+  //     "tools/dist-upgrade.sh"
+  //   ]
+  //   environment_vars=[
+  //     "IMAGE_VERSION=${local.image_name}"
+  //   ]
+  // }
 
   // provisioner "shell" {
   //   inline = [
@@ -156,19 +156,17 @@ build {
   // }
 
   post-processors {
+    post-processor "compress" {
+      output = "${local.output}/${local.image_filename}"
+      format = "${var.image_ext}"
+      compression_level = 9
+    }
     post-processor "checksum" {
         checksum_types = ["sha256"]
-        output = "${var.output}/{{.ChecksumType}}.checksum"
-        keep_input_artifact = true
-    }
-    # chain compress -> artifice -> checksum
-    # compress .img into tarball
-    post-processor "compress" {
-      output = "${var.output}/${local.image_filename}"
-      format = "${var.image_ext}"
+        output = "${local.output}/{{.ChecksumType}}.checksum"
     }
     post-processor "manifest" {
-        output     = "${var.output}/manifest.json"
+        output     = "${local.output}/manifest.json"
         strip_path = true
         strip_time = true
         custom_data = {
@@ -189,23 +187,24 @@ build {
           image_path = "${local.output}"
           image_variant = "${var.image_variant}"
           image_url = "${local.image_url}"
+          image_envfile = "${local.output}/packer.env"
           dryrun = "${var.dryrun}"
         }
       }
     post-processor "shell-local" {
       environment_vars = [
-        "OUTPUT=${var.output}packer.env",
-        "CHECKSUM_FILE=${var.output}/{{.ChecksumType}}.checksum",
-        "MANIFEST_FILE=${var.output}/manifest.json"
+        "OUTPUT=${local.output}/packer.env",
+        "CHECKSUM_FILE=${local.output}/sha256.checksum",
+        "MANIFEST_FILE=${local.output}/manifest.json"
       ]
       inline = ["./tools/manifest-to-packer-env.sh"]
     }
     post-processor "artifice" {
       files = [
-        "${var.output}/manifest.json",
-        "${var.output}/packer.env",
-        "${var.output}/${local.image_filename}",
-        "${var.output}/{{.ChecksumType}}.checksum"
+        "${local.output}/manifest.json",
+        "${local.output}/packer.env",
+        "${local.output}/${local.image_filename}",
+        "${local.output}/sha256.checksum"
       ]
     }
   }

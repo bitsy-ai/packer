@@ -1,0 +1,12 @@
+{
+    "ansible_extra_vars": "vars/octoprint.ansiblevars.yml",
+    "cpu_arch": "arm64",
+    "hostgroup": "octoprint",
+    "image_ext": ".tar.gz",
+    "image_family": "printnanny-os",
+    "image_os_version": "bullseye",
+    "image_size": "5G",
+    "image_variant": "slim-octoprint",
+    "playbook_file": "playbooks/octoprint/generic.yml",
+    "output": "dist/printnanny-os/bullseye/arm64/slim-octoprint/nightly"
+}

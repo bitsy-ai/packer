@@ -25,7 +25,7 @@ shellcheck:
 	shellcheck ./tools/*.sh
 
 outdir:
-	mkdir -p $(shell cat ${PACKER_VAR_FILE} | jq '.output' -r)
+	mkdir -p "$(shell cat ${PACKER_VAR_FILE} | jq '.output' -r)/$(DATESTAMP)"
 
 packer-build:
 	BASE=$(BASE) PACKER_VAR_FILE=$(PACKER_VAR_FILE) DATESTAMP=$(DATESTAMP) bash -c "tools/packer-build.sh"
@@ -38,10 +38,10 @@ printnanny-slim: PACKER_VAR_FILE=vars/printnanny-slim-arm64.pkrvars.json
 printnanny-slim: BASE=
 printnanny-slim: outdir packer-build
 
-octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-desktop-arm64.pkrvars.json
+octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-desktop.pkrvars.json
 octoprint-desktop: BASE="vars/printnanny-desktop-arm64.pkrvars.json"
 octoprint-desktop: outdir packer-build
 
-octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-slim-arm64.pkrvars.json
-octoprint-desktop: BASE="vars/printnanny-slim-arm64.pkrvars.json"
-octoprint-desktop: outdir packer-build
+octoprint-slim: PACKER_VAR_FILE=vars/octoprint-slim.pkrvars.json
+octoprint-slim: BASE="vars/printnanny-slim-arm64.pkrvars.json"
+octoprint-slim: outdir packer-build
