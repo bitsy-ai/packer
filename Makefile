@@ -10,11 +10,9 @@ PACKER_CMD ?= build --timestamp-ui -var "playbook_file=${PLAYBOOK_FILE}" -var-fi
 VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var-file ${PACKER_VAR_FILE} ${PACKER_TEMPLATE_FILE}
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
-OUTPUT ?= ${DIST_DIR}/$@/$(shell date +'%Y-%m-%d-%k%m')
+DATESTAMP ?= $(shell date +'%Y-%m-%d-%k%m')
+OUTPUT ?= ${DIST_DIR}/$@/${DATESTAMP}
 
-test: $(OUTPUT)
-	mkdir -p $(OUTPUT)
-	touch $(OUTPUT)/foo.txt
 clean:
 	rm -rf $(DIST_DIR)
 	rm -rf $(BUILD_DIR)
@@ -52,6 +50,7 @@ printnanny-desktop:
 			build \
 			--timestamp-ui \
 			-var "output=$(OUTPUT)" \
+			-var "datestamp=$(DATESTAMP)" \
 			-var-file vars/printnanny-desktop-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
 
@@ -63,6 +62,7 @@ printnanny-slim:
 			build \
 			--timestamp-ui \
 			-var "output=$(OUTPUT)" \
+			-var "datestamp=$(DATESTAMP)" \
 			-var-file vars/printnanny-slim-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
 
@@ -74,6 +74,7 @@ octoprint-desktop:
 			build \
 			--timestamp-ui \
 			-var "output=$(OUTPUT)" \
+			-var "datestamp=$(DATESTAMP)" \
 			-var-file vars/octoprint-desktop-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl
 
@@ -85,5 +86,6 @@ octoprint-slim:
 			build \
 			--timestamp-ui \
 			-var "output=$(OUTPUT)" \
+			-var "datestamp=$(DATESTAMP)" \
 			-var-file vars/octoprint-slim-arm64.pkrvars.hcl \
 			templates/generic-pi.pkr.hcl

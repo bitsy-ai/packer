@@ -11,13 +11,16 @@ variable "image_name" {
   type = string
 }
 
-variable "base_image_id" {
+variable "base_image_family" {
   type = string
-  default = ""
 }
 
-variable "base_image_stamp" {
-    type = string
+variable "image_family" {
+  type = string
+}
+
+variable "base_image_datestamp" {
+  type = string
 }
 
 variable "base_image_url" {
@@ -30,11 +33,6 @@ variable "base_image_checksum" {
 
 variable "base_image_ext" {
   type = string
-}
-
-variable "base_image_manifest_url" {
-  type = string
-  default = ""
 }
 
 variable "playbook_file" {
@@ -52,11 +50,6 @@ variable "dryrun" {
   default = false
 }
 
-variable "base_publish_path" {
-  type = string
-  default = "printnanny-os"
-}
-
 variable "hostgroup" {
   type = string
 }
@@ -72,7 +65,22 @@ variable "output" {
 
 variable "datestamp" {
   type = string
-  default = local.DATESTAMP
+}
+
+variable "image_os_version" {
+  type = string
+}
+
+variable "image_variant" {
+}
+
+variable "cpu_arch" {
+  type = string
+}
+
+variable "release_channel" {
+  type = string
+  default = "nightly"
 }
 
 source "arm" "base_image" {
@@ -157,15 +165,20 @@ build {
         strip_time = true
         custom_data = {
           ansible_extra_vars = file("../${var.ansible_extra_vars}")
-          image_path = "printnanny-os/${var.image_name}/nightly/${var.datestamp}-${var.image_name}.tar.gz"
-          image_filename = "${var.datestamp}-${var.image_name}.tar.gz"
-          image_stamp = "${var.datestamp}-${var.image_name}"
-          image_name = "${var.image_name}"
-          datestamp = "${var.datestamp}"
-          base_image_id = "${var.base_image_id}"
-          base_image_stamp = "${var.base_image_stamp}"
+          image_datestamp = "${var.datestamp}"
+          image_ext = "tar.gz"
+          image_family = "${var.image_family}"
+          image_filename = "${var.datestamp}-${var.image_family}.tar.gz"
+          image_os_version = "${var.image_os_version}"
+          image_variant = "${var.image_variant}"
+          image_name = "${var.datestamp}-${var.image_family}"
+          image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}/${var.datestamp}-${var.image_name}.tar.gz"
+          cpu_arch = "${var.cpu_arch}"
           base_image_checksum = "${var.base_image_checksum}"
+          base_image_datestamp = "${var.base_image_datestamp}"
           base_image_ext = "${var.base_image_ext}"
+          base_image_name = "${var.base_image_name}"
+          base_image_family = "${var.base_image_family}"
           base_image_url = "${var.base_image_url}"
           dryrun = "${var.dryrun}"
         }
