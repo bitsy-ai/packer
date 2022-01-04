@@ -128,32 +128,32 @@ build {
 
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
-  // provisioner "shell" {
-  //   scripts = [
-  //     "tools/image-version.sh",
-  //     "tools/dist-upgrade.sh"
-  //   ]
-  //   environment_vars=[
-  //     "IMAGE_VERSION=${local.image_name}"
-  //   ]
-  // }
+  provisioner "shell" {
+    scripts = [
+      "tools/image-version.sh",
+      "tools/dist-upgrade.sh"
+    ]
+    environment_vars=[
+      "IMAGE_VERSION=${local.image_name}"
+    ]
+  }
 
-  // provisioner "shell" {
-  //   inline = [
-  //     "reboot"
-  //   ]
-  //   expect_disconnect = true
-  //   pause_after = "10s"
-  // }
+  provisioner "shell" {
+    inline = [
+      "reboot"
+    ]
+    expect_disconnect = true
+    pause_after = "10s"
+  }
 
-  // provisioner "ansible" {
-  //   extra_arguments = [
-  //       "--extra-vars", "@${var.ansible_extra_vars}",
-  //   ]
-  //   inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
-  //   galaxy_file     = "./playbooks/requirements.yml"
-  //   playbook_file   = "${var.playbook_file}"
-  // }
+  provisioner "ansible" {
+    extra_arguments = [
+        "--extra-vars", "@${var.ansible_extra_vars}",
+    ]
+    inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
+    galaxy_file     = "./playbooks/requirements.yml"
+    playbook_file   = "${var.playbook_file}"
+  }
 
   post-processors {
     post-processor "compress" {
