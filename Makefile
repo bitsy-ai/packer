@@ -14,30 +14,12 @@ DATESTAMP ?= $(shell date +'%Y-%m-%d-%k%m')
 OUTPUT ?= dist
 
 clean:
-	rm -rf $(DIST_DIR)
-	rm -rf $(BUILD_DIR)
-	mkdir -p $(DIST_DIR)
-	mkdir -p $(BUILD_DIR)
+	rm -rf $(OUTPUT)
 
 docker-builder-image:
 	DOCKER_BUILDKIT=1 \
 	docker build -t bitsyai/packer-builder-arm-ansible -f docker/builder.Dockerfile docker
 	docker push bitsyai/packer-builder-arm-ansible
-
-packer-build: $(DIST_DIR) $(BUILD_DIR)
-	docker run \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible ${PACKER_CMD}
-
-dryrun: $(DIST_DIR) $(BUILD_DIR)
-	docker run \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible ${DRYRUN_CMD}
-
-validate: $(DIST_DIR) $(BUILD_DIR)
-	docker run \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible ${VALIDATE_CMD}
 
 shellcheck:
 	shellcheck ./tools/*.sh
@@ -45,49 +27,21 @@ shellcheck:
 outdir:
 	mkdir -p $(shell cat ${PACKER_VAR_FILE} | jq '.output' -r)
 
+packer-build:
+	BASE=$(BASE) PACKER_VAR_FILE=$(PACKER_VAR_FILE) DATESTAMP=$(DATESTAMP) bash -c "tools/packer-build.sh"
+
 printnanny-desktop: PACKER_VAR_FILE=vars/printnanny-desktop-arm64.pkrvars.json
-printnanny-desktop: outdir
-	docker run -it \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible \
-			build \
-			--timestamp-ui \
-			-var "datestamp=$(DATESTAMP)" \
-			-var-file ${PACKER_VAR_FILE} \
-			templates/generic-pi.pkr.hcl
+printnanny-desktop: BASE=
+printnanny-desktop: outdir packer-build
 
-printnanny-slim:
-	mkdir -p $(OUTPUT)
-	docker run -it \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible \
-			build \
-			--timestamp-ui \
-			-var "output=$(OUTPUT)" \
-			-var "datestamp=$(DATESTAMP)" \
-			-var-file vars/printnanny-slim-arm64.pkrvars.hcl \
-			templates/generic-pi.pkr.hcl
+printnanny-slim: PACKER_VAR_FILE=vars/printnanny-slim-arm64.pkrvars.json
+printnanny-slim: BASE=
+printnanny-slim: outdir packer-build
 
-octoprint-desktop:
-	mkdir -p $(OUTPUT)
-	docker run -it \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible \
-			build \
-			--timestamp-ui \
-			-var "output=$(OUTPUT)" \
-			-var "datestamp=$(DATESTAMP)" \
-			-var-file vars/octoprint-desktop-arm64.pkrvars.hcl \
-			templates/generic-pi.pkr.hcl
+octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-desktop-arm64.pkrvars.json
+octoprint-desktop: BASE="vars/printnanny-desktop-arm64.pkrvars.json"
+octoprint-desktop: outdir packer-build
 
-octoprint-slim:
-	mkdir -p $(OUTPUT)
-	docker run -it \
-		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
-		bitsyai/packer-builder-arm-ansible \
-			build \
-			--timestamp-ui \
-			-var "output=$(OUTPUT)" \
-			-var "datestamp=$(DATESTAMP)" \
-			-var-file vars/octoprint-slim-arm64.pkrvars.hcl \
-			templates/generic-pi.pkr.hcl
+octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-slim-arm64.pkrvars.json
+octoprint-desktop: BASE="vars/printnanny-slim-arm64.pkrvars.json"
+octoprint-desktop: outdir packer-build

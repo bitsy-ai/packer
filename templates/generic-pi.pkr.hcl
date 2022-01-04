@@ -130,10 +130,11 @@ build {
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     scripts = [
-      "echo ${local.image_name} > /boot/image_version.txt",
-      "DEBIAN_FRONTEND=noninteractive apt-get update",
-      "DEBIAN_FRONTEND=noninteractive apt-get install -y libfuse2",
-      "DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade"
+      "tools/image-version.sh",
+      "tools/dist-upgrade.sh"
+    ]
+    environment_vars=[
+      "IMAGE_VERSION=${local.image_name}"
     ]
   }
 
