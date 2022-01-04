@@ -3,7 +3,7 @@
 set -eux
 
 find_latest_env(){
-    # get the latest datestamp
+    # shellcheck disable=SC2012
     ls "$1" | sort | tail -n 1
 }
 
