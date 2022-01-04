@@ -9,3 +9,5 @@ RUN apt-get update -qq \
     unzip
 
 RUN pip3 install ansible
+
+WORKDIR /build

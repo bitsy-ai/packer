@@ -11,7 +11,7 @@ VALIDATE_CMD ?= validate -var "playbook_file=${PLAYBOOK_FILE}" -var-file ${PACKE
 .PHONY: clean docker-builder-image validate packer-build packer-init shellcheck
 
 DATESTAMP ?= $(shell date +'%Y-%m-%d-%k%m')
-OUTPUT ?= ${DIST_DIR}/$@/${DATESTAMP}
+OUTPUT ?= dist
 
 clean:
 	rm -rf $(DIST_DIR)
@@ -42,16 +42,18 @@ validate: $(DIST_DIR) $(BUILD_DIR)
 shellcheck:
 	shellcheck ./tools/*.sh
 
-printnanny-desktop:
-	mkdir -p $(OUTPUT)
+outdir:
+	mkdir -p $(shell cat ${PACKER_VAR_FILE} | jq '.output' -r)
+
+printnanny-desktop: PACKER_VAR_FILE=vars/printnanny-desktop-arm64.pkrvars.json
+printnanny-desktop: outdir
 	docker run -it \
 		--rm --privileged -v /dev:/dev -v ${PWD}:/build \
 		bitsyai/packer-builder-arm-ansible \
 			build \
 			--timestamp-ui \
-			-var "output=$(OUTPUT)" \
 			-var "datestamp=$(DATESTAMP)" \
-			-var-file vars/printnanny-desktop-arm64.pkrvars.hcl \
+			-var-file ${PACKER_VAR_FILE} \
 			templates/generic-pi.pkr.hcl
 
 printnanny-slim:
