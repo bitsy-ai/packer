@@ -94,7 +94,7 @@ source "arm" "base_image" {
   file_urls             = [
     "${var.base_image_url}"
   ]
-  image_build_method    = "resize"
+  image_build_method    = "new"
   image_mount_path      = "/tmp/rpi_chroot"
 
   # TODO parameterize partition scheme for A/B swap
