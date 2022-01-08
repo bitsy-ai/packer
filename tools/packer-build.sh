@@ -19,6 +19,7 @@ then
         --rm --privileged -v /dev:/dev -v "${PWD}:/build" \
         bitsyai/packer-builder-arm-ansible \
             build \
+            -debug \
             --timestamp-ui \
             -var "datestamp=$DATESTAMP" \
             -var-file "$PACKER_VAR_FILE" \
@@ -28,6 +29,7 @@ else
         --rm --privileged -v /dev:/dev -v "${PWD}:/build" \
         bitsyai/packer-builder-arm-ansible \
             build \
+            -debug \
             --timestamp-ui \
             -var "datestamp=$DATESTAMP" \
             -var-file "$PACKER_VAR_FILE" \

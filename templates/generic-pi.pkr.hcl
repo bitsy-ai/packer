@@ -80,6 +80,7 @@ variable "image_ext" {
 }
 
 locals {
+  chroot = "/tmp/rpi_chroot"
   image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
   image_filename = "${local.image_name}.tar.gz"
   image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}"
@@ -94,10 +95,20 @@ source "arm" "base_image" {
   file_urls             = [
     "${var.base_image_url}"
   ]
-  image_build_method    = "new"
-  image_mount_path      = "/tmp/rpi_chroot"
+  image_build_method    = "reuse"
+  image_mount_path      = "${local.chroot}"
 
-  # TODO parameterize partition scheme for A/B swap
+  // fdisk -l 2021-10-30-raspios-bullseye-arm64.img
+  // Disk 2021-10-30-raspios-bullseye-arm64.img: 3.83 GiB, 4093640704 bytes, 7995392 sectors
+  // Units: sectors of 1 * 512 = 512 bytes
+  // Sector size (logical/physical): 512 bytes / 512 bytes
+  // I/O size (minimum/optimal): 512 bytes / 512 bytes
+  // Disklabel type: dos
+  // Disk identifier: 0xae083906
+
+  // Device                                                       Boot  Start     End Sectors  Size Id Type
+  // 2021-10-30-raspios-bullseye-arm64.img1        8192  532479  524288  256M  c W95 FAT3
+  // 2021-10-30-raspios-bullseye-arm64.img2      532480 7995391 7462912  3.6G 83 Linux
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
@@ -114,7 +125,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${local.output}/${local.image_name}.img"
+  image_path                   = "${local.output}/${local.image_name}.tar.gz"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -126,34 +137,48 @@ build {
   sources = ["source.arm.base_image"]
   name = "ansible"
 
+  provisioner "shell" {
+    inline = [
+      "DEBIAN_FRONTEND=noninteractive sudo apt update",
+      "DEBIAN_FRONTEND=noninteractive sudo apt install -y initramfs-tools lvm2"
+    ]
+  }
+
+  provisioner "file" {
+    source = "tools/initramfs-hook.sh"
+    destination = "/etc/initramfs-tools/hooks/update_initrd"
+  }
+
   // Workaround libfuse2 autoremove recommendation triggering libc-bin trigger (re-runs ldconfig and seg faults)
   // "Setting up libc-bin (2.31-13+rpt2+rpi1) ...", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "qemu: uncaught target signal 11 (Segmentation fault) - core dumped", "Segmentation fault (core dumped)", "dpkg: error processing package libc-bin (--configure):", " installed libc-bin package post-installation script subprocess returned error exit status 139", "Errors were encountered while processing:", " libc-bin"]}
   provisioner "shell" {
     scripts = [
-      "tools/image-version.sh",
-      "tools/dist-upgrade.sh"
-    ]
-    environment_vars=[
-      "IMAGE_VERSION=${local.image_name}"
+      "tools/setup-initramfs.sh",
     ]
   }
 
-  provisioner "shell" {
-    inline = [
-      "reboot"
-    ]
-    expect_disconnect = true
-    pause_after = "10s"
+  provisioner "breakpoint" {
+    disable = false
+    note    = "this is a breakpoint"
   }
 
-  provisioner "ansible" {
-    extra_arguments = [
-        "--extra-vars", "@${var.ansible_extra_vars}",
-    ]
-    inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
-    galaxy_file     = "./playbooks/requirements.yml"
-    playbook_file   = "${var.playbook_file}"
-  }
+  // provisioner "shell" {
+  //   inline = [
+  //     "reboot"
+  //   ]
+  //   expect_disconnect = true
+  //   pause_after = "10s"
+  // }
+
+  // provisioner "ansible" {
+  //   extra_arguments = [
+  //       "--extra-vars", "@${var.ansible_extra_vars}",
+  //   ]
+  //   inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
+  //   galaxy_file     = "./playbooks/requirements.yml"
+  //   playbook_file   = "${var.playbook_file}"
+  // }
+
 
   post-processors {
     post-processor "compress" {

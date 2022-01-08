@@ -30,6 +30,10 @@ outdir:
 packer-build:
 	BASE=$(BASE) PACKER_VAR_FILE=$(PACKER_VAR_FILE) DATESTAMP=$(DATESTAMP) bash -c "tools/packer-build.sh"
 
+lvm-build: PACKER_VAR_FILE=vars/lvm.pkrvars.json
+lvm-build: BASE=
+lvm-build: outdir packer-build
+
 printnanny-desktop: PACKER_VAR_FILE=vars/printnanny-desktop-arm64.pkrvars.json
 printnanny-desktop: BASE=
 printnanny-desktop: outdir packer-build
