@@ -79,6 +79,11 @@ variable "image_ext" {
   type = string
 }
 
+variable "skiptags" {
+  type = string
+  default = "secret,secrets,credential,credentials,keys,key,private"
+}
+
 locals {
   image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
   image_filename = "${local.image_name}.tar.gz"
@@ -149,6 +154,7 @@ build {
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
+        "--skip-tags", "${var.skiptags}"
     ]
     inventory_file_template = "${var.hostgroup } ansible_host=/tmp/rpi_chroot ansible_connection=chroot ansible_ssh_pipelining=True\n"
     galaxy_file     = "./playbooks/requirements.yml"
