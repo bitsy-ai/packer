@@ -167,6 +167,13 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
+  provisioner "shell" {
+    inline = [
+      "mv /tmp/rpi_chroot/etc/ansible/facts.json/printnanny /tmp/rpi_chroot/etc/ansible/facts.json/localhost"
+    ]
+  }
+
+
   post-processors {
     post-processor "compress" {
       output = "${local.output}/${local.image_filename}"
