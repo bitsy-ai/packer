@@ -119,7 +119,7 @@ source "arm" "base_image" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "${local.output}/${local.image_name}.img"
+  image_path                   = "${local.image_name}.img"
   image_size                   = "${var.image_size}"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -175,14 +175,23 @@ build {
 
 
   post-processors {
+    // --junk-paths is not available when creating a zip w/ packer
+    // instead, zip from cwd
     post-processor "compress" {
-      output = "${local.output}/${local.image_filename}"
+      output = "${local.image_filename}"
       format = "${var.image_ext}"
       compression_level = 9
     }
+    // then calculate a checksum
     post-processor "checksum" {
         checksum_types = ["sha256"]
         output = "${local.output}/{{.ChecksumType}}.checksum"
+    }
+    // then move zip to output dir
+    post-processor "shell-local" {
+      inline = [
+        "mv ${local.image_filename} ${local.output}/${local.image_filename}" 
+      ]
     }
     post-processor "manifest" {
         output     = "${local.output}/manifest.json"
