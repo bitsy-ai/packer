@@ -190,7 +190,7 @@ build {
     // then move zip to output dir
     post-processor "shell-local" {
       inline = [
-        "mv ${local.image_filename} ${local.output}/${local.image_filename}" 
+        "mv ${local.image_filename}.${var.image_ext} ${local.output}/${local.image_filename}.${var.image_ext}" 
       ]
     }
     post-processor "manifest" {
