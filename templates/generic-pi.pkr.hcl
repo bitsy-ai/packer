@@ -167,7 +167,7 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     inline = [
       "mv /tmp/rpi_chroot/etc/ansible/facts.json/printnanny /tmp/rpi_chroot/etc/ansible/facts.json/localhost"
     ]
