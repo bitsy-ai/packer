@@ -151,6 +151,12 @@ build {
     pause_after = "10s"
   }
 
+  provisioner "shell" {
+    inline = [
+      "mkdir -p /tmp/rpi_chroot/etc/ansible/"
+    ]
+  }
+
   provisioner "ansible" {
     extra_arguments = [
         "--extra-vars", "@${var.ansible_extra_vars}",
