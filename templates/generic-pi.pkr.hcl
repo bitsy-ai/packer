@@ -86,7 +86,7 @@ variable "skiptags" {
 
 locals {
   image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
-  image_filename = "${local.image_name}.tar.gz"
+  image_filename = "${local.image_name}.zip"
   image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}"
   output = "${var.output}/${var.datestamp}"
   image_url = "./${local.output}/${local.image_filename}"
