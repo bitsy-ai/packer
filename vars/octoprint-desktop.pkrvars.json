@@ -2,7 +2,7 @@
     "ansible_extra_vars": "vars/octoprint.ansiblevars.yml",
     "cpu_arch": "arm64",
     "hostgroup": "octoprint",
-    "image_ext": ".tar.gz",
+    "image_ext": ".zip",
     "image_family": "printnanny-os",
     "image_os_version": "bullseye",
     "image_size": "5G",
