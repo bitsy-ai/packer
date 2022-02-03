@@ -180,7 +180,6 @@ build {
     post-processor "compress" {
       output = "${local.image_filename}"
       format = "${var.image_ext}"
-      compression_level = 9
     }
     // then calculate a checksum
     post-processor "checksum" {
