@@ -13,6 +13,6 @@
     "image_os_version": "bullseye",
     "image_size": "5G",
     "image_variant": "octoprint-desktop",
-    "playbook_file": "playbooks/octoprint/generic.yml",
+    "playbook_file": "playbooks/printnanny/desktop.yml",
     "output": "dist/printnanny-os/bullseye/arm64/octoprint-desktop/nightly"
 }
