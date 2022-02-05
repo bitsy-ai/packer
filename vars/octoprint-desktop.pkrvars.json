@@ -7,7 +7,7 @@
     "base_image_family": "raspios",
     "base_image_name": "2022-01-28-raspios-bullseye-arm64",
     "cpu_arch": "arm64",
-    "hostgroup": "octoprint",
+    "hostgroup": "printnanny",
     "image_ext": ".zip",
     "image_family": "printnanny-os",
     "image_os_version": "bullseye",
