@@ -166,9 +166,14 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  provisioner "shell-local" {
+  provisioner "shell" {
     inline = [
       "tools/image-version.sh",
+    ]
+  }
+
+  provisioner "shell-local" {
+    inline = [
       "mv /tmp/rpi_chroot/etc/ansible/facts.json/printnanny /tmp/rpi_chroot/etc/ansible/facts.json/localhost || echo 'Failed to mv ansible facts'"
     ]
   }
