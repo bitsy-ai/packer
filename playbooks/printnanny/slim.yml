@@ -1,2 +1,2 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.printnanny.printnanny.slim_image
+- ansible.builtin.import_playbook: bitsyai.printnanny.slim_image
