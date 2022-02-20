@@ -1,2 +1,2 @@
 ---
-- ansible.builtin.import_playbook: bitsyai.rpi.octoprint.image
+- ansible.builtin.import_playbook: bitsyai.printnanny.octoprint.image
