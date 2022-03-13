@@ -179,7 +179,7 @@ build {
     post-processor "shell-local" {
       inline = [
         "mv ${local.image_filename} ${local.output}/${local.image_filename}",
-        "cd ${local.output} && zip ${local.output}/${local.image_name} ${local.output}/${local.image_filename}",
+        "cd ${local.output} && zip ${local.output}/${local.image_name}.zip ${local.output}/${local.image_filename}",
         "sha256sum ${local.output}/* > ${local.output}/sha256.checksum"
       ]
     }
