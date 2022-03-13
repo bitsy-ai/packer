@@ -180,7 +180,7 @@ build {
       inline = [
         "mv ${local.image_filename} ${local.output}/${local.image_filename}",
         "cd ${local.output} && zip ${local.image_name}.zip ${local.image_filename}",
-        "sha256sum ${local.output}/* > ${local.output}/sha256.checksum"
+        "sha256sum * > sha256.checksum && cd -"
       ]
     }
     post-processor "manifest" {
