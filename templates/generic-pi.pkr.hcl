@@ -81,7 +81,7 @@ variable "image_ext" {
 
 variable "skiptags" {
   type = string
-  default = "secret,secrets,credential,credentials,keys,key,private,env"
+  default = "secret,secrets,credential,credentials,keys,key,private,env,firstboot"
 }
 
 locals {
