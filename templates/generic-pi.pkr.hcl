@@ -86,7 +86,7 @@ variable "skiptags" {
 
 locals {
   image_name = "${var.datestamp}-${var.image_family}-${var.image_os_version}-${var.cpu_arch}-${var.image_variant}"
-  image_filename = "${local.image_name}.zip"
+  image_filename = "${local.image_name}.img"
   image_path = "${var.image_family}/${var.image_os_version}/${var.cpu_arch}/${var.image_variant}/${var.release_channel}"
   output = "${var.output}/${var.datestamp}"
   image_url = "./${local.output}/${local.image_filename}"
@@ -175,17 +175,6 @@ build {
 
 
   post-processors {
-    // --junk-paths is not available when creating a zip w/ packer
-    // instead, zip from cwd
-    post-processor "compress" {
-      output = "${local.image_filename}"
-      format = "${var.image_ext}"
-    }
-    // then calculate a checksum
-    post-processor "checksum" {
-        checksum_types = ["sha256"]
-        output = "${local.output}/{{.ChecksumType}}.checksum"
-    }
     // then move zip to output dir
     post-processor "shell-local" {
       inline = ["mv ${local.image_filename} ${local.output}/${local.image_filename}"]
