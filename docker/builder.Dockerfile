@@ -7,6 +7,7 @@ RUN apt-get update -qq \
     python3-pip \
     git \
     unzip \
+    zip \
     jq
 
 RUN pip3 install ansible
