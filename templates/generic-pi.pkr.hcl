@@ -167,13 +167,6 @@ build {
     playbook_file   = "${var.playbook_file}"
   }
 
-  provisioner "shell-local" {
-    inline = [
-      "mv /tmp/rpi_chroot/etc/ansible/facts.json/printnanny /tmp/rpi_chroot/etc/ansible/facts.json/localhost || echo 'Failed to mv ansible facts'"
-    ]
-  }
-
-
   post-processors {
     // then move zip to output dir
     post-processor "shell-local" {
