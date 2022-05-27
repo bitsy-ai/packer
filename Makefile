@@ -44,6 +44,7 @@ printnanny-slim: PACKER_LOG_PATH=$(LOG_PATH)/$@.log
 printnanny-slim: outdir packer-build
 
 octoprint-desktop: PACKER_VAR_FILE=vars/octoprint-desktop.pkrvars.json
+# octoprint-desktop: BASE="vars/printnanny-desktop-arm64.pkrvars.json"
 octoprint-desktop: BASE=
 octoprint-desktop: PACKER_LOG=1
 octoprint-desktop: PACKER_LOG_PATH=$(LOG_PATH)/$@.log
@@ -54,10 +55,3 @@ octoprint-slim: BASE="vars/printnanny-slim-arm64.pkrvars.json"
 octoprint-slim: PACKER_LOG=1
 octoprint-slim: PACKER_LOG_PATH=$(LOG_PATH)/$@.log
 octoprint-slim: outdir packer-build
-
-uboot-test: PACKER_VAR_FILE=vars/uboot-test.pkrvars.json
-uboot-test: PACKER_TEMPLATE_FILE=templates/uboot-pi.pkr.hcl
-uboot-test: BASE=
-uboot-test: PACKER_LOG=1
-uboot-test: PACKER_LOG_PATH=$(LOG_PATH)/$@.log
-uboot-test: outdir packer-build
